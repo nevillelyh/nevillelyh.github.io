@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Getting Started</title>
+
+    <meta name="description" content="Scala Workshop - Getting Started">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write('<link rel="stylesheet" href="reveal.js/css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Getting Started</h2>
+          <ul>
+            <li>Environment</li>
+            <li>Hello World project</li>
+            <li>Basic types</li>
+            <li>Expressions</li>
+            <li>Functions</li>
+            <li>Object Orientation</li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+            <h3>Environment</h3>
+            <img src="images/setup.jpg" alt="setup" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+
+          <section>
+            <h3>Environment</h3>
+            <p>Install Scala &amp; SBT on Mac OS X</p>
+            <ul>
+              <li><a href="http://www.scala-sbt.org/">SBT</a> - Simple Built Tool</li>
+              <li>Simialar to Maven, Leiningen (Clojure) and Gradle (Groovy)</li>
+              <li>Also handles per project Scala version</li>
+            </ul>
+            <pre><code class="bash" data-trim>brew install scala sbt</code></pre>
+            <div class="fragment">
+            <p>A basic Scala console</p>
+<pre><samp style="font-size: 90%">neville@foobar:~$ scala
+Welcome to Scala version 2.10.4 (Java HotSpot(TM) 64-Bit Server VM, Java 1.7.0_55).
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala>
+</samp></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Environment</h3>
+            <p>Scala as a scripting language</p>
+<pre><code class="scala" data-trim>#!/usr/bin/env scala
+// hello.scala
+object World {
+  def hello = "Hello"
+}
+
+println(World.hello)
+</code></pre>
+            <div class="fragment">
+<pre><code class="bash" data-trim>neville@foobar:~$ scala hello.scala
+Hello
+
+neville@foobar:~$ chmod +x hello.scala
+neville@foobar:~$ ./hello.scala  # look mum, no compiling!
+Hello
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Environment</h3>
+            <p>Global repository setting</p>
+            <small><code>~/.sbt/global.sbt</code> (for SBT < 0.13)<br/><code>~/.sbt/0.13/global.sbt</code> (for SBT >= 0.13)</small>
+<pre><code class="scala" data-trim style="font-size: 70%">resolvers ++= Seq(
+    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository"
+)
+</code></pre>
+            <p>Override JVM memory flags</p>
+            <small><code>~/.sbtconfig</code></small>
+            <pre><code class="bash" data-trim>SBT_OPTS="-XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=1024M"</code></pre>
+          </section>
+
+          <section>
+            <h3>Environment</h3>
+            <ul>
+              <li>Install <a href="http://www.jetbrains.com/idea/download/">IntelliJ IDEA</a> (Community Edition is fine)</li>
+              <li>Preferences &rarr; Plugins &rarr; Install JetBrain Plugins &rarr; Scala</li>
+            </ul>
+            <br/>
+            <br/>
+            <a href="https://github.com/mpeltonen/sbt-idea">sbt-idea</a> (for IntelliJ IDEA &lt; 13)<br/>
+            <small>
+              <code>~/.sbt/plugins/build.sbt</code> (for SBT < 0.13)<br/><code>~/.sbt/0.13/plugins/build.sbt</code> (for SBT >= 0.13)
+            </small>
+            <pre><code class="scala" data-trim>addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.2")</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Hello World Project</h3>
+            <p><small><code>hello/project/build.properties</code></small></p>
+<pre><code class="scala" data-trim>sbt.version=0.13.5
+</code></pre>
+            <p><small><code>hello/build.sbt</code></small></p>
+<pre><code class="scala" data-trim>organization := "com.spotify"
+
+name := "hello"
+
+version := "0.1.0"  // com.spotify:hello_2.10-0.1.0.jar
+
+scalaVersion := "2.10.4"  // per project Scala version
+
+libraryDependencies ++= Seq(
+    // Scala library, SBT will append language version
+    "org.scalanlp" %% "breeze" % "0.8.1",         // breeze_2.10-0.8.1.jar
+    // Java library
+    "org.jblas" % "jblas" % "1.2.3",              // jblas-1.2.3.jar
+    // Scala lbrary, scope = test
+    "org.specs2" %% "specs2" % "2.3.13" % "test"  // specs2_2.10-2.3.13.jar
+)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p><small><code>hello/src/main/scala/com/spotify/hello/Hello.scala</code></small></p>
+<pre><code class="scala" data-trim>package com.spotify.hello
+
+import breeze.linalg.DenseVector  // Scala library
+import org.jblas.DoubleMatrix     // Java library
+
+object Hello {
+  def main(args: Array[String]) {  // public static void main
+    println("Hello " + args.mkString(" "))
+  }
+
+  // DenseVector.dot(DenseVector) -> infix operator
+  def d1(): Double = DenseVector(0.1, 0.2) dot DenseVector(1.0, 2.0)
+
+  def vec(a: Double*) = new DoubleMatrix(a.toArray)
+  def d2(): Double = vec(0.1, 0.2) dot vec(1.0, 2.0)  // infix operator
+}
+</code></pre>
+            <small>Scala allows multiple classes in the same file</small>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p><small><code>hello/src/test/scala/com/spotify/hello/HelloTest.scala</code></small></p>
+<pre><code class="scala" data-trim>package com.spotify.hello
+
+import org.specs2.mutable._  // Specs2: Software specification for Scala
+
+class HelloTest extends Specification {
+  "Hello.s1()" should {
+    "be 0.5" in {
+      Hello.s1() must_==(0.5)
+    }
+  }
+
+  "Hello.s2()" should {
+    "be 0.5" in {
+      Hello.s2() must_==(0.5)
+    }
+  }
+}
+</code></pre>
+            <small>Also see <a href="http://www.scalatest.org/">ScalaTest</a>, both have IntelliJ IDEA support</small>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p>Run Forrest Run!</p>
+<pre><code class="bash" data-trim>sbt compile
+sbt run       # run default main class without argument
+sbt "run-main com.spotify.hello.Hello ARG ..."
+</code></pre>
+            <p>Other useful SBT tasks</p>
+<pre><code class="bash" data-trim>sbt clean
+sbt test      # run unit tests
+sbt console   # Scala console with project dependencies loaded
+sbt package   # generate JAR file
+sbt assembly  # JAR with bundled deps, requires sbt-assembly plugin
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p>Continuous mode (for compile/test)</p>
+            <small>Executes task when source changes detected</small>
+<pre><samp>neville@foobar hello $ sbt
+[info] Loading global plugins from /Users/neville/.sbt/0.13/plugins
+[info] Set current project to hello (in build file:/Users/neville/hello/)
+> ~ compile
+[success] Total time: 1 s, completed Jan 22, 2014 4:13:05 AM
+1. Waiting for source changes... (press enter to interrupt)
+</samp></pre>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p>IntelliJ IDEA &gt;= 13 &rarr; "Open Project" directly</p>
+            <p>&lt; 13 &rarr; <code>sbt-idea</code> plugin</p>
+<pre><samp>neville@foobar hello $ sbt gen-idea
+[info] Loading global plugins from /Users/neville/.sbt/0.13/plugins
+[info] Set current project to hello (in build file:/Users/neville/hello/)
+[info] Creating IDEA module for project 'hello' ...
+[info] Created /Users/neville/hello/.idea/IdeaProject.iml
+[info] Created /Users/neville/hello/.idea
+[info] Created /Users/neville/hello/.idea_modules/hello.iml
+[info] Created /Users/neville/hello/.idea_modules/hello-build.iml
+</samp></pre>
+            <ul>
+              <li>File &rarr; Open &rarr; [navigate to project root] &rarr; Open</li>
+              <li>Need to re-generate every time build.sbt changes</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Hello World Project</h3>
+            <p>IntelliJ is your best friend</p>
+            <ul>
+              <li>&#x2318; + hover - inspect code</li>
+              <li>&#x2318; + click - navigate to code</li>
+              <li>alt + enter - show actions</li>
+              <li>&#x2318; + &#x21E7; + o - navigate to file</li>
+              <li>ctrl + j - show javadoc/scaladoc</li>
+              <li>Reference card for <a href="http://www.jetbrains.com/idea/docs/IntelliJIDEA_ReferenceCard_Mac.pdf">Mac</a> and <a href="http://www.jetbrains.com/idea/docs/IntelliJIDEA_ReferenceCard.pdf">Windows/Linux</a></li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Basic Types</h3>
+            <p>Java counterparts</p>
+            <ul>
+              <li>Primitives <code>Int</code>, <code>Double</code>, <code>Boolean</code>, etc.</li>
+              <li>Same as Java <code>int</code>, <code>double</code>, <code>boolean</code>, etc.</li>
+              <li><code>String</code>, <code>Array</code> same class as in Java</li>
+            </ul>
+<pre><code class="scala" data-trim>scala> val i: Int = 1
+i: Int = 1
+
+scala> val s: String = "Hello"
+s: String = Hello
+
+scala> val b: Boolean = true
+b: Boolean = true
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Collections</p>
+<pre><code class="scala" data-trim>scala> val a1: Array[Double] = Array[Double](1.0, 2.0, 3.0)
+a1: Array[Double] = Array(1.0, 2.0, 3.0)
+
+scala> val a2 = Array(1.0, 2.0, 3.0)  // type inference
+a2: Array[Double] = Array(1.0, 2.0, 3.0)
+
+scala> a1(0)
+res1: Double = 1.0
+
+scala> val a2 = Array(1.5, 2, "Hello")  // more type inference
+a2: Array[Any] = Array(1.5, 2, Hello)   // Any == Object in Java
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Immutability</p>
+            <ul>
+              <li>Key motivation in FP</li>
+              <li>States are hard to reason, test and error-prone</li>
+              <li>Copy and transform data with pure functions</li>
+              <li><code>val</code> is immutable (cannot be reassigned), <code>var</code> is not</li>
+              <li>Most Scala collections are immutable by default</li>
+              <li>Good fit - HDFS, log streams, etc. also immutable</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Tuples</p>
+            <ul>
+              <li>Sequence of items, each with its own type</li>
+              <li>Fixed number (max 22), immutable</li>
+              <li>Implimented as Java templates</li>
+            </ul>
+            <small><code class="">Tuple1[T1]</code>, <code>Tuple2[T1, T2]</code>, <code>Tuple3[T1, T2, T3]</code>, ...</small>
+<pre><code class="scala" data-trim>scala> val a = (1, 2.5, "three")
+a: (Int, Double, String) = (1,2.5,three)
+
+scala> a._1
+res0: Int = 1
+
+scala> a._2
+res1: Double = 2.5
+
+scala> a._3
+res2: String = three
+</code></pre>
+            <small>Also see <a href="http://crunch.apache.org/apidocs/0.10.0/org/apache/crunch/class-use/Tuple.html">Crunch Tuple</a>, e.g.
+              <code>Pair&lt;K,V&gt;</code>, <code>Tuple3&lt;V1,V2,V3&gt;</code>, <code>Tuple4&lt;V1,V2,V3,V4&gt;</code>, <code>TupleN</code></small>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Tuple decomposition</p>
+            <p>Think like lightweight, type safe struct</p>
+<pre><code class="scala" data-trim>scala> val t = (1, "a", (Array(1.0, 2.0), true))
+t: (Int, String, (Array[Double], Boolean)) = (1,a,(Array(1.0, 2.0),true))
+
+scala> val (i, s, (a, b)) = t
+i: Int = 1
+s: String = three
+a: Array[Double] = Array(1.0, 2.0)
+b: Boolean = true
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p><code>Some</code> or <code>None</code></p>
+            <p>Both sub-classes of <code>Option[T]</code></p>
+<pre><code class="scala" data-trim>val nothing: Option[String] = Option(null)  // None
+val nil = None
+val some = Some("data")                     // Option[String]
+
+val callMe: Option[String] = nil
+callMe.isDefined
+callMe.getOrElse("bye")
+
+val maybe: Option[String] = some
+maybe.isDefined
+maybe.getOrElse("what?")
+</code></pre>
+            <small>Have methods that behave like other Scala collections e.g. map, filter, foreach</small>
+            <small>Also see <a href="https://code.google.com/p/guava-libraries/wiki/UsingAndAvoidingNullExplained">Guava Optional</a> (<a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Optional.html">JavaDoc</a>)</small>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Type gymnastics</p>
+<pre><code class="scala" data-trim>import scala.collection.SortedSet
+
+val a = Set(1, 2)
+a.getClass                      // Set[Int] ...
+
+val b = SortedSet(1, 2)         // sub-class of Set
+b.getClass                      // SortedSet[Int] ...
+
+a.isInstanceOf[Set[Int]]        // true
+b.isInstanceOf[Set[Int]]        // also true
+
+a.isInstanceOf[SortedSet[Int]]  // false, default Set is not sorted
+b.isInstanceOf[SortedSet[Int]]  // true
+
+// cast up class hierarchy
+b.asInstanceOf[Set[Int]]        // SortedSet is also Set
+b.asInstanceOf[Iterable[Int]]   // most collections are iterable
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Type aliases</p>
+            <code>List&lt;ListenableFuture&ltMap&lt;String, Metadata&gt;&gt;&gt;</code>
+            <img src="images/alias.jpg" alt="alias" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+            <div class="fragment">
+<pre><code class="scala" data-trim>class Track
+class ListenableFuture[T]
+
+type TrackFuture = ListenableFuture[Map[String, Track]]
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Basic Types</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>What's the class of <code>("pi" -&gt; 3.14)</code>, <code>("e", 2.72)</code>,<br/>and <code>("one", 2, 3.0)</code></li>
+              <li>How do you create a tuple of one element?</li>
+              <li>What's the class of <code>Some("one")</code>, and <code>None</code></li>
+              <li>Find their common super class with <code>isInstanceOf[]</code></li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Expressions</h3>
+            <p>Think in expressions, not statements</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// use :paste mode in Scala console
+val volume = 11
+var result = ""
+if (volume &gt;= 11)
+  result = "loud"
+else
+  result = "suck"
+
+val a = Array(1.0, 2.0, 3.0)
+for (i &lt;- 0 until a.length) a(i) *= 10
+</code></pre>
+            <small>Statements - assign value, call function, loop over counter</small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// if/else evaluates to "passed"/"failed"
+val result = if (volume &gt;= 11) "loud" else "suck"
+
+val a = Array(1.0, 2.0, 3.0)
+a.map(_ * 10.0)  // more on this later
+</code></pre>
+            <small>Expressions - given data, apply logic, evaluates to new value</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Expressions</h3>
+            <p>Loops are expressions too</p>
+            <pre><code class="scala" data-trim>for (i <- 0 until 10) yield i * i
+
+for (i <- 0 until 10 if i % 2 == 0) yield i
+
+for (i <- 1 to 10;
+     j <- i to 10
+     if j % i == 0) yield (i, j)
+
+// no C/C++/Java style - for (int i = 0; i < 10; i++) { ... }
+// i is mutable and loop body is side effect, impure
+
+// No break (possible but ugly) or continue, and you do not need them
+</code></pre>
+            <small>
+              Yes Scala for loops are slow, but you will almost never use them<br/>
+              <a href="http://www.scala-lang.org/old/node/4456">For loop vs. while loop performance</a><br/>
+              <a href="https://issues.scala-lang.org/browse/SI-1338">SI-1138 Optimize simple for loops</a>
+            </small>
+          </section>
+
+          <section>
+            <h3>Expressions</h3>
+            <p>So are try/catch/finally blocks</p>
+<pre><code class="scala" data-trim>def safeGet(a: Array[Int], n: Int): Int = try {
+  a(n)
+} catch {
+  case e: ArrayIndexOutOfBoundsException => 0
+} finally {
+  println(s"safeGet($n)")  // string interpolation
+}
+
+val a = Array(1, 2, 3)
+safeGet(a, 2)
+safeGet(a, 3)
+</code></pre>
+            <small>No worries, we almost never use exceptions in data applications :)</small>
+          </section>
+
+          <section>
+            <h3>Expressions</h3>
+            <p>Pattern matching</p>
+            <p>Way more powerful than switch/case or if/else if/else</p>
+            <pre><code class="scala" data-trim>val color = "black"
+
+val noun = color match {
+  case "red"    => "sox"
+  case "blue"   => "sky"
+  case "yellow" => "cab"
+  case "green"  => "bay"
+  case "black"  => "metal"
+  case _        => "crap"  // wildcard
+}
+
+println(color + " " + noun)
+</code></pre>
+            <small>More on this later</small>
+          </section>
+
+          <section>
+            <h3>Expressions</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Find multiples of 3 below 20 with <code>for/yield</code></li>
+              <li>Find sign (+/-) of <code>math.sin</code> for integers between [0, 10)</li>
+              <li>Match integers [1, 7] to "Mon", "Tue", ...</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Functions</h3>
+            <p>Lots of things optional</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def addOne(m: Int): Int = m + 1   // no {}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def factorial(m: Int) = {         // no return type
+  var f = 1
+  for (i &lt;- 1 to m) f *= i        // not idiomatic, more later
+  f  // last expression is return value
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// java.lang.* (including System) imported by default
+def t = System.currentTimeMillis  // no (), either declaring or invoking
+
+def hello(name: String) {         // no =, return type Unit (void in C/C++)
+  println("Hello " + name)
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+            <ul>
+              <li>{} around one-liner body</li>
+              <li>Return type, but recommended for complex cases</li>
+              <li><code>return</code> statement</li>
+              <li>() for parameter-less functions</li>
+            </ul>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Optional and named arguments</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>def trainSuperFancyUberAweomeModel(
+    data: Array[Array[Double]],
+    rank: Int,
+    alpha: Double = 0.1,
+    beta: Double = 0.2,
+    lambda: Double = 0.5) = {
+  42
+}
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>val data = Array(Array(1.0))
+trainSuperFancyUberAweomeModel(data, 10)
+trainSuperFancyUberAweomeModel(data, 10, 0.3)
+trainSuperFancyUberAweomeModel(data, 10, beta=0.9)
+trainSuperFancyUberAweomeModel(rank=5, data=null)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Variable arguments</p>
+<pre><code class="scala" data-trim>def plus(l: Int*) = l.sum
+
+plus()
+plus(1)
+plus(1, 2)
+plus(1, 2, 3)
+
+plus(Array(1, 2, 3): _*)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Anonymous functions - a.k.a. &lambda;</p>
+            <small>Key component of Scala or any FP language</small>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>val addOne = (x: Int) => x + 1  // function is data
+addOne(1)
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>List(1, 2, 3).map(addOne)
+List(1, 2, 3).map((x: Int) => x + 1)
+List(1, 2, 3).map(x => x + 1)
+List(1, 2, 3).map(_ + 1)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// commonly seen in Scalding/Spark
+List((1, 2), (2, 3), (3, 4)).map { t =&gt;    // t is (Int, Int)
+  val (a, b) = t                           // tuple decomposition
+  val r = a + b
+  println(s"$a + $b = $r")  // side-effect
+  r                                        // return value
+}  // {} and () interchangeable but () recommended for one-liners
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>High order functions</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def applyFn(x: Int, fn: Int =&gt; Int) = fn(x)
+applyFn(10, _ + 10)              // x + 10
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def applyFn2(x: Int, y: Int, fn2: (Int, Int) =&gt; Int) = fn2(x, y)
+applyFn2(10, 20, _ + _)          // x + y
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def applyFn3(x: Int, y: Int, z: Int, fn3: (Int, Int, Int) =&gt; Int) =
+  fn3(x, y, z)
+applyFn3(10, 20, 30, _ + _ + _)  // x + y + z
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Currying</p>
+            <div class="fragment">
+              <img src="images/currying.jpg" alt="currying" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+              <small>Named after <a href="http://en.wikipedia.org/wiki/Haskell_Curry">Haskell Brooks Curry</a></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Curried functions</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>def add(m: Int, n: Int) = m + n            // function (Int, Int) =&gt; Int
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// partially apply one argument
+val add2 = add(2, _: Int)                  // new function Int =&gt; Int
+add2(3)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def multiply(m: Int)(n: Int): Int = m * n  // function (Int)(Int) =&gt; Int
+multiply(2)(3)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def multiplyByTwo = multiply(2)(_)         // new function Int =&gt; Int
+multiplyByTwo(3)
+</code></pre>
+            </div>
+            <div class="fragment">
+              <small>Common in Scalding APIs, e.g. <code>map('inFields -> 'outFields)(function)</code></small>
+              <small>Also <code>fold(z)(function)</code> &amp; <code>mapReduceMap(mapFn1)(reduceFn)(mapFn2)</code></small>
+              <small>That's why Haskell function signatures look like <code>Int -> Int -> Int</code></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Functions</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Write a recursive function for \(x^n\) with <code>n: Int</code></li>
+              <li>Make sure it supports negative <code>n</code></li>
+              <li>Curry it to \(x^2\) and \(x^3\), e.g.<br/>
+              <code>square(x: Double): Double</code><br/>
+              <code>cube(x: Double): Double</code></li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Packages</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// AwesomeAlgorithm.scala
+package com.spotify.prism
+
+import com.spotify.common._      // wildcard
+import scala.io.{Codec, Source}  // import many
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// rename Java collections to avoid collision
+import java.util.{List => JList, Map => JMap}
+
+class AwesomeAlgorithm {  // com.spotify.prism.AwesomeAlgorithm
+  def compute = 42
+}
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Objects</p>
+            <p>Basically singletons with static methods</p>
+<pre><code class="scala" data-trim>object ProblemFactory {
+  private var count = 0  // private mutable member
+
+  def newProblem() = {   // static method
+    count += 1
+    count * scala.util.Random.nextDouble
+  }
+}
+
+ProblemFactory.newProblem
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Apply method</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>object RandomDouble {
+  def apply() = scala.util.Random.nextDouble
+}
+
+RandomDouble()  // syntactic sugar for RandomDouble.apply()
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// classes can have apply member methods too
+val v = Vector(10, 20, 30)
+v.apply(1)
+v(1)  // -> 20, same as above
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Constructors</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>class Universe {   // default constructor with no argument
+  val answer = 42  // public immutable member
+}
+
+new Universe().answer
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>class Square(x: Double) {  // constructor with one argument
+  // constructor body {
+  val size = x * x
+  // }
+}
+
+new Square(10).size
+new Square(10).x  // error: value x is not a member of Square
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>More constructors</p>
+<pre><code class="scala" data-trim>// x and y are public immutable members
+class Vector(val x: Double, val y: Double) {  // default constructor
+  val magnitude = math.sqrt(x * x + y * y)
+
+  def this() = this(0.0, 0.0)  // constructor overloading
+}
+
+val v = new Vector(2, 3)
+(v.x, v.y, v.magnitude)
+
+val v = new Vector()
+(v.x, v.y, v.magnitude)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Companion objects</p>
+            <small>Tired of typing <code>new SomeObject(arg1, arg2)</code>?</small>
+<pre><code class="scala" data-trim>class Vector(val x: Double, val y: Double) {
+  val magnitude = math.sqrt(x * x + y * y)
+  println("|($x, $y)| = $magnitude")
+}
+
+object Vector {
+  def apply(x: Double = 0.0, y: Double = 0.0) = new Vector(x, y)
+}
+
+Vector()
+Vector(1.0, 2.0)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Functions are objects</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// Function1[T1, R], Function2[T1, T2, R], ...
+// Function22[T1, T2, ... T22, R]
+class AddOne extends Function1[Int, Double] {
+  def apply(x: Int): Double = x + 1.0
+}
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>val plusOne = new AddOne()
+plusOne(10)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// shorthand
+class AddOne extends (Int => Double) {
+  def apply(x: Int): Double = x + 1.0
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// even shorter
+val plusOne: Int =&gt; Double = _ + 1.0
+plusOne(10)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Functions in Java</p>
+            <div class="fragment">
+<pre><code class="java" data-trim>Function&lt;Integer, Double&gt; addOne = new Function&lt;Integer, Double&gt;() {
+  @Nullable
+  @Override
+  public Double apply(@Nullable Integer x) {
+    if (x == null) return 1.0;
+    return x + 1.0;
+  }
+};
+addOne.apply(10);
+</code></pre>
+              <small>Guava <a href="https://code.google.com/p/guava-libraries/wiki/FunctionalExplained">function explained</a></small>
+            </div>
+            <div class="fragment">
+<pre><code class="java" data-trim>DoFn&lt;Integer, Double&gt; addOne = new DoFn&lt;Integer, Double&gt;() {  // Crunch
+  @Override
+  public void process(Integer x, Emitter&lt;Double&gt; emitter) {
+    emitter.emit(x + 1.0);
+  }
+};
+</code></pre>
+              <small>Crunch (not exactly due to internal state, and hence not compatible with Java 8 lambda)<br/>
+              </small>
+            </div>
+          </section>
+
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Case classes</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim style="font-size: 90%">// public immutable fields, toString and apply method for free
+case class Metal(name: String, country: String, femaleSinger: Boolean = false,
+                 violin: Boolean = false, flameThrower: Boolean = false)
+</code></pre>
+              <small>Think C struct or Python namedtuple</small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim style="font-size: 90%">val inflames = Metal("In Flames", "SE")  // apply, no need for new
+println(inflames)                        // free toString
+val epica = Metal("Epica", "NL", true)
+val delain = epica.copy(name="Delain")   // free copy constructor
+val korpiklaani = Metal("Korpiklaani", "FI", violin=true)
+val rammstein = Metal("Rammstein", "DE", flameThrower=true)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim style="font-size: 90%">def classify(m: Metal) = m match {
+  case Metal(_, "SE", false, false, false) => "melodic death"
+  case Metal(_, "FI", false, true, _) => "folk"
+  case Metal(_, "NL", true, _, _) => "goth"
+  case Metal(_, _, _, _, true) => "Tanz Metal"
+  case _ => "unknown"
+}
+</code></pre>
+              <small>Powerful with pattern matching</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Object Orientation</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Write a class <code>Time</code> with hour, minute, and second</li>
+              <li>Add a secondOfDay member in the constructor</li>
+              <li>An optional non-member argument <code>AM</code> to the constructor</li>
+              <li>Create <code>Midnight</code> and <code>Noon</code> companion objects with <code>apply()</code></li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>That's It</h2>
+          <p>Further reading</p>
+          <ul>
+            <li>Inheritance</li>
+            <li>Abstract classes and methods</li>
+            <li>Visibility control</li>
+            <li>Traits</li>
+            <li>Call by name</li>
+          </ul>
+          <p><a href="day2.html">&rArr; Day 2</a></p>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

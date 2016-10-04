@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Semigroups</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Advanced Scala
+## Semigroups
+Neville Li
+
+@sinisa_lyh
+
+Sep 2016
+
+---
+
+class: center, middle
+## Examples in [Scio](https://github.com/spotify/scio)
+## Concepts apply to [Scalding](https://github.com/twitter/scalding) and [Spark](https://spark.apache.org/)
+
+---
+
+# Count streams per artist
+
+```scala
+case class Stream(user: String, artist: String, timestamp: Long)
+
+def countStreamsPerArtist(input: SCollection[Stream]) =
+  input
+    .groupByKey(_.artist)
+    .mapValues(_.size)
+```
+
+---
+
+# Expanded
+
+```scala
+case class Stream(user: String, artist: String, timestamp: Long)
+
+def countStreamsPerArtist(input: SCollection[Stream]) = {
+
+  val group: SCollection[(String, Iterable[Stream])] = input.groupByKey(_.artist)
+
+  val count: SCollection[(String, Long)] = group.mapValues { values: Iterable[Stream] =>
+    values.size
+  }
+
+  count
+}
+```
+
+---
+
+# Analyzed
+
+```scala
+case class Stream(user: String, artist: String, timestamp: Long)
+
+def countStreamsPerArtist(input: SCollection[Stream]) = {
+
+  // user: String and timestamp: Long are grouped even though they are never used
+  val group: SCollection[(String, Iterable[Stream])] = input.groupByKey(_.artist)
+
+  // values can be huge and must be shipped to a single reducer
+  val count: SCollection[(String, Long)] = group.mapValues { values: Iterable[Stream] =>
+    // Requires iterating through all elements
+    // O(n) operation in many frameworks
+    values.size
+  }
+
+  count
+}
+```
+
+---
+
+# What's the problem?
+
+- ### Network and disks way slower than RAM
+- ### Shuffling is expensive
+- ### Serialization is expensive
+- ### Uneven workload among workers
+
+---
+
+class: center, middle
+# What's the #1 rule in data engineering?
+
+---
+
+class: center, middle
+# Process as little data as possible!
+
+---
+
+# Doing it old school
+
+Imagine a fake Scala M/R framework called Scuigi
+
+```scala
+trait ScuigiJob[I, K, V, O] {
+  // Map from input elements to key-value pairs for shuffling
+  def map(input: Iterator[I]): Iterator[(K, V)]
+
+  // Invisible shuffle layer
+
+  // Reduce values per key to output elements
+  def reduce(kv: Iterator[(K, Iterable[V])]): Iterator[O]
+}
+```
+
+--
+
+```scala
+class CountStreamsPerArtist extends ScuigiJob[Stream, String, Stream, (String, Long)] {
+  def map(input: Iterator[Stream]): Iterator[(String, Stream)]
+  def reduce(kv: Iterator[(String, Iterable[Stream])]): Iterator[(String, Long)]
+}
+```
+
+---
+
+# Implementation
+
+```scala
+class CountStreamsPerArtist extends ScuigiJob[Stream, String, Stream, (String, Long)] {
+  def map(input: Iterator[Stream]): Iterator[(String, Stream)] =
+    input.map(s => (s.artist, s))
+
+  def reduce(kv: Iterator[(String, Iterable[Stream])]): Iterator[(String, Long)] =
+    kv.map { case (k, vs) =>
+      (k, vs.size)
+    }
+}
+```
+
+---
+
+# Can you tell the difference?
+
+```scala
+class CountStreamsPerArtist extends ScuigiJob[Stream, String, Long, (String, Long)] {
+  def map(input: Iterator[Stream]): Iterator[(String, Long)] =
+    input.map(s => (s.artist, 1L))
+
+  def reduce(kv: Iterator[(String, Iterable[Long])]): Iterator[(String, Long)] =
+    kv.map { case (k, vs) =>
+      (k, vs.size)
+    }
+}
+```
+
+---
+
+# Let's cheat more
+
+```scala
+class CountStreamsPerArtist extends ScuigiJob[Stream, String, Long, (String, Long)] {
+  def map(input: Iterator[Stream]): Iterator[(String, Long)] = {
+    val m = mutable.Map.empty[String, Long]
+    input.foreach { s =>
+      count = m.getOrElse(s.artist, 0L)
+      m(s.artist) = count + 1
+    }
+    m.iterator
+  }
+
+  def reduce(kv: Iterator[(String, Iterable[Long])]): Iterator[(String, Long)] =
+    kv.map { case (k, vs) =>
+      (k, vs.sum)
+    }
+}
+```
+
+---
+
+class: center, middle
+
+# Congratulations
+# You just implemented a combiner
+
+---
+
+class: center, middle
+
+# All it does is 1 + 1 + 1 + ...
+# On both mappers and reducers
+
+---
+
+# Let's generalize this
+
+```scala
+class CombineJob[K, V](f: (V, V)) extends ScuigiJob[(K, V), K, V, (K, V)] {
+  def map(input: Iterator[(K, V)]): Iterator[(K, V)] = {
+    val m = mutable.Map.empty[K, V]
+    input.foreach { case (k, v) =>
+      m(k) = if (m.contains(k)) f(m(k), v) else m(k) = v
+    }
+    m.iterator
+  }
+
+  def reduce(kv: Iterator[(K, Iterable[V])]): Iterator[(K, V)] = {
+    kv.map { case (k, vs) =>
+      (k, vs.reduce(f))
+    }
+  }
+}
+```
+
+---
+
+class: center, middle
+
+# Congratulations
+# You just implemented reduceByKey
+
+---
+
+# Count with reduce
+
+```scala
+case class Stream(user: String, artist: String, timestamp: Long)
+
+def countStreamsPerArtist(input: SCollection[Stream]) =
+  input
+    .map(s => (s.artist, 1L))
+    .reduceByKey(_ + _)
+```
+
+---
+
+# This works only because
+
+- ### (1 + 1) + 1 = 1 + (1 + 1) &rarr; associative property
+- ### 1 + 2 = 2 + 1 &rarr; commutative property
+
+---
+
+class: center, middle
+
+# Congratulations
+# You now know abstract algebra
+
+---
+
+# Semigroup
+
+Given a set `\(S\)` and an operation `\(*\)`, we say that `\((S, *)\)` is a _semigroup_ if it satisfies the following properties for any `\(x, y, z \in S\)`:
+- _Closure_: `\(x * y \in S\)`
+- _Associativity_: `\((x * y) * z = x * (y * z)\)`
+
+We also say that `\(S\)` _forms a semigroup under_ `\(*\)`.
+
+---
+
+# Examples of Semigroups
+
+- ### Strings under concatenation (not commutative)
+- ### Integers under plus (commutative)
+- ### Sets under union (commutative)
+- ### Bloom filters under bitwise OR (commutative)
+
+---
+
+# Implementing a Semigroup
+
+```scala
+trait Semigroup[T] {
+  def plus(x: T, y: T): T
+}
+```
+
+--
+
+```scala
+class LongSemigroup extends Semigroup[Long] {
+  override def plus(x: Long, y: Long): Long = x + y
+}
+```
+
+---
+
+# Applying a Semigroup
+
+```scala
+trait SCollection[(K, V)] {
+  def sumByKey(implicit sg: Semigroup[V]): SCollection[(K, V)] =
+    this.reduceByKey(sg.plus)
+}
+```
+
+--
+
+```scala
+implicit val longSemigroup = new LongSemigroup
+
+def countStreamsPerArtist(input: SCollection[Stream]) =
+  input
+    .map(s => (s.artist, 1L))
+    .sumByKey  // calling with implicit argument
+
+```
+
+---
+
+class: center, middle
+
+# So all this work just to remove `(_+_)`?
+
+---
+
+# Hold on, what about
+
+```scala
+def sumColumns(input: SCollection[(String, (Int, Long, Float, Double))]) =
+  input.reduceByKey { (x, y) =>
+    (x._1 + y._1, x._2 + y._2, x._3 + y._3, x._4 + y._4)
+  }
+```
+
+---
+
+class: center, middle
+# What's the #1 rule in data engineering?
+
+---
+
+class: center, middle
+# Write as little code as possible!
+
+---
+
+# With Algebird
+
+```scala
+import com.twitter.algebird._
+
+def sumColumns(input: SCollection[(String, (Int, Long, Float, Double))]) =
+  input.sumByKey // implicit Semigroup[(Int, Long, Float, Double)]
+```
+
+--
+
+```scala
+implicit def tuple4Semigroup[A, B, C, D](implicit sgA: Semigroup[A],
+                                                  sgB: Semigroup[B],
+                                                  sgC: Semigroup[C],
+                                                  sgD: Semigroup[D]): Semigroup[(A, B, C, D)] =
+  new Semigroup[(A, B, C, D)] {
+    override def plus(x: (A, B, C, D), y: (A, B, C, D)): (A, B, C, D) =
+      (sgA.plus(x._1, y._1), sgB.plus(x._2, y._2), sgC.plus(x._3, y._3), sgD.plus(x._4, y._4))
+  }
+```
+
+---
+
+# More Algebird
+
+```scala
+def sumMap(input: SCollection[(String, Map[String, Long])]) =
+  input.sumByKey  // implicit Semigroup[Map[String, Long]]
+```
+
+--
+
+```scala
+implicit def mapSemigroup[K, V](implicit sgV: Semigroup[V]): Semigroup[Map[K, V]] =
+  new Smigroup[Map[K, V]] {
+    override def plus(x: Map[K, V], y: Map[K, V]): Map[K, V] =
+      x ++ y.map { case (k, v) => k -> (if (x.contains(k)) sgV(x(k), v) else v) }
+  }
+```
+
+---
+
+class: center, middle
+
+# So no more artisan handcraft
+# What else are you taking away from me!?
+
+---
+
+# Reducing fat objects
+
+```scala
+class DoubleArraySemigroup extends Semigroup[Array[Double]] {
+  override def plus(x: Array[Double], y: Array[Double]): Array[Double] =
+    (x zip y).map(p => (p._1 + p._2))
+}
+```
+
+--
+
+# One copy per pair of inputs
+
+--
+
+# Neunundneunzig per hundert
+
+---
+
+# Let's cheat again
+
+```scala
+class DoubleArraySemigroup extends Semigroup[Array[Double]] {
+  override def plus(x: Array[Double], y: Array[Double]): Array[Double] = {
+    var i = 0
+    while (i &lt; x.size) {
+      x(i) += y(i)
+      i += 1
+    }
+    x
+  }
+}
+```
+
+--
+
+# Nice, but...
+
+---
+
+# Do you spot the problem?
+
+```scala
+val vectors: SCollection[(String, Array[Double])] = // ...
+val sum = vectors.sumByKey
+
+vectors
+  .join(sum)
+  .mapValues { case (vec, sumVec) =>
+    (vec zip (sumVec)).map(p => (p._1 / p._2))
+  }
+```
+
+--
+
+# `vec` may have been mutated by `sumByKey`!
+
+---
+
+class: center, middle
+# What's the #1 rule in data engineering?
+
+---
+
+class: center, middle
+# Mutate as little data as possible!
+
+---
+
+# Mutating in place
+
+- ### Scalding - OK since it runs on M/R and no caching
+- ### Spark - OK since cached data are serialized copies
+- ### Scio - ERROR since Dataflow runner enforces immutable `fn`
+
+---
+
+# Cheat differently
+
+```scala
+
+class DoubleArraySemigroup extends Semigroup[Array[Double]] {
+  override def plus(x: Array[Double], y: Array[Double]): Array[Double] = plusI(x.copy, y)
+  override def sumOption(iterator: TraversableOnce[Double]): Option[Double] = {
+    var x: Array[Double] = null
+    iterator.foreach { y => if (x == null) x = y.copy else plusI(x, y) }
+    Option(x)
+  }
+  def plusI(x: Array[Double], y: Array[Double]): Array[Double] = {
+    var i = 0
+    while (i &lt; x.size) {
+      x(i) += y(i)
+      i += 1
+    }
+    x
+  }
+}
+```
+
+---
+
+# Accumulate &rarr; buffer &rarr; sum
+
+```scala
+class ReduceFn[T](sg: Semigroup[T]) extends CombineFn[T, JList[T], T] {
+  override def createAccumulator(): JList[T] = Lists.newArrayList()
+  override def extractOutput(accumulator: JList[T]): T = sg.reduceOption(accumulator.asScala).get
+
+  override def addInput(accumulator: JList[T], input: T): JList[T] = {
+    accumulator.add(input)
+    if (accumulator.size > BUFFER_SIZE) {
+      val combined = sg.sumOption(accumulator.asScala)
+      accumulator.clear()
+      combined.foreach(accumulator.add)
+    }
+    accumulator
+  }
+
+  override def mergeAccumulators(accumulators: JIterable[JList[T]]): JList[T] = {
+    val partial: Iterable[T] = accumulators.asScala.flatMap(a => sg.sumOption(a.asScala))
+    sg.sumOption(partial).toList.asJava
+  }
+
+  override def mergeAccumulators(accumulators: JIterable[JList[T]]): JList[T] = {
+    val partial = accumulators.asScala.flatMap(a => sg.sumOption(a.asScala))
+    val combined = sg.sumOption(partial).get
+    Lists.newArrayList(combined)
+  }
+}
+```
+
+---
+
+# `sumByKey` simplified
+
+```scala
+def sumByKey(implicit sg: Semigroup[V]): SCollection[(K, V)] =
+  this.applyPerKey(Combine.perKey(new ReduceFn(sg)))
+```
+
+---
+
+# Further Reading
+- ## Databricks [Avoid GroupByKey](https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html)
+- ## Algebird [wiki](https://github.com/twitter/algebird/wiki)
+- ## Scio [AlgebirdSpec.scala](https://github.com/spotify/scio/blob/master/scio-examples/src/test/scala/com/spotify/scio/examples/extra/AlgebirdSpec.scala)
+
+---
+
+class: center, middle
+# The End
+## Happy Summing
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>

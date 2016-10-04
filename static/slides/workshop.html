@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Scala Workshop</title>
+
+    <meta name="description" content="Scala Workshop - Functional Data Science">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write('<link rel="stylesheet" href="reveal.js/css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h1>Scala Workshop</h1>
+          <h3>Functional Data Science</h3>
+          <p>
+            <a href="mailto:neville@spotify.com">Neville Li</a><br/>
+            Jul 2014
+          </p>
+        </section>
+
+        <section>
+          <img src="images/scala-logo.png" alt="Scala" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          <small><a href="pitch.html">Why Functional? Why Scala?</a></small>
+        </section>
+
+        <section>
+          <h3>Quick Sort</h3>
+<pre><code class="scala" data-trim>def quickSort(a: List[Double]): List[Double] = a match {
+  case Nil      =&gt; Nil
+  case x :: xs  =&gt;
+    val (lt, gt) = xs.partition(_ &lt; x)
+    quickSort(lt) ++ List(x) ++ quickSort(gt)
+}
+</code></pre>
+          <ul>
+            <li class="fragment">Pattern matching &rarr; <code>match</code>/<code>case</code></li>
+            <li class="fragment">Powerful collections &rarr; <code>partition</code>/<code>::</code>/<code>Nil</code></li>
+            <li class="fragment">Anonymous functions, a.k.a. &lambda; &rarr; <code>(_ &lt; x)</code></li>
+            <li class="fragment">Tuple decomposition &rarr; <code>val (lt, gt) = ...</code></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>About Scala</h2>
+          <h3>The Good Parts</h3>
+          <ul>
+            <li>Functional &amp; object-oriented</li>
+            <li>Statically typed + type inference</li>
+            <li>Concise, expressive and flexible syntax</li>
+            <li>Java ecosystem</li>
+            <li>Great for modelling data flow</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>About Scala</h2>
+          <h3>The Not So Good Parts</h3>
+          <ul>
+            <li>Complexity - traits, implicits, advanced types, ...</li>
+            <li>Slow compilation and crazy stack trace</li>
+            <li>Performance overhead</li>
+            <li>Many ways to do one thing</li>
+          </ul>
+          <small>
+            Most can be avoided for data application<br/>
+            We will visit the rest during this workshop
+          </small>
+        </section>
+
+        <section>
+          <h2>Scala in Big Data</h2>
+          <ul>
+            <li><a href="http://spark-project.org/">Spark</a> - high performance in memory computing</li>
+            <li><a href="https://kafka.apache.org/">Kafka</a> - messaging and logging, from LinkedIn</li>
+            <li><a href="https://github.com/twitter/scalding">Scalding</a> - Twitter, eBay, Etsy, Airbnb, Square, Stripe...</li>
+            <li><a href="https://github.com/twitter/summingbird">Summingbird</a> - unify Scalding + Storm, Twitter</li>
+            <li><a href="http://crunch.apache.org/scrunch.html">Scrunch</a> - Scala wrapper for Crunch</li>
+            <li><a href="https://github.com/nicta/scoobi">Scoobi</a> - type-safe MapReduce framework, FourSquare</li>
+            <li><a href="https://github.com/twitter/algebird">Algebird</a> - Abstract algebra for Scala, Twitter</li>
+            <li><a href="https://github.com/amplab/shark">Shark</a>, <a href="http://amplab.github.io/graphx/">GraphX</a> - Hive, graph algorithms on Spark</li>
+            <li><a href="http://www.scalanlp.org/">ScalaNLP</a> - numerical (Breeze) and NLP (Epic) tools</li>
+            <li><a href="https://code.google.com/p/scalalab/">ScalaLab</a> - Matlab-like scientific computing in Scala</li>
+            <li><a href="https://github.com/BIDData/BIDMach">BIDMach</a> - ML on GPU</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>About The Workshop</h2>
+          <ul>
+            <li>Python and Java/C++ knowledge helps</li>
+            <li>Functional data structure and composition</li>
+            <li>Common patterns in Scalding/Scrunch/Spark/etc.</li>
+            <li>Even those in Java (through Guava)</li>
+            <li>Does not cover web frameworks (<a href="http://www.playframework.com/">Play</a>, <a href="https://lift.do/">Lift</a>, <a href="http://www.scalatra.org/">Scalatra</a>, etc.)</li>
+            <li>Nor distributed systems (<a href="http://akka.io/">Akka</a>, <a href="http://twitter.github.io/finagle">Finagle</a>, <a href="https://github.com/twitter/kestrel">Kestrel</a>, etc.)</li>
+            <li>Not an endorsement for production backend</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Resources</h2>
+          <ul>
+            <li><a href="https://blog.udemy.com/scala-tutorial-getting-started-with-scala/">Scala Tutorial: Getting Started with Scala</a> - beginner tutorial from <a href="https://www.udemy.com/">udemy</a></li>
+            <li><a href="http://horstmann.com/scala/">Scala for the Impatient</a> - recommended for beginners</li>
+            <li><a href="http://twitter.github.io/scala_school/">Scala School</a> - Twitter's online course</li>
+            <li><a href="https://www.coursera.org/course/progfun">Functional Programming Principles in Scala</a><br/>- taught by Martin Odersky, slightly academic</li>
+            <li><a href="http://www.manning.com/suereth/">Scala in Depth</a> - advanced topics</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>For the Impatient</h2>
+          <img src="images/impatient.jpg" alt="Scala for the Impatient" style="vertical-align: middle; border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          <ul>
+            <li>Chapters and sections with skill levels</li>
+            <li><code>A1-3</code> for application programmers</li>
+            <li><code>L1-3</code> for library designers</li>
+            <li>We will cover mostly <code>A1</code> and <code>A2</code></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Outline</h2>
+          <ol>
+            <li><a href="day1.html">Getting started</a></li>
+            <li><a href="day2.html">Functional patterns</a></li>
+            <li><a href="day3.html">Advanced topics</a></li>
+            <li><a href="day4.html">Case studies - Scalding and Spark</a></li>
+          </ol>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+    <script>
+      if( !navigator.userAgent.match( /(iphone|android)/gi ) && !!document.querySelector ) {
+        document.querySelector( '.fork-reveal' ).style.display = 'block';
+      }
+    </script>
+
+  </body>
+</html>

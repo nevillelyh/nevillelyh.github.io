@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>What's in a for?</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Advanced Scala
+## What's in a for?
+Neville Li
+
+@sinisa_lyh
+
+Sep 2016
+
+---
+
+# Map and flatMap
+
+```scala
+trait List[A] {
+  map(f: A => B): List[B]
+  flatMap(f: A => GenTraversableOnce[B]): List[B]
+}
+```
+
+--
+
+```scala
+trait Option[A] {
+  map(f: A => B): Option[B]
+  flatMap(f: A => Option[B]): Option[B]
+}
+```
+
+--
+
+```scala
+trait Future[A] {
+  map(f: A => B): Future[B]
+  flatMap(f: A => Future[B]): Future[B]
+}
+```
+
+---
+
+# Handling options
+
+```scala
+def plus(x: Option[Int], y: Option[Int]): Option[Int] =
+  if (x.isDefined &amp;&amp; y.isDefined) Some(x.get + y.get) else None
+```
+
+--
+
+```scala
+def plus(x: Option[Int], y: Option[Int], z: Option[Int]): Option[Int] =
+  if (x.isDefined &amp;&amp; y.isDefined &amp;&amp; z.isDefined) Some(x.get + y.get + z.get) else None
+```
+
+--
+
+### Ugh...
+
+--
+
+```scala
+def plus(x: Option[Int], y: Option[Int]): Option[Int] =
+  x.flatMap(a => y.map(b => a + b))
+```
+
+```scala
+def plus(x: Option[Int], y: Option[Int], z: Option[Int]): Option[Int] =
+  x.flatMap(a => y.flatMap(b => z.map(c => a + b + c)))
+```
+
+--
+
+### Not much better...
+
+---
+
+# For to the rescue
+
+```scala
+for(x &lt;- c1; y &lt;- c2; z &lt;-c3) {...}
+```
+is translated to
+
+--
+
+```scala
+c1.foreach(x => c2.foreach(y => c3.foreach(z => {...})))
+```
+
+--
+
+- - -
+
+```scala
+for(x &lt;- c1; y &lt;- c2; z &lt;-c3) yield {...}
+```
+is translated to
+
+--
+
+```scala
+c1.flatMap(x => c2.flatMap(y => c3.map(z => {...})))
+```
+
+- - -
+
+--
+
+[http://docs.scala-lang.org/tutorials/FAQ/yield.html]()
+
+---
+
+# List comprehensions
+
+```scala
+scala> for (x &lt;- List("a", "b", "c"); y &lt;- List(1, 2, 3)) yield (x + y)
+res0: List[String] = List(a1, a2, a3, b1, b2, b3, c1, c2, c3)
+```
+
+--
+
+equals
+```scala
+List("a", "b", "c").flatMap(x => List(1, 2, 3).map(y => x + y))
+```
+
+--
+
+- - -
+
+```scala
+def plus(a: Option[Int], b: Option[Int], c: Option[Int]): Option[Int] =
+  for (x &lt;- a; y &lt;- b; z &lt;- c) yield (x + y + z)
+```
+
+--
+
+equals
+```scala
+a.flatMap(x => b.flatMap(y => (c.map(z => x + y + z))))
+```
+
+---
+
+# More list comprehensions
+
+```scala
+val f1: Future[Response1] = backend1.request(payload)
+val f2: Future[Response2] = backend2.request(payload)
+def compute(r1: Response1, r2: Response2): Response = /* ... */
+
+val response: Future[Reponse] =
+  for {
+    r1 &lt;- f1
+    r2 &lt;- f2
+  } yield (compute(r1, r2))
+```
+Because `Future[T]` has `map` and `flatMap`.
+
+--
+
+- - -
+
+```scala
+val g: Gen[(Double, Double)] =
+  for {
+    x &lt;- Gen.choose(-1.0, 1.0)
+    y &lt;- Gen.choose(-1.0, 1.0)
+  } yield (x, y)
+```
+Because `Gen[T]` has `map` and `flatMap`.
+
+---
+
+class: center, middle
+# The End
+## Happy Yielding
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Macros in Data Pipelines</title>
+
+    <meta name="description" content="Macros in Data Pipelines">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Macros in</h2>
+          <h2>Data Pipelines</h2>
+          <p>
+            Neville Li<br/>
+            Jan 2015<br/>
+            <a href="mailto:neville@spotify.com">neville@spotify.com</a><br>
+            <a href="https://twitter.com/sinisa_lyh">@sinisa_lyh</a>
+          </p>
+        </section>
+
+        <section>
+          <h4>About Me</h4>
+          <ul>
+            <li>Music recommendation @Spotify</li>
+            <li>Scala since early 2013</li>
+            <li>Scalding, Storm, Spark, etc.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Powerful data combo</h4>
+          <ul>
+            <li class="fragment">Parquet - storage</li>
+            <li class="fragment">Avro - representation</li>
+            <li class="fragment">Scalding / Spark - pipeline</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Schema</h4>
+          <pre><code class="javascript" data-trim>{
+    "type": "record",
+    "name": "Account",
+    "namespace": "me.lyh.parquet.avro.schema",
+    "fields": [
+        {"name": "id", "type": "int"},
+        {"name": "type", "type": "string"},
+        {"name": "name", "type": "string"},
+        {"name": "amount", "type": "float"}
+    ]
+}</code></pre>
+        </section>
+
+        <section>
+          <h4>Pipeline</h4>
+          <pre><code class="scala" data-trim>ParquetAvroSource[Account]("input")
+  .map(a => (a.getName, a.getAmount))
+  .group
+  .reduce(_+_)</code></pre>
+        </section>
+
+        <section>
+          <h4>Projection and predicate</h4>
+          <ul>
+            <li>Column projection - skip columns</li>
+            <li>Filter predicate - skip row(group)s</li>
+            <li>Massive speedup - often 10+ times</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>So what's the problem?</h3>
+        </section>
+
+        <section>
+          <h4>Projection</h4>
+          <pre><code class="scala" data-trim>// native
+pipe.map(a => (a.getName, a.getAmount))
+
+// Parquet
+Parquet.project[Account]("name", "amount")</code></pre>
+          <ul>
+            <li class="fragment">STRINGS &rarr; unsafe and error prone</li>
+            <li class="fragment">No IDE auto-complete &rarr; finger injury</li>
+            <li class="fragment">my_fancy_field_name &rarr; .getMyFancyFieldName</li>
+            <li class="fragment">Hard to migrate existing code</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Predicate</h4>
+          <pre><code class="scala" data-trim>// native
+pipe.filter(a => a.getName == "Neville" &amp;&amp; a.getAmount &gt; 100)
+
+// Parquet
+FilterApi.and(
+  FilterApi.eq(FilterApi.binaryColumn("name"),
+               Binary.fromString("Neville")),
+  FilterApi.gt(FilterApi.floatColumn("amount"),
+               100f.asInstnacesOf[java.lang.Float])  // Java...
+)</code></pre>
+          <p class="fragment">Like Clojure, but worse</p>
+        </section>
+
+        <section>
+          <h3>Macros to the rescue</h3>
+        </section>
+
+        <section>
+          <h4>What's in an Expr</h4>
+		  <div>
+          	<pre><code class="scala" data-trim>_.getAccounts.get(0).getAmount > 10</code></pre>
+		  </div>
+		  <div class="fragment">
+		  	<p>Internal</p>
+			<pre><code class="scala" data-trim>scala.this.Predef.Integer2int(x$1.getAccounts().get(0).getAmount()).>(10)</code></pre>
+		  </div>
+		  <div class="fragment">
+		  	<p>RAWRRR</p>
+            <pre><code class="scala" data-trim>Apply(Select(Apply(Select(Select(This(newTypeName("scala")), scala.Predef),
+newTermName("Integer2int")), List(Apply(Select(Apply(Select(Apply(Select(
+Ident(newTermName("x$1")), newTermName("getAccounts")), List()),
+newTermName("get")), List(Literal(Constant(0)))), newTermName("getAmount")),
+List()))), newTermName("$greater")), List(Literal(Constant(10))))</code></pre>
+		  </div>
+          <p class="fragment">Don't worry, there's pattern matching and recursion</p>
+        </section>
+
+        <section>
+          <h4>Projection improved</h4>
+          <pre><code class="scala" data-trim>import org.apache.avro.Schema
+import org.apache.avro.specific.{ SpecificRecord => SR }
+
+object Projection {
+  def apply[T <: SR](gs: (T => Any)*): Schema = macro applyImpl[T]
+  def applyImpl[T <: SR : c.WeakTypeTag]
+               (c: Context)(gs: c.Expr[(T => Any)]*): c.Expr[Schema] = {
+    // ...
+}</code></pre>
+          <pre class="fragment"><code class="scala" data-trim>Projection[Accont](_.getName, _.getAmount)</code></pre>
+        </section>
+
+        <section>
+          <h4>Predicate improved</h4>
+          <pre><code class="scala" data-trim>import _root_.parquet.filter2.predicate.FilterPredicate
+import org.apache.avro.specific.{ SpecificRecord => SR }
+
+object Predicate {
+  def apply[T <: SR](p: T => Boolean): FilterPredicate = macro applyImpl[T]
+  def applyImpl[T <: SR : c.WeakTypeTag]
+               (c: Context)
+               (p: c.Expr[T => Boolean]): c.Expr[FilterPredicate] = {
+    // ...
+}</code></pre>
+          <pre class="fragment"><code class="scala" data-trim>Predicate[Accont](x => x.getName == "Neville" &amp;&amp; x.getAmount > 100)</code></pre>
+        </section>
+
+        <section>
+          <h4>Things that the complier does</h4>
+          <p><em>that I have to mimic</em></p>
+            <ul>
+			  <li class="fragment">Flipped <code>(a &gt; 10)</code> === <code>(10 &lt; a)</code></li>
+              <li class="fragment">Primitive vs boxed values (and NULLs!)</li>
+              <li class="fragment">Numeric type coercion</li>
+              <li class="fragment">Booleans<br/><code>(_.getBool)</code> === <code>(_.getBool == true)</code></li>
+            </ul>
+        </section>
+
+        <section>
+          <h4>Code</h4>
+          <p><a href="https://github.com/nevillelyh/parquet-avro-extra">https://github.com/nevillelyh/parquet-avro-extra</a></p>
+          <p>In production @Spotify</p>
+        </section>
+
+        <section>
+          <h2>The End</h2>
+          <h3>Thank You</h3>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

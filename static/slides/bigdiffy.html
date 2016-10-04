@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BigDiffy</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Advanced Scala
+## BigDiffy
+Neville Li
+
+@sinisa_lyh
+
+Sep 2016
+
+---
+
+class: center, middle
+# BigDiffy
+## Pairwise Field-Level Statistical Diff
+## a.k.a. B4D 4$$ D1FF
+
+[github/ratatool:BigDiffy.scala](https://github.com/spotify/ratatool/blob/master/src/main/scala/com/spotify/ratatool/diffy/BigDiffy.scala)
+
+---
+
+# What's a diff?
+
+```diff
+@@ -206,7 +209,7 @@ object AlgebirdSpec extends Properties("Algebird") {
+       .boundsContain(xs.internal.toSet.size)
+   }
+
+-  property("aggregate with HyperLogLog") = forAll(sCollOf(Gen.alphaStr)) { xs =>
++  property("aggregate with HyperLogLog") = forAll(sCollOfN(1000, Gen.alphaStr)) { xs =>
+     xs.aggregate(HyperLogLogAggregator(10).composePrepare(_.getBytes))
+       .approximateSize
+       // approximate bounds should contain exact distinct count
+```
+
+---
+
+# Unix diff
+
+- ## Line-oriented
+- ## Ordered sequences
+
+---
+
+# Big data
+
+- ## Record-oriented
+- ## Unordered parallel collections
+
+---
+
+# What's a delta?
+
+### Change of any changeable quantity
+
+- ## Numeric: &Delta;(10, 9) = 10 - 9 = 1
+- ## String: Levenshtein edit distance &Delta;(Lez Zeppelin, Led Zeppelin) = 1
+- ## Vector: &Delta;(v1, v2) = 1 - CosineSim(v1, v2) &rarr; [0.0, 2.0]
+
+---
+
+# Abstract "Delta" Types
+
+```scala
+object DeltaType extends Enumeration {
+  val NUMERIC, STRING, VECTOR = Value
+}
+
+sealed trait DeltaValue
+case object UnknownDelta extends DeltaValue
+case class TypedDelta(deltaType: DeltaType.Value, value: Double) extends DeltaValue
+
+object NumericDelta {
+  def apply(value: Double): TypedDelta = TypedDelta(DeltaType.NUMERIC, value)
+}
+object StringDelta {
+  def apply(value: Double): TypedDelta = TypedDelta(DeltaType.STRING, value)
+}
+object VectorDelta {
+  def apply(value: Double): TypedDelta = TypedDelta(DeltaType.VECTOR, value)
+}
+```
+
+---
+
+# Field level deltas
+
+```scala
+case class Delta(field: String, left: Any, right: Any, delta: DeltaValue)
+```
+
+```scala
+abstract class Diffy[T] {
+  def apply(x: T, y: T): Seq[Delta]
+}
+```
+
+## `T` &rarr; Avro, ProtoBuf, or BigQuery TableRow
+
+```scala
+Delta("track.artist.name", "Lez Zeppelin", "Led Zeppelin", TypedDelta(STRING, 1.0))
+Delta("track.popularity", 50, 80, TypedDelta(NUMERIC, 30.0))
+Delta("track.acoustic_vector", [0.1234, ...], [0.4321, ...], TypedDelta(VECTOR, 0.02))
+```
+
+---
+
+# Implementing `Diffy[T]`
+
+- ## Generic programing in Java a.k.a. treating everything as objects
+- ## Recursion recursion recursion...
+- ## Stops at repeated nested records
+- ## `Object.equals()`
+
+---
+
+# BigDiffy
+
+### Implementation in Scio, copy pastable to Scalding and Spark
+
+- ## LHS, RHS &rarr; `SCollection[T]`
+- ## `keyFn: T => String`
+- ## `diffy: Diffy[T]`
+
+---
+
+class: center, middle
+# Demo Time!
+
+---
+
+# Pairwise field-level deltas
+
+```scala
+def computeDeltas[T](lhs: SCollection[T], rhs: SCollection[T], diffy: Diffy[T], keyFn: T => String) = {
+  val lKeyed = lhs.map(t => (keyFn(t), ("l", t)))
+  val rKeyed = rhs.map(t => (keyFn(t), ("r", t)))
+  (lKeyed ++ rKeyed)
+    .groupByKey
+    .map { case (k, vs) =>
+      val m = vs.toMap
+      if (m.size == 2) {
+        val ds = diffy(m("l"), m("r")) // Seq[Delta]
+        val dt = if (ds.isEmpty) SAME else DIFFERENT
+        (k, (ds, dt))  // (field, ([delta...], delta type))
+      } else {
+        val dt = if (m.contains("l")) MISSING_RHS else MISSING_LHS
+        (k, (Nil, dt)) // (field, ([], delta type))
+      }
+    }
+}
+```
+
+--
+
+### Essentially a `map` &rarr; `concat` &rarr; `groupByKey` &rarr; `map`
+
+---
+
+# Summing deltas
+
+```scala
+deltas  // (field, ()[delta...], delta type))
+  .map { case (_, (ds, dt)) =>
+    val m = mutable.Map.empty[String, (Long, Option[(DeltaType.Value, Min[Double], Max[Double], Moments)])]
+    ds.foreach { d =>
+      val optD = d.delta match {
+        case UnknownDelta => None
+        case TypedDelta(t, v) => Some((t, Min(v), Max(v), Moments.aggregator.prepare(v)))
+      }
+      // Map of: field -> Semigroup of Option[(count, delta stats)]
+      m(d.field) = (1L, optD)
+    }
+    // also sum global statistics
+    val dtVec = dt match {
+      case SAME => (1L, 1L, 0L, 0L, 0L)
+      case DIFFERENT => (1L, 0L, 1L, 0L, 0L)
+      case MISSING_LHS => (1L, 0L, 0L, 1L, 0L)
+      case MISSING_RHS => (1L, 0L, 0L, 0L, 1L)
+    }
+    (dtVec, m.toMap)
+  }
+  .sum
+```
+
+--
+
+### Essentially a `map` &rarr; `sum`
+
+---
+
+# What does the last `sum` do?
+--
+
+- ## (delta type vec, field map)
+--
+
+- ## delta type vec &rarr; (total, same, diff, missing LHS, missing RHS)
+--
+
+- ## field map &rarr; field &rarr; Option[(count, delta stats)]
+--
+
+- ## delta stats &rarr; (delta type, min, max, moments)
+--
+
+- ## moments &rarr; (count, mean, variance, stddev, skewness, kurtosis)
+
+---
+
+class: center, middle
+# [Semigroup!](http://www.lyh.me/slides/semigroups.html)
+
+---
+
+# What about non-determinism?
+
+```scala
+class Diffy[T](val ignore: Set[String], val unordered: Set[String])
+```
+
+- ## `ignore` - fields to ignore during comparison
+  Date, timestamp, random ID
+
+- ## `unordered` - fields to be treated as unordered list
+  Sets
+
+---
+
+# Use cases
+
+- ## Tracking data set change over time
+- ## Validation when porting pipelines
+- ## Composite key for time series, e.g. (user + track + timestamp)
+- ## Integration or regression test
+- ## Sanity checking ML models
+
+---
+
+class: center, middle
+# The End
+## Happy Diffing
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Advanced Topics</title>
+
+    <meta name="description" content="Scala Workshop - Advanced Topics">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write('<link rel="stylesheet" href="reveal.js/css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Advanced Topics</h2>
+          <ul>
+            <li>Operators</li>
+            <li>Monoids and Monads</li>
+            <li>Generics</li>
+            <li>Bounds</li>
+            <li>Variance</li>
+            <li>Implicits</li>
+            <li>Polymorphism</li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+            <h3>Operators</h3>
+            <p>Operators are functions</p>
+<pre><code class="scala" data-trim>// use :paste mode in Scala console
+class Vec(val data: Seq[Double]) {
+  def +(rhs: Vec): Vec = new Vec(data.zip(rhs.data).map(t => t._1 + t._2))
+  def *(scalar: Double): Vec = new Vec(this.data.map(_ * scalar))
+  override def toString: String = "Vec(" + data.mkString(",") + ")"
+}
+
+object Vec {  // companion object
+  def apply(data: Double*) = new Vec(data)
+}
+</code></pre>
+            <div class="fragment">
+<pre><code class="scala" data-trim>Vec(0.1, 0.2) + Vec(1.0, 2.0)  // Vec.+(Vec), infix operator
+Vec(0.1, 0.2) * 2.0            // Vec.*(2.0)
+</code></pre>
+            </div>
+            <small class="fragment">Heavily used in math libraries like breeze</small>
+          </section>
+
+          <section>
+            <h3>Operators</h3>
+            <p>Associativity</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>1 + 2 + 3 + 4 == ((1 + 2) + 3) + 4
+1 * 2 * 3 * 4 == ((1 * 2) * 3) * 4
+</code></pre>
+            <small>Most operators are left Associative</small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>1 :: 2 :: 3 :: Nil == 1 :: (2 ::(3 :: Nil))
+2 :: Nil == Nil.::(2)                // .::() is a method of Nil
+1 +: List(2, 3) == List(2, 3).+:(1)  // .+:() is a mmethod of List
+</code></pre>
+            <small>Except those end with a colon (:)</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Operators</h3>
+            <p>Binary operator properties</p>
+            <div>
+            <ul>
+              <li>Associative - \((ab)c = a(bc)\)</li>
+              <li>Commutative - \(ab = ba\)</li>
+              <li>Affect fold/reduce left or right</li>
+              <li>Also whether collection is parallelizable</li>
+            </ul>
+            </div>
+            <small>More on this later</small>
+          </section>
+
+          <section>
+            <h3>Operators</h3>
+            <p>:: ::: +: :+ ++: :++ /: :\ % %% ...</p>
+            <img src="images/perl.jpg" alt="perl" style="vertical-align: middle;border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+            <p>Do not overuse!</p>
+          </section>
+
+          <section>
+            <h3>Operators</h3>
+            <p>Christmas Tree</p>
+<pre><code class="scala" data-trim>// lots of operator overloading...
+// ...
+object ChristmasTree extends DecorationBuilder {
+  def main(args: Array[String]) {
+           \-/.
+         -->*<--
+            .
+           /.\
+         ./.|.\.
+         /.oxo.\
+       ./.*.|.x.\.
+       /.oo.|.oo.\
+     ./.oxo.|.***.\.
+     /.*.oo.|.*.oo.\.
+           |||
+  }
+}
+</code></pre>
+            <small><a href="http://www.cakesolutions.net/teamblogs/2011/12/22/merry-christmas/">http://www.cakesolutions.net/teamblogs/2011/12/22/merry-christmas/</a><br/>
+              Do not attempt at home!</small>
+          </section>
+
+          <section>
+            <h3>Operators</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Write a class for complex number</li>
+              <li>Write methods for \(+\) and \(\times\)</li>
+              <li>Make sure they support <code>Double</code> too</li>
+              <li>How about <code>double</code> <em>op</em> <code>complex</code>?</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monoid definition</p>
+            <ul>
+              <li>A set \(S\) and a binary function \(\bullet\) of \(S \times S \rightarrow S\)</li>
+              <li>Closure - \(\forall a, b \in S: a \bullet b \in S\)</li>
+              <li>Associativity - \(\forall a, b, c \in S: (a \bullet b) \bullet c = a \bullet (b \bullet c)\)</li>
+              <li>Identity element - \(\exists e \in S: e \bullet a = a \bullet e = a\)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monoid examples</p>
+            <ul>
+              <li>\(S =\) natural numbers, \(\bullet = +, e = 0\) or \(\bullet = \times, e = 1\)</li>
+              <li>\(S =\) finite strings with alphabet \(\Sigma\), \(\bullet = concat, e = ""\)</li>
+              <li>\(S =\) sets, \(\bullet = union, e = \emptyset\)</li>
+              <li>Algebird <code>BloomFilter</code>, <code>SGDMonoid</code>, ...</li>
+              <li>For some cases of \(S =\) <code>T</code>, \(\bullet =\) <code>op</code>, \(e =\) <code>z</code> in<br/>
+              <code>foldLeft[T](z: T)(op: (T, T) =&gt; T): T</code></li>
+              <li class="fragment"><code>List(10, 20, 30).foldLeft(0)(_+_)</code><br/>
+              <code>List(10, 20, 30).reduce(_+_)</code>
+              <li class="fragment"><code>List(10, 20, 30).foldLeft(1)(_*_)</code><br/>
+              <code>List(10, 20, 30).reduce(_*_)</code>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monoid illustrated</p>
+            <img src="images/monoid.png" alt="monoid" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p><span class="fragment" data-fragment-index="5">Distributed</span><br/>Sum</p>
+            <pre><code>List(1, 2, 3, 4, 5, 6).reduce(_ + _)</code></pre>
+            <ul>
+              <li class="fragment" data-fragment-index="1">(1 + 2) + (3 + 4) + (5 + 6)</li>
+              <li class="fragment" data-fragment-index="2">(1 + 2 + 3) + (4 + 5 + 6)</li>
+              <li class="fragment" data-fragment-index="3">(1 + 3 + 5) + (2 + 4 + 6)</li>
+            </ul>
+            <div class="fragment" data-fragment-index="4">
+            <p>Any order, multiple steps</p>
+            <p>Perfect for an unordered, parallel collection</p>
+<pre><code class="scala" data-trim>pipe              // of type [(String, Int)]
+  .group          // by key String with values {Int, Int, ...}
+  .reduce(_ + _)  // happens both on mapper and reducer side
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p><span class="fragment" data-fragment-index="5">Distributed</span><br/>Distinct</p>
+            <pre><code>List(1, 1, 1, 2, 2, 3).map(x =&gt; Set(x)).reduce(_ ++ _).size</code></pre>
+            <ul>
+              <li class="fragment" data-fragment-index="1">({1} ++ {1}) ++ ({1} ++ {2}) ++ ({2} ++ {3})</li>
+              <li class="fragment" data-fragment-index="2">({1} ++ {1} ++ {1}) ++ ({2} ++ {2} ++ {3})</li>
+              <li class="fragment" data-fragment-index="3">({1} ++ {2} ++ {3}) ++ ({1} ++ {1} ++ {2})</li>
+            </ul>
+            <div class="fragment" data-fragment-index="4">
+<pre><code class="scala" style="font-size: 90%" data-trim>// mapFn: input type T to intermediate, reduceable type X
+// redFn: binary operator
+// mapFn2: X to output type U
+def mapReduceMap[T, X, U](mapFn: T =&gt; X)(redFn: (X, X) =&gt; X)(mapFn2: X =&gt; U)
+</code></pre>
+              <small>From Scalding field-based API <a href="http://twitter.github.io/scalding/#com.twitter.scalding.GroupBuilder">GroupBuilder</a></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>User artists as a monoid</p>
+<pre><code class="scala" data-trim>abstract class UserArtists {  // S
+  def getArtists: Set[String]
+  def +(that: UserArtists): UserArtists  // binary function
+}
+case class UserArtistsEmpty() extends UserArtists {  // e
+  override def getArtists: Set[String] = Set[String]()
+  override def +(that: UserArtists): UserArtists = that
+}
+case class UserArtistsFull(artists: Set[String]) extends UserArtists {
+  override def getArtists: Set[String] = artists
+  override def +(that: UserArtists): UserArtists = that match {
+    case that: UserArtistsEmpty =&gt; this
+    case that: UserArtistsFull =&gt; {
+      UserArtistsFull(this.artists ++ that.artists)
+    }
+  }
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Semigroup and group</p>
+            <ul>
+              <li>Semigroup - Monoid without identity element</li>
+              <li>Group - Monoid with inverse \(\forall a \in S: \exists b \in S \rightarrow a \bullet b = b \bullet a = e\)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monad definition</p>
+            <ul>
+              <li>A monad <code>M</code> embeds an underlying type <code>T</code></li>
+              <li>Type constructor: <code>T</code> &rArr; <code>M[T]</code> (generics!)</li>
+              <li>Unit function: <code>fn: T =&gt; M[T]</code></li>
+              <li>Binding operation: <code>m: M[T]</code>, <code>op: T =&gt; M[U]</code> &rArr; <code>M[U]</code></li>
+            </ul>
+            <small>Also see <a href="http://en.wikipedia.org/wiki/Monad_(functional_programming)#Monad_laws">monad laws</a><br/>
+              In short, identity and associativity, just like monoid
+            </small>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monad examples</p>
+<pre><code class="scala" data-trim>// from Algebird
+trait Monad[M[_]] {
+  // Also called `unit` (in papers) or `return` (in Haskell).
+  def apply[T](v: T): M[T]
+
+  // Also called `bind` (in papers) or `&gt;&gt;=` (in Haskell).
+  def flatMap[T, U](m: M[T])(fn: (T) =&gt; M[U]): M[U]
+}
+
+// Option[T] is a monad
+Option
+  .apply[Int](10)   // T =&gt; M[T] where T == Int and M == Option
+  .flatMap { t  =&gt;  // T =&gt; M[U] where U = String
+    Option.apply[String](t.toString)
+  }
+</code></pre>
+            <small>Other monadic structures: collections, futures, Storm bolts, Scalding pipes, Spark RDDs, etc.</small>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Future is monad</p>
+<pre><code class="java" data-trim>ListenableFuture&lt;T&gt;  // M = ListenableFuture
+ListenableFuture&lt;T&gt; f1 = Futures.immediateFuture(T value); // unit function
+
+// binding operation
+ListenableFuture&lt;U&gt; f2 = Futures.transform(f, new Function&lt;T, U&gt;() {
+  public U apply(T value) {
+    U result;
+    // computation...
+    return result;
+  }
+});
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Monoids and Monads</h3>
+            <p>Monad illustrated</p>
+            <img src="images/monad.png" alt="monad" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Generics</h3>
+            <p>Generic classes</p>
+<pre><code class="scala" data-trim>// types of member key and value unknown and parameterized
+class KeyVal[K, V](val key: K, val value: V)
+
+val one = new KeyVal("one", 1)                   // KeyVal[String, Int]
+val genericOne = new KeyVal[Any, Any]("one", 1)  // KeyVal[Any, Any]
+</code></pre>
+            <ul>
+              <li>Most Scala library APIs are generic</li>
+              <li><code>sealed abstract class List[+A] ...</code></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Generics</h3>
+            <p>Generic functions</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// function definition with type parameter
+def getMiddle[T](a: Array[T]) = a(a.length / 2)
+
+val line = Array("We", "all", "live", "in", "Amerika")
+getMiddle(line)        // getMiddle[String]
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+              <p>Specialized versions</p>
+<pre><code class="scala" data-trim>val getMiddleString = getMiddle[String] _
+getMiddleString(line)  // getMiddle[String]
+
+val getMiddleInt = getMiddle[Int] _
+getMiddleInt(line)     // error!
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Generics</h3>
+            <p>Tuples are generic classes</p>
+<pre><code class="scala" data-trim>// use :paste mode in Scala console
+class Tuple1[T1](val _1: T1)
+class Tuple2[T1, T2](val _1: T1, val _2: T2)
+// ...
+// class Tuple22[T1, ..., T22](val _1: T1, ... , val _22: T22)
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+              <p>With companion objects</p>
+<pre><code class="scala" data-trim>object Tuple1 {
+  def apply[T1](v1: T1) = new Tuple1(v1)
+}
+object Tuple2 {
+  def apply[T1, T2](v1: T1, v2: T2) = new Tuple2(v1, v2)
+}
+// ...
+
+Tuple2("A", 1)  // Tuple2[String, Int].apply("A", 1)
+</code></pre>
+            <small>Remember <a href="http://crunch.apache.org/apidocs/0.10.0/org/apache/crunch/class-use/Tuple.html">Crunch Tuple</a>? e.g.
+              <code>Pair&lt;K,V&gt;</code>, <code>Tuple3&lt;V1,V2,V3&gt;</code>, <code>Tuple4&lt;V1,V2,V3,V4&gt;</code>, <code>TupleN</code></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Generics</h3>
+            <p>So are functions</p>
+<pre><code class="scala" data-trim>// use :paste mode in Scala console
+trait Function1[T1, R] {
+  def apply(v1: T1): R          // abstract method
+}
+trait Function2[T1, T2, R] {
+  def apply(v1: T1, v2: T2): R  // abstract method
+}
+// ...
+// trait Function22[T1, ..., T22, R] {
+//   def apply(v1: T1, ..., v22: T22): R
+// }
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>object add extends Function2[Int, Int, Int] {
+  def apply(v1: Int, v2: Int): Int = v1 + v2
+}
+add(10, 20)  // add.apply(10, 20)
+</code></pre>
+              <small>Remember Guava <a href="https://code.google.com/p/guava-libraries/wiki/FunctionalExplained">function</a>?</small>
+            </div>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Bounds</h3>
+            <p>Upper bounds</p>
+<pre><code class="scala" data-trim>class Band(val name: String)
+
+class MetalBand(name: String, val flameThrower: Boolean) extends Band(name)
+class HipsterBand(name: String, val banjo: Boolean) extends Band(name)
+
+class SetList[T &lt;: Band](bands: T*) {
+  val runningOrder = List(bands)
+}
+
+val rammstein = new MetalBand("Rammstein", true)
+val mumford = new HipsterBand("Mumford &amp; Sons", true)
+new SetList(rammstein, mumford)    // SetList[Band]
+
+case class Guitar(strings: Int)
+new SetList(Guitar(7), Guitar(8))  // fail, Guitar is not Band
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Bounds</h3>
+            <p>Bounds for type interface</p>
+<pre><code class="scala" data-trim>class Pair[T](val first: T, val second: T) {
+  // error: value compareTo is not a member of type parameter T
+  def smaller = if (first.compareTo(second) < 0) first else second
+}
+
+// T with upper bound Comparable[T], i.e. T is a subtype of Comparable[T]
+class Pair[T <: Comparable[T]](val first: T, val second: T) {
+  def smaller = if (first.compareTo(second) < 0) first else second
+}
+
+new Pair("Amerika", "wunderbar").smaller  // success!
+new Pair(42, 666).smaller                 // fail! Int not Comparable[Int]
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Bounds</h3>
+            <p>View bounds</p>
+<pre><code class="scala" data-trim>// Int is not Comparaple[Int]
+// However Int can be implicitly converted to RichInt with Comparable[Int]
+// T &lt;% Comparaple[T] -&gt; T is viewable as Comparable[T]
+class Pair[T &lt;% Comparable[T]](val first: T, val second: T) {
+  def smaller = if (first.compareTo(second) &lt; 0) first else second
+}
+
+new Pair(42, 666).smaller  // success!
+
+// Ordered[T] has comparison operators
+class Pair[T &lt;% Ordered[T]](val first: T, val second: T) {
+  def smaller = if (first &lt; second) first else second
+}
+
+new Pair("Amerika", "wunderbar").smaller
+new Pair(42, 666).smaller
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Bounds</h3>
+            <p>Lower bounds</p>
+<pre><code class="scala" data-trim>class Pair[T](val first: T, val second: T) {
+  // no restriction, R can be anything, return type is Pair[Any]
+  def replaceFirst[R](newFirst: R) = new Pair(newFirst, second)
+
+  // R is supertype of T, return type is Pair[R]
+  def replaceFirstSafe[R >: T](newFirst: R) = new Pair(newFirst, second)
+}
+
+val reiter = new MetalBand("Die Apokalyptischen Reiter", true)
+val p = new Pair(rammstein, reiter )  // Pair[MetalBand]
+p.replaceFirst(mumford)               // Pair[Any]
+p.replaceFirstSafe(mumford)           // Pair[Band]
+</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Variance</h3>
+            <p>An example</p>
+<pre><code class="scala" data-trim>class Band
+class MetalBand extends Band
+
+val b: Band = new MetalBand  // success!
+
+class Concert[T &lt;: Band]
+// fail! Concert[MetalBand] is not subtype of Concert[Band]
+val c: Concert[Band] = new Concert[MetalBand]
+
+class Concert[+T &lt;: Band]
+// success! Concert[T'] is subtype of Concert[T] (where T' extends T)
+val c: Concert[Band] = new Concert[MetalBand]
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Variance</h3>
+            <p>{Co/contra/in}variant</p>
+              <ul>
+                <li><code>B extends A</code> &rarr; <code>B</code> is subtype of <code>A</code></li>
+                <li><code>C[+A]</code> &rarr; covariant, <code>C[B]</code> is subtype of <code>C[A]</code></li>
+                <li><code>C[A]</code> &rarr; invariant, <code>C[B]</code> and <code>C[A]</code> are unrelated</li>
+                <li><code>C[-A]</code> &rarr; contravariant, <code>C[B]</code> is supertype of <code>C[A]</code></li>
+              </ul>
+          </section>
+
+          <section>
+            <h3>Variance</h3>
+            <p>Covariant</p>
+              <ul>
+                <li>Most Scala collections have coveriant type variable</li>
+                <li><code>List[+A]</code>, <code>Set[+A]</code>, <code>Map[A, +B]</code> ...</li>
+              </ul>
+          </section>
+
+          <section>
+            <h3>Variance</h3>
+            <p>Contravariant</p>
+<pre><code class="scala" data-trim>// Scala functions have contravariant arguments
+// trait Function1[-T1, +R]
+
+class Band
+class MetalBand extends Band
+
+def playMusic(b: Band) = "call me maybe"
+def playMetal(b: MetalBand) = "RAWR!!!"  // accepts Band, more generic
+
+val play: Band => String = playMusic  // same type, fine
+
+// fail! playMetal does not accept Band argument type
+val play: Band => String = playMetal
+
+// success! playMusic accepts MetalBand argument type
+val play: MetalBand => String = playMusic
+</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Implicits</h3>
+            <img src="images/implicits.jpg" alt="implicits" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+          <section>
+            <h3>Implicits</h3>
+            <p>Conversions</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>class Band(val name: String)
+class MetalBand(name: String) extends Band(name)
+
+val one = new Band("One Direction")
+def playMetal(b: MetalBand) = b.name + " RAWR!"
+playMetal(one)  // fail!
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>implicit def metallize(b: Band) = new MetalBand(b.name.replace("O", "Ö"))
+playMetal(one)  // playMetal(metallize(one))
+</code></pre>
+              <small>Also see C++ <a href="http://msdn.microsoft.com/en-us/library/s2ff0fz8(v=vs.80).aspx">conversion constructor</a></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Implicits</h3>
+            <p>Pimp my library</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// library code
+class TopHit(val line: String) {
+  def sing = line + "!"
+}
+class MetalTopHit(t: TopHit) {
+  def rawr = t.line.toUpperCase + " RAWR!"
+}
+object Implicits {
+  implicit def makeMetalTopHit(t: TopHit) = new MetalTopHit(t)
+}
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// application code
+import Implicits._
+val t = new TopHit("call me maybe")
+t.sing  // TopHit.sing
+
+// .rawr not defined on TopHit, but on MetalTopHit
+t.rawr  // makeMetalTopHit(t).rawr
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Implicits</h3>
+            <p>Uses</p>
+            <ul>
+              <li><code>RichInt</code>, <code>RichDouble</code>, etc. for <code>Int</code>, <code>Double</code> ...</li>
+              <li><code>StringOps</code> for <code>String</code> with indexed sequence methods</li>
+              <li><code>scala.collection.JavaCoverters._</code></li>
+              <li>Spark <code>PairRDDFunctions</code> for <code>RDD</code></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Implicit</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Implement support for <code>double</code> <em>op</em> <code>complex</code></li>
+              <li>Pimp <code>String</code> with a <code>toComplex</code> method</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Polymorphism</h3>
+            <p>Parametric polymorphism</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>def head[A](xs: List[A]): A = xs(0)</code></pre>
+            <small>with unconstrained <em>type variable</em>, i.e. <code>A</code></small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>head(1 :: 2 :: Nil)</code></pre>
+            <small><code>A</code> is <code>Int</code></small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>case class Band(name: String)
+head(Band("Carcass") :: Band("Immortal") :: Nil)
+</code></pre>
+            <small><code>A</code> is <code>Band</code></small>
+            </div>
+            <div class="fragment">
+              <small>Notice that we did not interact with <code>A</code> directly</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Polymorphism</h3>
+            <p>Sub-type polymorphism</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>def plus[A](a1: A, a2: A): A = ???</code></pre>
+            <small>We can't use <code>a1 + a2</code> since not all types of <code>A</code> have method <code>+</code><br/>
+            Type of <code>A</code> is unknown at compile time, unlike C++ templates</small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>trait Plus[A] {
+  def plus(a2: A): A
+}
+</code></pre>
+            <small><code>Plus[A]</code> to be implemented by all sub-types of <code>A</code></small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def plus[A &lt;: Plus[A]](a1: A, a2: A): A = a1.plus(a2)</code></pre>
+            <small><code>a1</code> is sub-type of <code>Plus[A]</code> with <code>plus(a2: A)</code></small>
+            </div>
+            <div class="fragment">
+              <small>But we must extend any <code>A</code> with <code>Plus[A]</code>!</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Polymorphism</h3>
+            <p>Ad-hoc polymorphism</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>trait Plus[A] {  // a.k.a. type class
+  def plus(a1: A, a2: A): A
+}
+</code></pre>
+            <small>We can implement <code>Plus[A]</code> independently and not mix-in with <code>A</code></small>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>implicit object PlusInt extends Plus[Int] {
+  def plus(a1: Int, a2: Int): Int = a1 + a2
+}
+</code></pre>
+            <small>implicit implementation of <code>Plus[Int]</code> that can be used as an context for <code>Int</code></small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// implicit evidence that there exists Plus[A] for A
+def plus[A](a1: A, a2: A)(implicit ev: Plus[A]): A = ev.plus(a1, a2)
+
+// shorthand, a.k.a. context bound
+def plus[A : Plus](a1: A, a2: A): A = implicitly[Plus[A]].plus(a1, a2)
+</code></pre>
+            <small><code>a1</code> is sub-type of <code>Plus[A]</code> with <code>plus(a2: A)</code></small>
+            </div>
+            <div class="fragment">
+              <small>We can implement <code>Plus[A]</code> for any <code>A</code>, without access to <code>A</code>'s source code or extending it</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Polymorphism</h3>
+            <p>Type classes</p>
+            <small><code>Numeric</code> for <code>Int</code>, <code>Double</code>, etc., <code>Ordering</code> for any <code>Numeric</code>, <code>String</code>, etc.</small>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def add[T : Numeric](x: T, y: T): T = implicitly[Numeric[T]].plus(x, y)
+add(1, 2)      // Numeric[Int].plus(x: Int, y: Int)
+add(1.0, 2.0)  // Numeric[Double].plus(x: Double, y: Double)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def max[T](x: T, y: T)(implicit ev: Ordering[T]): T =
+  if (ev.lt(x, y)) y else x
+
+max(1, 2)      // Ordering[Int].lt(x: Int, y: Double)
+max("1", "2")  // Ordering[String].lt(x: String, y: String)
+</code></pre>
+            </div>
+          </section>
+        </section>
+
+        <section>
+          <h2>That's It</h2>
+          <p>Further reading</p>
+          <ul>
+            <li>Scala collection <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.package">API</a></li>
+            <li>Twitter's <a href="http://twitter.github.io/effectivescala/">Effective Scala</a></li>
+            <li><a href="http://www.michael-noll.com/blog/2013/12/02/twitter-algebird-monoid-monad-for-large-scala-data-analytics/">Article</a>, <a href="https://www.youtube.com/watch?v=ZhuHCtR3xq8">video</a> and <a href="https://www.youtube.com/watch?v=Mw_Jnn_Y5iA">video</a><br/>on monoids and monads</li>
+          </ul>
+          <p><a href="day4.html">&rArr; Day 4</a></p>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
