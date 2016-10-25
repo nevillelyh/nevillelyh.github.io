@@ -186,7 +186,7 @@ def computeDeltas[T](lhs: SCollection[T], rhs: SCollection[T], diffy: Diffy[T], 
 # Summing deltas
 
 ```scala
-deltas  // (field, ()[delta...], delta type))
+deltas  // (field, [delta...], delta type))
   .map { case (_, (ds, dt)) =>
     val m = mutable.Map.empty[String, (Long, Option[(DeltaType.Value, Min[Double], Max[Double], Moments)])]
     ds.foreach { d =>
