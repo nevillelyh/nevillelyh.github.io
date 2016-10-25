@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Case Studies</title>
+
+    <meta name="description" content="Scala Workshop - Case Studies">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write('<link rel="stylesheet" href="reveal.js/css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Case Studies</h2>
+          <ul>
+            <li>Setup</li>
+            <li>Scalding</li>
+            <li>Spark</li>
+            <li>Exercises</li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+            <h3>Setup</h3>
+            <p>Running locally</p>
+            <ul>
+              <li>Both Scalding and Spark can run locally</li>
+              <li>No need for Hadoop or even network</li>
+              <li>Scalding - local distribution, run .scala/jar with <code>scald.rb</code></li>
+              <li>Spark - build and run with <code>sbt</code></li>
+              <li>Avro support - scp files from HDFS</li>
+              <li>Unit tests!</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <img src="images/scalding.png" alt="Scalding" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Introduction</p>
+            <ul>
+              <li>Scala wrapper for <a href="http://www.cascading.org/">Cascading</a><sup>*</sup></li>
+              <li>Source &amp; sink - input &amp; output (local/HDFS)</li>
+              <li>Pipe - collection of tuples</li>
+              <li>Tuple - named fields</li>
+              <li>Flow - source &rarr; pipe &rarr; sink</li>
+              <li>Compiled to Map/Reduce jobs</li>
+              <li><a href="https://github.com/twitter/scalding/wiki/Fields-based-API-Reference">Field-based</a> and
+                <a href="https://github.com/twitter/scalding/wiki/Type-safe-api-reference">type safe</a> API</li>
+            </ul>
+            <small>* Also see <a href="http://cascalog.org">Cascalog</a> (Clojure),
+              <a href="https://github.com/twitter/pycascading">PyCascading</a>,
+              <a href="https://github.com/gmarabout/cascading.jruby">Cascading.JRuby</a></small>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Ecosystem</p>
+            <ul>
+              <li><a href="http://cascading.io/driven/">Driven</a> - commercial pipeline visualization tool</li>
+              <li>Modules for Avro, JSON, JDBC, Parquet</li>
+              <li>ML - <a href="https://github.com/etsy/Conjecture">Conjecture</a> and <a href="http://www.cascading.org/projects/pattern/">Pattern</a></li>
+              <li>Reducer auto-tuning!</li>
+              <li>Cascading on Tez (3.0) out soon</li>
+              <li>Many other <a href="http://www.cascading.org/extensions/">extensions</a></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Word count</p>
+<pre><code class="scala" data-trim>import com.twitter.scalding._
+
+class WordCountJob(args : Args) extends Job(args) {
+  TextLine(args("input"))        // --input hdfs://... -> [line]
+    .read                        // input -> pipe
+    .flatMap('line -> 'word) {   // [line] -> [line, word]
+      line: String => line.split("""\s+""")
+    }
+    .groupBy('word) { _.size }   // [word, size]
+    .write(Tsv(args("output")))  // --output hdfs://...
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Sources and sinks</p>
+<pre><code class="scala" data-trim>// TSV with 4 fields
+val pipe = Tsv(args("input"), ('user, 'email, 'country, 'product)).read
+
+pipe.write(Tsv(args("output")))  // fields inferred from input
+pipe.write(Tsv(args("output"), ('user, 'email)))  // keep only 2
+
+pipe1 ++ pipe2  // union 2 pipes that have the same fields
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Working with fields</p>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input1"), ('user, 'track, 'artist, 'time)).read
+
+pipe.project('user, 'track)   // keep these 2
+pipe.discard('artist, 'time)  // throw away these 2
+
+// insert 2 constants to every tuple
+pipe.insert(('alpha, 'beta), (0.02, 0.01))
+
+// useful before join
+pipe.rename(('user, 'item) -> ('userLHS, 'itemLHS))
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Map and flatMap</p>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input"), ('user, 'time, 'uri, 'msg)).read
+
+// new field "userGroup" from "user"
+pipe.map('user -> 'userGroup) { user: String => user.hashCode }
+
+pipe
+  .project('uri, 'msg)
+  .flatMap('msg -> 'token) { msg: String => text.split("\\s+") }
+/*
+["spotify:track:J3P53n", "so call me maybe"] ->
+  ["spotify:track:J3P53n", "so call me maybe", "so"]
+  ["spotify:track:J3P53n", "so call me maybe", "call"]
+  ["spotify:track:J3P53n", "so call me maybe", "me"]
+  ["spotify:track:J3P53n", "so call me maybe", "maybe"] */
+</code></pre>
+            <small>Use <code>mapTo</code> and <code>flatMapTo</code> when only new fields are needed</small>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Filter</p>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input"), ('user, 'time, 'uri, 'msg)).read
+
+// keep tracks
+pipe.filter('uri) { uri: String => uri.startsWith("spotify:track:") }
+
+// get rid of spams
+pipe.filterNot('user, 'msg) { fields: (String, String) =>
+  val (user, msg) = fields
+  user == "spammer.inc" || msg == "call me maybe"
+}
+</code></pre>
+            <small>See <code>RichPipe</code> <a href="http://twitter.github.io/scalding/#com.twitter.scalding.RichPipe">ScalaDoc</a> for more operations</small>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Group</p>
+            <ul>
+              <li>Group by some fields</li>
+              <li>Rest of the fields go to GroupBuilder</li>
+              <li>GroupBuilder methods aggregate these fields</li>
+            </ul>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input"), ('user, 'item, 'rating)).read
+
+// groupBy(f: Fields)(builder: (GroupBuilder) => GroupBuilder): Pipe
+pipe.groupBy('user) {  // uri -> [[item, rating], [item, rating], ...]
+  _.size               // [[item, rating], ...] -> Int
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Group</p>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input"), ('user, 'item, 'rating)).read
+pipe.groupBy('user) {  // user -> [[item, rating], [item, rating], ...]
+  -
+    .reducers(1000)             // number of reducers, jbx will kill you!
+    .size('n)                   // [user, n]
+    .average('rating -> 'avgR)  // [user, n, avgR]
+    .sum('rating -> 'sumR)      // [user, n, avgR, sumR]
+    .max('rating -> 'maxR)      // [user, n, avgR, sumR, maxR]
+    .min('rating -> 'minR)      // [user, n, avgR, sumR, maxR, minR]
+}
+
+// [user, n, avgR, stdevR]
+pipe.groupBy('user) { _.sizeAveStdev('rating -> ('n, 'avgR, 'stdevR)) }
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Group reduce</p>
+<pre><code class="scala" data-trim>val pipe = Tsv(args("input"), ('user, 'uri, 'duration)).read
+pipe.groupBy('uri) {
+  // reduce function is commutative
+  // done on both mapper and reducer side
+  _.reduce('duration -> 'totalDuration) { (d1: Int, d2: Int) => d1 + d2 }
+}
+
+pipe.groupBy('user) {
+  // foldLeft(fields -> newFields)(init) { function }
+  // done only on reducer side
+  _.foldLeft('item -> 'uniqueItems)(Set[Int]()) {
+    (uris: Set[Int], uri: Int) => uris + uri
+  }
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>More group operations</p>
+<pre><code class="scala" data-trim>def int2set(i: Int): Set[Int] = Set(i)
+def setUnion(s1: Set[Int], s2: Set[Int]): Set[Int] = s1 ++ s2
+def set2str(s: Set[Int]): String = s.mkString(":")
+
+val pipe = Tsv(args("input"), ('user, 'uri, 'duration)).read
+pipe.groupBy('user) {
+  // mapReduceMap(fields -> newFields)(mapFn1)(ReduceFn)(mapFn2)
+  // T, X, U -> original, intermediate, result type
+  // mapFn1: (T) => X, mapper side
+  // reduceFn: (X, X) => X, both mapper and reducer side
+  // mapFn2: (X) => U, reducer side
+  _.mapReduceMap('item -> 'uniqueItems)(int2set)(setUnion)(set2str)
+}
+</code></pre>
+            <small>See <code>GroupBuilder</code> <a href="http://twitter.github.io/scalding/#com.twitter.scalding.GroupBuilder">ScalaDoc</a> for more operations</small>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Joins</p>
+            <ul>
+              <li><code>joinWithSmaller</code> - preferred</li>
+              <li><code>joinWithLarger</code> - reverse of <code>joinWithSmaller</code></li>
+              <li><code>joinWithTiny</code> - entirely mapper side</li>
+            </ul>
+<pre><code class="scala" data-trim>val ratings = Tsv(args("ratings"), ('user, 'item, 'rating)).read')).read
+val names = Tsv(args("names"), ('item, 'name)).read
+
+ratings
+  .groupBy('item) { _.average('avgRating) }  // [item, avgRating]
+  // (LHS fields -> RHS fields, RHS pipe)
+  .joinWithSmaller('item -> 'item, names)    // [item, avgRating, name]
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Scalding</h3>
+            <p>Functions on multiple fields</p>
+<pre><code class="scala" data-trim>Tsv(args("input"), ('user, 'item, 'rating)).read
+  .map(('user, 'item) -> ('userGroup, 'itemType)) {
+    // (Tuple2[String, String]) => Tuple2[String, String]
+    fields: (String, String) =>
+    val (user, item) = fields
+    (user.hashCode, item.split(":")(1))
+  }
+</code></pre>
+<pre><code class="scala" data-trim>import com.twitter.scalding.FunctionImplicits._
+
+Tsv(args("input"), ('user, 'item, 'rating)).read
+  .map(('user, 'item) -> ('userGroup, 'itemType)) {
+    // (Tuple2[String, String]) => Tuple2[String, String]
+    // implicitly converted to
+    // (String, String) => Tuple2[String, String]
+    (user: String, item: String) =>
+    (user.hashCode, item.split(":")(1))
+  }
+</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Safe Scalding</h3>
+            <p>Type safe API</p>
+            <ul>
+              <li>Pipe with only 1 typed field: <a href="http://twitter.github.io/scalding/com/twitter/scalding/typed/TypedPipe.html"><code>TypedPipe[T]</code></a></li>
+              <li>Key-value (1-to-n) during group/join: <a href="http://twitter.github.io/scalding/com/twitter/scalding/typed/KeyedListLike.html"><code>Grouped[K, V]</code></a></li>
+              <li>Easy mix &amp; match with field-based API</li>
+              <li>Behaves just like standard collections</li>
+              <li>Better Avro support</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p>Back-n-forth</p>
+            <p>Between <code>Pipe</code> and <code>TypedPipe[T]</code></p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// field-based input, 3 untyped fields
+Tsv(args("input"), ('username, 'trackGid, 'count)).read
+  // convert to TypedPipe of Tuple3
+  .toTypedPipe[(String, String, Int)]('username, 'trackGid, 'count)
+</code></pre>
+            <small>unsafe in, safe out</small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>PackedAvroSource[EndSongCleaned](args("input"))
+  .map(e =&gt; (e.getUsername.toString, e.getTrackid.toString, e.getMsPlayed))
+  .toPipe('username, 'trackId, 'msPlayed)
+</code></pre>
+            <small>safe in, unsafe out</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p><code>TypedPipe[T]</code></p>
+            <ul>
+              <li class="fragment"><code>map</code>, <code>flatMap</code> &amp; <code>filter</code> work just like standard collection</li>
+              <li class="fragment"><code>groupBy(fn: T =&gt; K)</code> &rarr; <code>Grouped[K, T]</code><br/>
+                <small><code>TypedPipe[EndSongCleaned].groupBy(_.getUsername.toString)</code><br/>
+                  &rarr; <code>Grouped[String, EndSongCleaned]</code></small>
+              </li>
+              <li class="fragment"><code>group</code> when <code>T == (K, V)</code> &rarr; <code>Grouped[K, V]</code><br/>
+                <small><code>TypedPipe[(String, Int)].grouped</code> &rarr; <code>Grouped[String, Int]</code></small>
+              </li>
+              <li class="fragment"><code>groupAll</code> &rarr; <code>Grouped[Unit, T]</code><br/>
+                <small><code>TypedPipe[T].groupAll</code> &rarr; <code>Grouped[Unit, T]</code><br/>
+                  Force everything to 1 reducer, slow!
+                </small>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p><code>Grouped[K, V]</code></p>
+            <ul>
+              <li class="fragment">Key &rarr; many values</li>
+              <li class="fragment">Can join with another <code>Grouped[K, W]</code><br/>
+              &rarr; <code>CoGrouped[K, (V, W)]</code>
+              </li>
+              <li class="fragment">Tune with <code>withReducers(reds: Int)</code></li>
+              <li class="fragment">Either reduce values n-to-1:<br/>\(k \rightarrow [v_1, v_2 \dots v_n]\) to \(k \rightarrow v'\)</li>
+              <li class="fragment">Or n-to-m:<br/>\(k \rightarrow [v_1, v_2 \dots v_n]\) to \(k \rightarrow [v_1', v_2' \dots v_m']\)</li>
+              <li class="fragment">Convert back to <code>TypedPipe[(K, V)]</code> when done:<br/>\(k \rightarrow [v_1, v_2 \dots v_m]\) to \([k \rightarrow v_1', k \rightarrow v_2' \dots k \rightarrow v_m']\)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p><code>Grouped[K, V]</code> value reduction operations</p>
+            <ul>
+              <li class="fragment"><code>reduce(fn: (V, V) =&gt; V)</code> values n-to-1<br/>both mapper and reducer side</li>
+              <li class="fragment"><code>foldLeft(fn: (B, V) =&gt; B)</code> values n-to-1<br/>reducer side only</li>
+              <li class="fragment"><code>max</code>, <code>min</code>, <code>size</code>, <code>sum</code>, <code>product</code>, etc. also n-to-1</li>
+              <li class="fragment"><code>count(fn: V =&gt; Boolean)</code><br/><code>forall(fn: V =&gt; Boolean)</code><br/>also n-to-1 with predicate</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p><code>Grouped[K, V]</code> value n-to-m operations</p>
+            <ul>
+              <li class="fragment"><code style="font-size: 90%">mapValues(fn: V =&gt; U)</code> map values, n-to-n</li>
+              <li class="fragment"><code style="font-size: 90%">mapValueStream(fn: Iterator[V] =&gt; Iterator[U])</code><br/>map values lazily, n-to-m</li>
+              <li class="fragment"><code style="font-size: 90%">mapGroup(fn: (K, Iterator[V]) =&gt; Iterator[U])</code><br/>with key as additional input, n-to-m</li>
+              <li class="fragment"><code>take</code>, <code>takeWhile</code>, <code>drop</code>, <code>dropWhile</code>, and <code>sort*</code></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Safe Scalding</h3>
+            <p>Type safe word count</p>
+<pre><code class="scala" data-trim style="font-size: 90%">package com.spotify.scalding.tutorial
+
+import com.twitter.scalding._
+import TDsl._
+
+class Tutorial1(args: Args) extends Job(args) {
+  val input = TypedTsv[String](args("input"))  // TypedPipe[String]
+    .filter(_ != null)                         // TypedPipe[String], fewer
+    .flatMap(_.split("""\s+"""))               // TypedPipe[String], more
+    .groupBy(identity)                         // Grouped[String, String]
+    .size                                      // UnsortedGroup[String, Long]
+    .toTypedPipe                               // TypedPipe[(String, Long)]
+    .write(TypedTsv[(String, Long)](args("output")))
+}
+</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <img src="images/spark.png" alt="Spark" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <iframe width="853" height="480" src="https://www.youtube.com/embed/dJQ5lV5Tldw" frameborder="0" allowfullscreen></iframe>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p>Introduction</p>
+            <ul>
+              <li>In memory computation</li>
+              <li>Multiple M/R stages without intermediate I/O</li>
+              <li>Input/output - local, HDFS, stream, DB</li>
+              <li>RDD<sup>*</sup> - parallelized collection across nodes</li>
+              <li>One master, many workers</li>
+              <li>Works on standalone, Mesos or YARN clusters</li>
+            </ul>
+            <small>* Resilient Distributed Dataset</small>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p>Word count</p>
+<pre><code class="scala" data-trim>import org.apache.spark._
+import org.apache.spark.SparkContext._
+
+object WordCount {
+  def main(args: Array[String]) {
+    // args(0) is master, local or yarn-standalone
+    val sc = new SparkContext(args(0), "Tutorial0")  // one context per job
+
+    sc.textFile(args(1))        // local/HDFS input, RDD[String]
+      .flatMap { line => line.split("""\s+""") }  // RDD[String]
+      .map(word => (word, 1))   // RDD[(String, Int)]
+      .reduceByKey(_ + _)       // RDD[(String, Int)], fewer items
+      .saveAsTextFile(args(2))  // local/HDFS output
+  }
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p>RDD API</p>
+            <ul>
+              <li><code><a href="https://spark.apache.org/docs/latest/api/scala/#org.apache.spark.rdd.RDD">RDD</a></code> - Resilient Distributed Dataset</li>
+              <li>More operators via Pimp My Library pattern</li>
+              <li><code><a href="https://spark.apache.org/docs/latest/api/scala/#org.apache.spark.rdd.DoubleRDDFunctions">RDD[Double]</a></code> - <code>DoubleRDDFunctions</code><br/>
+                  histogram, mean, stdev, sum, variance, etc.</li>
+              <li><code><a href="https://spark.apache.org/docs/latest/api/scala/#org.apache.spark.rdd.PairRDDFunctions">RDD[K, V]</a></code> - <code>PairRDDFunctions</code><br>
+                  group, join, {count/fold/reduce}ByKey etc.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p>Workflow</p>
+            <ul>
+              <li class="fragment">Code in <code>main</code> runs sequentially on master (driver)</li>
+              <li class="fragment">Transformations (<code>RDD</code> &rarr; <code>RDD</code>): in parallel on executors</li>
+              <li class="fragment">Actions (<code>RDD</code> &rarr; local value): executors &rarr; driver</li>
+              <li class="fragment">Broadcast (local value &rarr; executors): driver &rarr; executors</li>
+              <li class="fragment">Transformations are either<br/>
+              within local partitions (<code>map</code>, <code>flatMap</code>, <code>filter</code>, ...)<br/>
+              or over network shuffle (<code>reduceByKey</code>, <code>groupByKey</code>, ...)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p><a href="http://spark.apache.org/docs/latest/mllib-guide.html">MLlib</a></p>
+            <ul>
+              <li>Common ML functionality on Spark</li>
+              <li>Classification, regression, clustering, CF</li>
+            </ul>
+<pre><code class="scala" data-trim>import org.apache.spark._
+import org.apache.spark.SparkContext._
+import org.apache.spark.mllib.recommendation.{Rating, ALS}
+
+object ImplicitALS {
+  def main(args: Array[String]) {
+    val sc = new SparkContext(args(0), "ImplicitALS")
+    val ratings = sc.textFile(args(1)).map { l: String =>
+      val t = l.split('\t')
+      Rating(t(0).toInt, t(1).toInt, t(2).toFloat)
+    }
+    ALS.trainImplicit(ratings, 40, 20, 0.8, 0.2)
+      .productFeatures
+      .map { case (id, vec) => id + "\t" + vec.mkString(" ") }
+      .saveAsTextFile(args(2))
+  }
+}
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Spark</h3>
+            <p>Performance tuning</p>
+            <ul>
+              <li>Use Kyro instead of Java serialization</li>
+              <li>Use simple data structures</li>
+              <li>Tune partition to avoid network overhead</li>
+              <li>Use web UI (when YARN application is RUNNING)</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Exercises</h3>
+            <img src="images/programming.gif" alt="programming" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+
+          <section>
+            <h3>Exercises</h3>
+            <p>Test data</p>
+            <ul>
+              <li>Play count of top 10k users and 1k artists</li>
+              <li><code>projects/data/user-artist-1k</code><br/>
+              TSV of userId, artistId, playCount</li>
+              <li><code>projects/data/id-to-name</code><br/>
+              TSV of artistId, artistName</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Exercises</h3>
+            <p>Options</p>
+            <ul>
+              <li>Pick either Scalding or Spark</li>
+              <li>Top 10 artists by total play count</li>
+              <li>Top 10 artists with most unique listeners</li>
+              <li>Top 10 artists of each user</li>
+              <li>Users who listen to Megadeth also listened to?</li>
+              <li>Join results above with <code>id-to-name</code></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Exercises</h3>
+            <p>Spark</p>
+            <ul>
+              <li>Implicit matrix factorization (MLlib ALS)</li>
+              <li>Save item vectors to disk</li>
+              <li>Find Cosine similarity between 2 artists you like</li>
+              <li>Find 10 most similar artists to your favorite</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>That's It</h2>
+          <p>Further reading</p>
+          <ul>
+            <li>Scalding field based <a href="https://github.com/twitter/scalding/wiki/Fields-based-API-Reference">API</a></li>
+            <li>Scalding type safe <a href="https://github.com/twitter/scalding/wiki/Type-safe-api-reference">API</a></li>
+            <li>Scalding <a href="http://twitter.github.io/scalding/com/twitter/scalding/typed/TypedPipe.html">TypedPipe</a> &amp; <a href="http://twitter.github.io/scalding/com/twitter/scalding/typed/Grouped.html">Grouped</a></li>
+            <li>Spark RDD <a href="http://spark.incubator.apache.org/docs/latest/api/core/#org.apache.spark.rdd.RDD">API</a></li>
+            <li>Spark <a href="http://spark.incubator.apache.org/docs/latest/api/core/index.html#org.apache.spark.rdd.PairRDDFunctions">PairRDDFunctions</a></li>
+            <li>Spark <a href="http://spark.incubator.apache.org/docs/latest/api/core/index.html#org.apache.spark.rdd.DoubleRDDFunctions">DoubleRDDFunctions</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>The End</h1>
+          <h2>Thank You</h2>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

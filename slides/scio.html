@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scio</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Scio
+## A Scala API for Google Cloud Dataflow
+Neville Li
+
+@sinisa_lyh
+
+May 2016
+
+---
+
+class: center, middle
+# Who am I?
+
+---
+
+# Origin story
+
+- ## Scalding ML, recs, analytics since mid 2013
+- ## Spark picking up momentum for ML
+- ## 50+ users, 400+ unique pipelines
+
+---
+
+class: center, middle
+# Moving to Google Cloud
+## Early 2015 - Dataflow Scala hack project
+
+---
+
+# What is Google Cloud Dataflow?
+- ## Unified batch and streaming model
+- ## Direct runner for local mode
+- ## Dataflow runner for managed service on GCP
+- ## Spark and Flink runners
+- ## Apache Beam incubation
+
+[Beam model](https://docs.google.com/presentation/d/17eq17-4KYvF1-2sCOo0sSUdm6gj4h6sWLhLDUYOe1cU/edit), [Beam and Dataflow](https://docs.google.com/presentation/d/1SlzllDkCtWdg18qKFhxB1EkQAW2ZiG-r80BykODcvVY/edit)
+
+---
+
+class: center, middle
+# Hardest problem in Computer Science?
+
+---
+
+class: center, middle
+# Naming things!
+
+---
+
+class: center, middle
+# _Enterprise Dataslow™_
+
+---
+
+class: center, middle
+# Just kidding
+
+---
+
+class: center, middle
+
+# Scio
+> Ecclesiastical Latin IPA: /ˈʃi.o/, [ˈʃiː.o], [ˈʃi.i̯o]
+
+> Verb: I can, know, understand, have knowledge.
+
+---
+
+# Scio
+- ## Core API similar to spark-core, some ideas from scalding
+- ## [github.com/spotify/scio](https://github.com/spotify/scio)
+- ## Apache License 2
+
+---
+
+# Scalding on GCE?
+- ## Big community - Twitter, eBay, Etsy, Stripe, LinkedIn, SoundCloud
+- ## Mature and proven
+
+---
+
+# Scalding on GCE?
+- ## Hadoop cluster operations
+- ## Multi-tenancy, resource contention and utilization
+- ## No streaming mode (Summingbird anyone?)
+
+---
+
+# Spark on GCE?
+- ## Batch, streaming, interactive and SQL
+- ## MLLib and GraphX
+- ## Scala, Java, Python and R
+
+---
+
+# Spark on GCE?
+- ## Hard to tune and scale
+- ## Cluster life cycle management
+
+---
+
+# Dataflow + Scala
+## Dataflow
+- ## Managed service, no operation cost
+- ## Google ecosystem - GCS, BigQuery, PubSub, Datastore, Bigtable
+- ## Simple unified model for batch and streaming
+
+---
+
+# Dataflow + Scala
+## Scala
+- ## High level DSL, easy transition for developers
+- ## Reusable and composable code via FP
+- ## Numerical libraries - Breeze, Algebird
+
+---
+
+# Word count
+```scala
+val sc = ScioContext()
+sc.textFile("shakespeare.txt")
+  .flatMap(_.split("[^a-zA-Z']+").filter(_.nonEmpty))
+  .countByValue()
+  .saveAsTextFile("wordcount.txt")
+```
+
+---
+
+# PageRank
+```scala
+def pageRank(in: SCollection[(String, String)]) = {
+  val links = in.groupByKey()
+  var ranks = links.mapValues(_ => 1.0)
+  for (i <- 1 to 10) {
+    val contribs = links.join(ranks).values
+      .flatMap { case (urls, rank) =>
+        val size = urls.size
+        urls.map((_, rank / size))
+    }
+    ranks = contribs.sumByKey.mapValues((1 - 0.85) + 0.85 * _)
+  }
+  ranks
+}
+```
+
+---
+
+# Data model
+## Spark
+- `RDD` for batch, `DStream` for streaming
+- Explicit caching and in-memory semantics
+- Two sets of APIs
+
+## Dataflow
+- `PCollection` for both batch and streaming
+- Values can be windowed and timestamped
+- Same API
+
+---
+
+# Execution
+## Spark
+- Driver and executors
+- Dynamic execution driven by master
+- Transformations and actions
+
+## Dataflow
+- No master, only workers
+- Static execution plan
+- Transformations only, no actions
+
+---
+
+# More from Scio
+- ## Scala API
+- ## Sum and aggregate with Algebird
+- ## Type safe BigQuery with Scala macros
+- ## Interactive REPL
+- ## Simple orchestration with `Future[Tap[T]]`
+
+---
+
+class: center, middle
+<img src="scio.png" width="100%"/>
+
+---
+
+# Spotify Running
+
+- ## 60 million tracks
+- ## 30 million users x 10 tempo buckets x 25 personalized tracks
+- ## Audio: tempo, energy, time signature ...
+- ## Metadata: genres, categories
+- ## Latent vectors from collaborative filtering
+
+---
+
+class: center, middle
+<img src="scio-bq.png" width="80%"/>
+
+---
+
+class: center, middle
+<img src="scio-running.png" width="100%"/>
+
+---
+
+class: center, middle
+<img src="scio-df1.png" width="100%"/>
+
+---
+
+class: center, middle
+<img src="scio-df2.png" width="100%"/>
+
+---
+
+# New Releases Recommendation
+
+- ## Pre-computed weekly on Hadoop (on-premise cluster)
+- ## 100GB from HDFS to Bigtable in US+EU
+- ## 250GB Bloom filters from Bigtable to HDFS
+- ## 200 LOC
+
+---
+
+# User conversion analysis
+
+- ## For marketing and campaigning strategies
+- ## Track user transitions through products
+- ## Aggregate data for simulation and projection
+- ## 150GB BigQuery in and out
+
+---
+
+class: center, middle
+# Demo Time!
+
+---
+
+class: center, middle
+# Fun things learned
+# From building a big data framework
+
+---
+
+# Serialization is a PITA
+--
+
+- ## Scalding, Spark, Storm, etc. use Kryo and chill
+--
+
+- ## Dataflow and Crunch require explicit coder (and Guava `TypeToken`)
+--
+
+- ## `ClassTag` to the rescue
+--
+
+- ## Fallback to Kryo when necessary
+
+---
+
+# Closure serialization is worse
+- ## Lambdas require cleaning with chill's `ClosureCleaner`
+--
+
+- ## Make things `Serializable` or `transient`
+--
+
+- ## Still some edge cases
+
+---
+
+# Hacking the REPL
+- ## Workers need serialized code for execution
+- ## Scala console doesn't produce `.class` files
+- ## Custom class loader and `ILoop`!
+
+---
+
+# Macro type provider is fun
+- ## Data type tied to SQL code
+- ## No separate repo/file/build
+- ## Generated converters
+- ## IntelliJ bug https://youtrack.jetbrains.com/issue/SCL-8834
+
+---
+
+# What's the status
+
+- ## A few teams within Spotify
+- ## WIP SQL-2011 dialect support
+- ## Planned Apache Beam migration
+- ## PRs and issues welcome!
+
+---
+
+class: center, middle
+# GCP NEXT 16
+# https://cloudplatformonline.com/NEXT2016.html
+
+---
+
+class: center, middle
+# Questions?
+
+---
+
+class: center, middle
+# The End
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>

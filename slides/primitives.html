@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Primitives</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Advanced Scala
+## Primitives
+Neville Li
+Apr 2015
+
+---
+
+class: center, middle
+# In the Beginning
+# There is Java
+
+---
+
+# The Java&trade; Programming Language
+
+--
+
+- ### Object-oriented
+
+--
+
+- ### Everything is an `Object`
+
+--
+
+- ### Except `int`, `long`, `float`, `double`, `boolean`, etc.
+
+--
+
+- ### So let's wrap them in `Integer`, `Long`, ...
+
+---
+
+# Boxed types
+
+### `java.lang.{Integer,Long,Float,Double,Boolean,...}`
+
+```java
+int x = 100;
+Integer y = new Integer(100);  // boxing
+int z = y.intValue(); // unboxing
+```
+
+--
+
+# Wrappers are objects, and objects can be `null`
+
+```java
+Integer x = null;
+int y = x.intValue();  // NullPointerException!
+
+```
+
+---
+
+class: center, middle
+# So integers can be from `\(-\infty\)` to `\(\infty\)`
+# And `null`!
+
+---
+
+# `==` versus `.equals()`
+
+```java
+System.out.println(new Integer(5) == new Integer(5));
+System.out.println(new Integer(500) == new Integer(500));
+
+// primitive factories!
+System.out.println(Integer.valueOf(5) == Integer.valueOf(5));
+System.out.println(Integer.valueOf(500) == Integer.valueOf(500));
+```
+
+--
+
+# WTF!
+
+```java
+false  // different objects
+false  // different objects
+*true   // cached flyweights from factory method, for small values only and depends on JVM
+false  // no flyweights
+```
+
+--
+
+# Don't laugh, Python has the same problem with `int` and `is`
+
+---
+
+class: center, middle
+# Then Came
+# Java&trade; 2 Platform, Standard Edition 5.0
+
+---
+
+# Autoboxing
+
+```java
+Integer x = new Integer(9);  // always OK
+*Integer y = 9;  // error in versions prior to 5.0!
+```
+
+--
+
+# Unboxing
+
+```java
+Integer x = new Integer(9);
+int y = x.intValue();  // always OK
+int z = x;  // error in versions prior to 5.0!
+```
+
+--
+
+# Objects can still be `null`
+
+```java
+Integer x = null;
+int y = x;  // NullPointerException!
+```
+
+---
+
+# Generics
+```java
+class List<T>;
+class Map<K, V>;
+class Set<T>;
+```
+
+--
+
+# Erasure
+- Type parameters checked at compile-time for type-correctness
+- Removed at runtime in _type erasure_
+- So `List<T>` of any `T` becomes `List<Object>` at runtime
+
+### `T` must be an `Object`, so `Integer` not `int`, etc.
+
+---
+
+class: center, middle
+
+# Primitives or Boxed Types?
+
+---
+
+# Arrays - either primitive or boxed elements
+
+```java
+int[] a1 = new int[10];
+Integer[] a2 = new Integer[10];
+```
+
+--
+
+# Generic collections - boxed elements only
+
+```java
+List<Double> l;
+Set<Integer> s;
+Map<String, Boolean> m;
+```
+
+---
+
+# `Object` creation is expensive
+
+### _Item 5: Avoid creating unnecessary objects_ - _Effective Java_, Joshua Bloch
+
+```java
+public static void main(String[] args) {
+  Long sum = 0L;
+  for(long i = 0; i &lt;= Integer.MAX_VALUE; i++) {
+    sum += i;
+  }
+  System.out.println(sum);
+}
+```
+
+--
+
+_Changing the declaration of sum from `Long` to `long` reduces the runtime from **43** seconds to **6.8** seconds on my machine._
+
+---
+
+class: center, middle
+
+# Finally There Came Scala
+# _Trying to Fix Java_ &trade; since 2004
+
+---
+
+# Unified primitives
+
+--
+
+- ### `scala.Int`, `scala.Long`, etc.
+
+--
+
+- ### Behave like objects, no `null`s, usable `==` operator
+
+--
+
+- ### Compiler managed primitive vs. boxed types
+
+--
+
+- ### Primitives: `&lt;: AnyVal &lt;: Any`
+
+--
+
+- ### Other objects: `&lt;: AnyRef` (~= Java `Object`) `&lt;: Any`
+
+---
+
+# No `null`s
+```scala
+null.asInstanceOf[Int]  // 0
+val x: Int = null       // error: type mismatch
+```
+
+--
+
+# Autoboxing & conversion
+```scala
+val x: java.lang.Double = 1.5  // Java boxed type
+val y: scala.Double = x        // java.lang.Double to scala.Double (primitive)
+val z: java.lang.Double = y    // scala.Double (primitive) to java.lang.Double
+```
+
+---
+
+# Compiler chooses best approach
+```scala
+def f1(x: Int): Int
+def f2(x: Array[Int]): Array[Int]
+def f3(x: List[Int]): List[Int]
+```
+
+--
+
+# Compiles to
+```java
+public abstract int f1(int);
+public abstract int[] f2(int[]);
+public abstract List<java.lang.Object> f3(List<java.lang.Object>);
+```
+
+---
+
+# Except when generics are involved
+```scala
+def f1[T](x: T): T
+def f2[T](x: Array[T]): Array[T]
+```
+
+--
+
+# Compiles to
+```java
+public abstract <T extends java/lang/Object> T f1(T);
+public abstract <T extends java/lang/Object> java.lang.Object f2(java.lang.Object);
+```
+
+### `Array[T]` &rarr; `java.lang.Object` since arrays are objects
+
+---
+
+# `specialized` to the rescue
+```scala
+def f1[@specialized(Int, Long, Float, Double) T](x: T): T
+def f2[@specialized(Int, Long, Float, Double) T](x: Array[T]): Array[T]
+```
+
+--
+
+# Compiles to
+```java
+public abstract <T extends java/lang/Object> T f1(T);
+public int f1$mIc$sp(int);
+public long f1$mJc$sp(long);
+public float f1$mFc$sp(float);
+public double f1$mDc$sp(double);
+
+public abstract <T extends java/lang/Object> java.lang.Object f2(java.lang.Object);
+public int[] f2$mIc$sp(int[]);
+public long[] f2$mJc$sp(long[]);
+public float[] f2$mFc$sp(float[]);
+public double[] f2$mDc$sp(double[]);
+```
+
+Heavily used in Breeze and Spire
+
+---
+
+# Type-checking fail
+
+```scala
+scala> val x = List(java.lang.Double.valueOf(1.0), java.lang.Double.valueOf(2.0))
+x: List[Double] = List(1.0, 2.0)  // List[java.lang.Double]
+
+scala> val y: List[Double] = x
+<console>:9: error: type mismatch;
+ found   : List[java.lang.Double]
+ required: List[scala.Double]
+       val y: List[Double] = x
+                             ^
+```
+
+Even though `scala.Double` is boxed and equivalent to `java.lang.Double` in `List[T]`
+
+--
+
+# But it's safe to cast
+
+```scala
+scala> val y: List[Double] = x.asInstanceOf[List[Double]]
+y: List[Double] = List(1.0, 2.0)  // List[scala.Double]
+
+scala> val z: List[java.lang.Double] = y.asInstanceOf[List[java.lang.Double]]
+z: List[Double] = List(1.0, 2.0)  // List[java.lang.Double]
+```
+
+---
+
+# Or really?
+
+```scala
+scala> val x: List[java.lang.Double] = List(1.0, 2.0, null)
+x: List[Double] = List(1.0, 2.0, null)  // List[java.lang.Double]
+
+scala> val y: List[Double] = x.asInstanceOf[List[Double]]
+y: List[Double] = List(1.0, 2.0, null)  // List[scala.Double]
+```
+
+--
+
+### `scala.Double` can't be `null`!
+
+```scala
+scala> y(2)  // lazily casting java.lang.Double to scala.Double
+res0: Double = 0.0
+```
+
+--
+
+### WTF!
+
+```scala
+scala> x(2).asInstanceOf[Double]  // manually casting null to scala.Double
+res1: Double = 0.0
+
+scala> y.asInstanceOf[List[java.lang.Double]](2)  // no casting on the element
+res2: Double = null
+```
+
+---
+
+# Primitive Fails - Avro
+
+```json
+"fields": [
+    {"name": "f1", "type": "int"},
+    {"name": "f2", "type": ["null", "int"], "default": "null"},
+    {"name": "f3", "type": {"type": "array", "items": "int"}}
+]
+```
+
+---
+
+# Compiled code
+
+```java
+public class TestRecord {
+  @Deprecated public int f1;                                // primitive
+  @Deprecated public java.lang.Integer f2;                  // boxed nullable
+  @Deprecated public java.util.List<java.lang.Integer> f3;  // boxed collection
+
+  // boxed everywhere in constructor
+  public TestRecord(java.lang.Integer f1, java.lang.Integer f2, java.util.List<java.lang.Integer> f3) {/*...*/}
+
+  // plus getters and setters
+  public java.lang.Integer getF1() {/*...*/}
+  public void setF1(java.lang.Integer value) {/*...*/}
+  public java.lang.Integer getF2() {/*...*/}
+  public void setF2(java.lang.Integer value) {/*...*/}
+  public java.util.List<java.lang.Integer> getF3() {/*...*/}
+  public void setF3(java.util.List<java.lang.Integer> value) {/*...*/}
+}
+```
+
+--
+
+- No null check in constructor or setters
+- Getters may return null, i.e. Parquet unprojected fields
+- `getF3.asScala` &rarr; `List[java.lang.Integer]` &ne; `List[scala.Int]`
+
+---
+
+# Except the builder
+
+```java
+public class TestRecord {
+  public static class Builder {
+    private int f1;                                // primitive
+    private java.lang.Integer f2;                  // boxed nullable
+    private java.util.List<java.lang.Integer> f3;  // boxed collection
+
+    public java.lang.Integer getF1() {/*...*/}            // boxed getter
+    public TestRecord.Builder setF1(int value) {/*...*/}  // primitive setter
+    public java.lang.Integer getF2() {/*...*/}
+    public TestRecord.Builder setF2(java.lang.Integer value) {/*...*/}
+    public java.util.List<java.lang.Integer> getF3() {/*...*/}
+    public TestRecord.Builder setF3(java.util.List<java.lang.Integer> value) {/*...*/}
+  }
+}
+
+```
+
+--
+
+- No constructor, has setter input validation
+- Still return boxed types
+
+---
+
+# Summary
+
+--
+
+- ### Avoid `java.lang.{Integer,Long,...}`
+
+--
+
+- ### Yes even in Java
+
+--
+
+- ### Prefer `scala.{Int,Long,...}` and `Option[T]`
+
+--
+
+- ### Beware of boxed type parameters
+
+--
+
+- ### Know your libraries
+
+---
+
+class: center, middle
+# The End
+## Happy Null-Checking
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>

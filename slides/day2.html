@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Functional Patterns</title>
+
+    <meta name="description" content="Scala Workshop - Functional Patterns">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write('<link rel="stylesheet" href="reveal.js/css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Functional Patterns</h2>
+          <ul>
+            <li>Collections</li>
+            <li>Combinators</li>
+            <li>Compositions</li>
+            <li>Laziness</li>
+            <li>Performance</li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+            <h3>Collections</h3>
+            <p>Overview</p>
+            <ul>
+              <li>Under package <code>scala.collection</code>
+              <li>Sub-package <code>mutable</code> and <code>immutable</code></li>
+              <li>Immutable <code>List</code>, <code>Set</code>, <code>Map</code>, ... imported by default</li>
+            </ul>
+<pre><code class="scala" data-trim>import scala.collection.mutable
+
+val s1 = Set("A", "B")          // default immutable version
+val s2 = mutable.Set("A", "B")  // imported mutable version
+
+s1.add("C")  // error, no such method
+s2.add("C")  // true, success!
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Abstract class hierarchy</p>
+            <img src="images/collections.png" alt="collections" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/><br/>
+            <ul style="font-size: 60%">
+              <li><code>Set</code>/<code>Map</code> &rarr; <code>HashSet</code>/<code>HashMap</code></li>
+              <li><code>SortedSet</code>/<code>SortedMap</code> &rarr; <code>TreeSet</code>/<code>TreeMap</code></li>
+              <li><code>IndexedSeq</code> &rarr; <code>Vector</code>, <code>Array</code>, <code>String</code>, ...</li>
+              <li><code>LinearSeq</code> &rarr; <code>List</code>, <code>Stream</code>, <code>Queue</code>, <code>Stack</code>, ...</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Unified API</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>import scala.collection.immutable._
+
+// some common collection interfaces
+// can traverse, iterate, access linearly (head/tail)
+Traversable(1, 2, 3)      // creates a List by default
+Iterable("x", "y", "z")   // also List
+LinearSeq(1.0, 2.0, 3.0)  // List again
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// can also random access
+IndexedSeq(1.0, 2.0)      // creates a Vector by default
+
+Set("a", "b", "c")
+Map("a" -> 1, "b" -> 2, "c" -> 3)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// more on these later
+List(1, 2, 3).map(_ + 1)
+Set(1, 2, 3).map(_ + 1)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Lists</p>
+            <ul>
+              <li>Fundamental data structure in FP</li>
+              <li>Linked list with head (item) and tail (rest)</li>
+            </ul>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val list = List(1, 2, 3)
+list.head               // element, 1
+list.tail               // rest, List(2, 3)
+list.tail.tail.tail     // List()
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// Haskell style syntax
+1 :: 2 :: Nil           // head :: (head :: tail), right associative
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def getHead(list: List[Int]) = list match {
+  case 1 :: _ => "one"  // decompose list in pattern matching
+  case 2 :: _ => "two"
+  case _ => "many"
+}
+
+getHead(list)
+getHead(list.tail)
+getHead(list.tail.tail)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Concatenation</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// ++ for 2 collections
+List(1, 2) ++ List(3, 4)
+Set(1, 2) ++ Set(2, 3)
+Map("A" -> 1, "B" -> 2) ++ Map("C" -> 3)
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// +:/:+ for preppending/appending an element in Seq (List, Vector, ...)
+val list = List(1, 2, 3)
+0 +: list  // colon facing the collection
+list :+ 4  // linked list, append is O(n)!
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// +/- for adding/substracting an element in set/map
+val set = Set(1, 2, 3)
+set + 4 - 3
+
+val map = Map("A" -> 1, "B" -> 2, "C" -> 3)
+map + ("D" -> 4) - "A"
+
+map + ("A" -> 10)  // overwrites existing key
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Set/Map as functions</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val s = Set(1, 3, 5)
+(s(1), s(2))     // (true, false), actually s.apply(1) &amp; s.apply(2)
+(1 to 5).map(s)  // Vector(true, false, true, false, true)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val m = Map(1 -> "a", 2 -> "b").withDefaultValue(null)
+(m(1), m(3))     // (a, null), actually m.apply(1) &amp; m.apply(3)
+(1 to 5).map(m)  // Vector(a, b, null, null, null)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Ranges</p>
+<pre><code class="scala" data-trim>Range(0, 10)     // Range(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+Range(0, 10, 2)  // Range(0, 2, 4, 6, 8)
+
+0 until 10       // Range(0, 10)
+0 until 10 by 2  // Range(0, 10, 2)
+
+1 to 10          // Range(1, 11)
+1 to 10 by 2     // Range(1, 11, 2)
+
+(1 to 10).toList
+</code></pre>
+<small>Commonly used in <code>for</code> comprehensions</small>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Java interoperability</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>val s = List(1, 2, 3)
+val j = java.util.Collections.singletonList(1)
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// implicits for pimp my library pattern, more later
+import scala.collection.JavaConverters._
+s.asJava   // extra pimped method for scala.collection.List
+j.asScala  // extra pimped method for java.util.List
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// implicit conversion methods
+import scala.collection.JavaConversions._
+
+def countS(s: Seq[Int]) = s.size
+def countJ(j: java.util.List[Int]) = j.size
+countS(j)  // java.util.List -> Seq
+countJ(s)  // List -> java.util.List
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Collections</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Write a recurive function to print elements in a <code>List[Int]</code></li>
+              <li>Concatenate a <code>List[Int]</code> and <code>Set[Int]</code></li>
+              <li>How about a <code>Set[Int]</code> and keys in a <code>Map[Int, String]</code></li>
+              <li>Given <code>s: Set[String]</code> and <code>m: Map[String, Int]</code>, build a new Map with only keys from <code>s</code></li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Combinators</h3>
+            <p>Basics</p>
+            <ul>
+              <li>Takes a function as argument</li>
+              <li>Applies on every element in the collection</li>
+              <li>Returns a new collection/single value</li>
+            </ul>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val l1 = List(1, 2, 3)
+val l2 = l1.map(_ + 1)  // new List with +1 applied to every element
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// break down
+l1.map { x =>
+  val r = x + 1
+  println(s"$x + 1 = $r")  // side-effect
+  r
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// like map, but for side-effects only
+l1.foreach(println)  // returns Unit
+</code></pre>
+              <small>Also see <a href="http://www.drdobbs.com/jvm/lambdas-and-streams-in-java-8-libraries/240166818">Lambdas and Streams in Java 8 Libraries</a></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Slicing</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val l1 = List(1, 2, 3, 4, 5)
+val l2 = l1.filter(_ > 2)
+
+l1.filter { x =>
+  val r = x > 2
+  println(x + " " + (if (r) "keep" else "drop"))
+  r
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>l1.drop(1)  // drop first item
+l1.drop(2)  // drop first 2 items
+l1.dropWhile(_ % 2 == 1)  // drop first X consecutive even numbers
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>l1.take(2)
+l1.takeWhile(_ % 2 == 1)
+
+// also see takeRight and dropRight
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Combining/splitting</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val l1 = List("a", "b", "c")
+val l2 = List(1, 2, 3)
+
+l1.zip(l2)        // -> List[(String, Int)]
+l1.zipWithIndex   // -> List[(String, Int)], i.e. Python enumerate
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// Map entries are Tuple2:s (Pair)
+l1.zip(l2).toMap                 // -> Map[String, Int]
+Map("a" -> 1, "b" -> 2).toList   // -> List[(String, Int)]
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>(1 to 10).partition(_ % 2 == 0)  // -> (List[Int], List[Int])
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Flatten out</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// List[List[Int]] -> List[Int]
+List(List(1, 2, 3), List(4, 5, 6), List()).flatten  // empty member out
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// List[Map[String, Int]] -> List[(String, Int)]
+List(Map("A" -> 1, "B"-> 2), Map("C" -> 3, "D" -> 4)).flatten
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val lyrics = List("We all live in Amerika", "Amerika ist wunderbar")
+
+lyrics.flatMap(_.split(" "))       // flatMap = map then flatten
+lyrics.map(_.split(" ")).flatten   // equivalent
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// break down
+lyrics.flatMap { line =>
+  val tokens = line.split(" ")     // split returns Array[String]
+  println(tokens.mkString(" | "))  // and Java Array has ugly .toString()
+  tokens
+}
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Reduce</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// reduce function is (T, T) => T for List[T]
+List(2.0, 3.0, 4.0).reduce(math.pow)
+// ((2.0 ^ 3.0) ^ 4.0)
+</code></pre>
+              <small>Combining values into a single result of the same type</small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// break down
+List(2.0, 3.0, 4.0).reduce { (x, y) =>
+  val r = math.pow(x, y)
+  println(s"$x ^ $y = $r")
+  r
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>List("A", "B", "C").reduce("(%s, %s)".format(_, _))
+List("A", "B", "C").reduceRight("(%s, %s)".format(_, _))
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Reduce visualized</p>
+            <p>&#x261c; and &#x261e;</p>
+            <img src="images/reduction.gif" alt="reduction" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+            <div class="fragment">
+              <small>Parallelizable if <code>fn</code> is associative and commutative (Monoid!)<br/>
+              More on this later...
+              </small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Fold</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>List(1, 1, 1, 2, 2, 3, 4).foldLeft(Set[Int]())(_ + _)  // Set[Int] + Int
+</code></pre>
+              <small>Combining values into an initial value (of possibly a different type)</small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val bytes = List(222, 173, 190, 239)  // List[Int]
+
+// 2 arguments, start value for the accumulator: String
+// and binary operator: (String, Int) => String
+// operator folds each item into accumulator
+bytes.foldLeft("0x")(_ + _.toHexString.toUpperCase)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// break down
+bytes.foldLeft("0x") { (str, byte) =>
+  println("byte = \"%d\", str = %s".format(byte, str))
+  str + byte.toHexString.toUpperCase
+}
+</code></pre>
+            </div>
+            <div class="fragment">
+            <ul>
+              <li>Aggregate elements into single value of a different type</li>
+              <li>e.g. Strings &rarr; Bloom filter, feature vectors &rarr; SGD</li>
+              <li>Also see <code>foldRight</code></li>
+            </ul>
+            </div>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Fold visualized</p>
+            <p>&#x261c; and &#x261e;</p>
+            <img src="images/foldl.png" alt="foldl" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+            <img src="images/foldr.png" alt="foldr" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+            <small>
+              Folding a linked-list of <code>1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 5 &rarr; []</code><br/>
+              Reduce is a special form of fold</small>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Scan</p>
+<pre><code class="scala" data-trim>val range = (1 to 10)
+val partials = range.scanLeft("List")(_ + ":" + _)
+partials.foreach(println)
+</code></pre>
+            <ul>
+              <li>Similar to fold but retains partial results</li>
+              <li>Also see <code>scanRight</code></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Grouping</p>
+<pre><code class="scala" data-trim>val lyrics = List("We all live in Amerika", "Amerika ist wunderbar")
+val tokens = lyrics.flatMap(_.split(" "))  // List[String]
+
+// use :paste mode in Scala console
+tokens
+  .groupBy(identity)            // Map[String, List[String]]
+  .map(p => (p._1, p._2.size))  // Map[String, Int]
+  .toVector                     // Vector[(String, Int)]
+  .sortBy(_._2)                 // sort by second item
+  .reverse
+  .take(3)
+
+// longest token
+tokens.groupBy(_.length).toVector.sortBy(_._1).reverse.take(1)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Combinators</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Implement factorial with <code>Range</code> and <code>reduce</code></li>
+              <li>Find which line in <code>lyrics</code> has most number of tokens</li>
+              <li>Count tokens by folding into <code>Map[String, Int]</code></li>
+              <li>Build a histogram of token length (<code>Map[Int, Int]</code>)</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Compositions</h3>
+            <p>Functions are objects</p>
+<pre><code class="scala" data-trim>object addOne extends Function1[Int, Int] {
+  def apply(x: Int): Int = x + 1
+}
+
+object add extends Function2[Int, Int, Int] {
+  def apply(x: Int, y: Int): Int = x + y
+}
+
+object mul extends ((Double, Double) => Double) {
+  def apply(x: Double, y: Double): Double = x * y
+}
+
+val div = (x: Double, y: Double) => x / y
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Chaining functions</p>
+<pre><code class="scala" data-trim>def sqSum(v: Iterable[Double]) = v.map(math.pow(_, 2.0)).reduce(_ + _)
+
+val l2norm1 = math.sqrt _ compose sqSum _  // l^2norm = sqrt(sqSum(v))
+val l2norm2 = sqSum _ andThen math.sqrt _  // same as above
+
+l2norm1(List(3.0, 4.0))
+l2norm2(List(3.0, 4.0))
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Functions are data</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>val square = math.pow(_: Double, 2.0)  // partially applied function
+square.getClass                        // Double => Double
+
+// math.* are class methods (JVM), _ converts them to functions (object)
+val functions = List(square, math.sqrt _, math.log _, math.log10 _)
+// List[Double => Double]
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>functions.map(_(10.0))  // apply same argument to all functions
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// chaining rightward
+functions.reduce(_ compose _)(10.0)  // square(sqrt(log(log10(10.0))))
+// chaining leftward
+functions.reduce(_ andThen _)(10.0)  // log10(log(sqrt(square(10.0))))
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Predicates</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>// Int => Boolean
+val isEven = { x: Int => x % 2 == 0 }
+val isSquare = { x: Int => math.pow(math.sqrt(x).toInt, 2.0) == x }
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>val range = 1 to 30
+range.filter(isEven)
+range.filter(isSquare)
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// take 2 predicates, create a new one
+// more on templates later
+def and[A](fn1: A => Boolean, fn2: A => Boolean) = {
+  x: A => fn1(x) &amp;&amp; fn2(x)
+}
+range.filter(and(isEven, isSquare))
+</code></pre>
+              <small>See also Guava <a href="https://code.google.com/p/guava-libraries/wiki/FunctionalExplained">function explained</a></small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Composing predicates</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// function returning function
+def not[A](fn: A => Boolean) = { x: A => !fn(x) }
+range.filter(not(isEven))
+range.filter(not(isSquare))
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// function with variable number of arguments
+def and[A](fns: (A => Boolean)*) = { x: A => fns.forall(fn => fn(x)) }
+def or[A](fns: (A => Boolean)*) = { x: A => fns.exists(fn => fn(x)) }
+
+range.filter(and(isEven, isSquare))
+range.filter(or(isEven, isSquare))
+</code></pre>
+              <small>Now you can programmatically control predicates, e.g. query parameter, streams</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Closure</p>
+<pre><code class="scala" data-trim>// a function that creates new functions
+def makePowFn(n: Double): Double => Double = {
+  x: Double => math.pow(x, n)  // n is from enclosing scope
+}
+
+val square = makePowFn(2.0)  // n = 2.0 in double's closure
+val cube = makePowFn(3.0)    // n = 3.0 in triple's closure
+
+square(10.0)
+cube(10.0)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Partial functions</p>
+<pre><code class="scala" data-trim>val one: PartialFunction[Int, String] = { case 1 => "one" }
+
+one.isDefinedAt(1)  // true
+one.isDefinedAt(2)  // false
+
+val two: PartialFunction[Int, String] = { case 2 => "two" }
+val three: PartialFunction[Int, String] = { case 3 => "three" }
+val wildcard: PartialFunction[Int, String] = { case _ => "something else" }
+
+// chaining partial functions
+val oneTwoThree = one orElse two orElse three
+val number = one orElse two orElse three orElse wildcard
+
+List(1, 2, 3, 4, 5).map(oneTwoThree.isDefinedAt)
+List(1, 2, 3, 4, 5).map(number.isDefinedAt)
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Lifting partial functions</p>
+<pre><code class="scala" data-trim>val one: PartialFunction[Int, String] = { case 1 => "one" }
+one(1)         // defined
+one(2)         // error!
+
+val plainOne = one.lift  // plain function that returns Option
+plainOne(1)    // Some(one)
+plainOne(2)    // None
+
+val partialOne = Function.unlift(plainOne)
+partialOne(1)  // defined
+partialOne(2)  // error!
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Anonymous partial functions</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val lyrics = List("We all live in Amerika", "Amerika ist wunderbar")
+
+// use :paste mode in Scala console
+lyrics
+  .flatMap(_.split(" "))  // List[String]
+  .groupBy(identity)      // Map[String, List[String]]
+  .map { case (token, list) => (token, list.size) }
+  // more readable than .map(p => (p._1, p._2.size))
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>case class Band(name: String, members: Int)
+val bands = List(
+  Band("Pungent Stench", 3),
+  Band("Rammstein", 6),
+  Band("Haggard", 18))
+
+// don't care about band name
+bands.filter { case Band(_, members) => members > 10 }
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Compositions</h3>
+            <p>Exercises</p>
+            <ul>
+              <li>Given \(\log_b(x) = \frac{\log(x)}{\log(b)}\), implement<br/>
+                <code>mkLogWithBase(b: Double): Double =&gt; Double</code></li>
+              <li>Using <code>and</code>, find captalized tokens that has 3+ characters and contains 'i'</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Laziness</h3>
+            <img src="images/lazy.jpg" alt="lazy" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+          <section>
+            <h3>Laziness</h3>
+            <p>Lazy val and views</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>def plog(x: Int) = {
+  println(x)
+  math.log(x)
+}
+lazy val data = plog(10)
+
+println(data)  // Computing...
+println(data)  // cached
+</code></pre>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>// Scala collections are strictly (eagerly) evaluated
+(1 to 100).map(plog).take(5)  // waste of CPU cycles
+
+// .view to convert to lazy view, .force to strictly evaluate
+(1 to 100).view.map(plog).take(5).force
+</code></pre>
+            </div>
+            <div class="fragment">
+              <small>
+                Clojure and Haskell are lazy<br/>
+                So are Scalding pipes and Spark RDDs
+              </small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Laziness</h3>
+            <p>Streams</p>
+<pre><code class="scala" data-trim style="font-size: 90%">// recursive, lazy, and infinite, n, n+1, n+2, ...
+def intsFrom(n: BigInt): Stream[BigInt] = n #:: intsFrom(n + 1)
+
+intsFrom(10).take(5).force     // Stream(10, 11, 12, 13, 14)
+Stream.from(10).take(5).force  // same as above
+
+// use :paste mode in Scala console
+val factorial = Stream
+  .from(2)             // 2, 3, ...
+  .scanLeft(1)(_ * _)  // 1, 2 * 1, 3 * 2 * 1, ...
+
+factorial.take(10).force
+</code></pre>
+          </section>
+
+          <section>
+            <h3>Laziness</h3>
+            <p>Examples</p>
+<pre><code class="scala" data-trim style="font-size: 90%">// Fibonacci take 1
+val fibs1: Stream[Int] = 0 #:: 1 #:: fibs1.zip(fibs1.tail).map { n => n._1 + n._2 }
+fibs1.take(10).force
+
+// Fibonacci take 2
+val fibs2: Stream[Int] = 0 #:: fibs2.scanLeft(1)(_ + _)
+fibs2.take(10).force
+
+// prime numbers
+def sieve(s: Stream[Int]): Stream[Int] = {
+  s.head #:: sieve(s.tail.filter(_ % s.head != 0))
+}
+val primes: Stream[] = sieve(Stream.from(2))
+primes.take(10).force
+</code></pre>
+            <small>See <a href="http://projecteuler.net/">Project Euler</a> for more challenges</small>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Performance</h3>
+            <p>Choose the right data structures</p>
+            <ul>
+              <li>Built-in operations are usually performant</li>
+              <li>Immutable collections avoid copying when possible</li>
+              <li>But still slower than mutable counterparts</li>
+              <li>Both are slower than Java counterparts</li>
+              <li>Beware of small, temporary objects and GC</li>
+              <li>Trade off between readability and performance</li>
+            </ul>
+            <small><a href="http://docs.scala-lang.org/overviews/collections/performance-characteristics.html">Scala collections performance characteristics</a></small>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <p>Unnecessary copies</p>
+            <div class="fragment">
+<pre><code class="scala" data-trim>val m = Map("A" -&gt; 1, "B" -&gt; 2, "C" -&gt; 3)
+m.toList.map(t =&gt; (t._1, t._2 + 1)).toMap
+</code></pre>
+            </div>
+            <div class="fragment">
+              <small>2 temp lists and 2 * n temp tuples</small>
+            </div>
+            <div class="fragment">
+<pre><code class="scala" data-trim>for ((k, v) &lt;- m) yield (k, v + 1)
+m.map { case (k, v) =&gt; (k, v + 1) }
+m.mapValues(_ + 1)
+</code></pre>
+            </div>
+            <div class="fragment">
+              <small>n temp tuples</small>
+            </div>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <p>How many copies now?</p>
+            <!--div class="fragment"-->
+<pre><code class="scala" data-trim>val m1 = Map("A" -&gt; 1.0, "B" -&gt; 2.0, "C" -&gt; 3.0)
+val m2 = Map("A" -&gt; 1.5, "B" -&gt; 2.5, "D" -&gt; 3.5)
+
+def addMaps(m1: Map[String, Double], m2: Map[String, Double]) {
+  val i = m1.keySet intersect m2.keySet        // Set[String]
+  val m = i.map { k =&gt; k -&gt; (m1(k) + m2(k)) }  // Set[(String, Double)]
+  (m1 -- i) ++ (m2 -- i) ++ m                  // better: m1 ++ m2 ++ m
+}
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+<pre><code class="scala" data-trim>// 50 million Map:s
+val pipe = FancyBigDataPipe[Map[String, Double]]("hdfs://...")
+
+// how many copies now?
+pipe.foldLeft(Map[String, Double]())(addMaps)
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <!--div class="fragment"-->
+            <p>Slightly fewer</p>
+<pre><code class="scala" data-trim>val m1 = Map("A" -&gt; 1.0, "B" -&gt; 2.0, "C" -&gt; 3.0)
+val m2 = Map("A" -&gt; 1.5, "B" -&gt; 2.5, "D" -&gt; 3.5)
+
+// how many copies?
+(m1.keySet ++ m2.keySet) map { k =&gt;
+  k -&gt; (m1.getOrElse(k, 0.0) + m2.getOrElse(k, 0.0))
+}
+</code></pre>
+            <!--/div-->
+            <div class="fragment">
+            <p>Harder Faster Better Shorter</p>
+<pre><code class="scala" data-trim>m1 ++ m2.map { case (k, v) =&gt; k -&gt; (v + m1.getOrElse(k, 0.0)) }
+</code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <p>Cheat with mutable collections</p>
+<pre><code class="scala" data-trim>import scala.collection.mutable. { Map => MMap }
+
+def addMaps(m1: MMap[String, Double], m2: MMap[String, Double]) = {
+  m2.foreach { case (k, v) => m1(k) = v + m1.getOrElse(k, 0.0) }
+  m1
+}
+
+pipe.foldLeft(MMap[String, Double]())(addMaps)
+</code></pre>
+            <small>Impure but gets the job done, but beware of side-effects!</small>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <p>Third party libraries</p>
+            <ul>
+              <li>Aware of memory characteristics</li>
+              <li>Bloom filter - Algebird vs. Guava</li>
+              <li>Linear algebra - Breeze vs. JBLAS</li>
+              <li><a href="https://github.com/nevillelyh/benchmark">Benchmark!</a></li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Performance</h3>
+            <p>vs. agility</p>
+            <img src="images/performance.png" alt="performance" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          </section>
+        </section>
+
+        <section>
+          <h2>That's It</h2>
+          <p>Further reading</p>
+          <ul>
+            <li>What every hipster should know about<br/>functional programming <a href="http://vimeo.com/68331937">video</a>/<a href="http://bodil.org/hipster/">slides</a></li>
+            <li><code>Option[T]</code>, <code>Some</code> and <code>None</code></li>
+            <li>Parallel collections</li>
+            <li>Guava functional <a href="https://code.google.com/p/guava-libraries/wiki/FunctionalExplained">idioms</a> and <a href="https://code.google.com/p/guava-libraries/wiki/ListenableFutureExplained">futures</a></li>
+          </ul>
+          <p><a href="day3.html">&rArr; Day 3</a></p>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

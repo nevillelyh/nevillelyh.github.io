@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Why Functional? Why Scala?</title>
+
+    <meta name="description" content="Why Functional> Why Scala?">
+    <meta name="author" content="Neville Li">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/blood.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <!--link rel="stylesheet" href="lib/css/zenburn.css"-->
+    <link rel="stylesheet" href="styles/monokai_sublime.css">
+    <script src="scripts/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h2>Why Functional?</h2>
+          <h2>Why Scala?</h2>
+          <p>
+            <a href="mailto:neville@spotify.com">Neville Li</a><br/>
+            <a href="https://twitter.com/sinisa_lyh">@sinisa_lyh</a><br/>
+          </p>
+          Jul 2014
+        </section>
+
+        <section>
+          <h4 class="fragment" data-fragment-index="5">Monoid!</h4>
+          <small class="fragment" data-fragment-index="5">Actually it's a semigroup, monoid just sounds more interesting :)</small>
+          <p>A Little Teaser</p>
+          <div class="fragment" data-fragment-index="1">
+            <pre><code class="java" data-trim>PGroupedTable&lt;K,V&gt;::combineValues(CombineFn&lt;K,V&gt; combineFn,
+                                  CombineFn&lt;K,V&gt; reduceFn) </code></pre>
+            <small>Crunch: <em>CombineFns are used to represent the associative operations...</em></small>
+          </div>
+          <div class="fragment" data-fragment-index="2">
+            <pre><code class="scala" data-trim>KeyedList[K, T]::reduce(fn: (T, T) =&gt; T)</code></pre>
+            <small>Scalding: <em>reduce with fn which must be associative and commutative</em></small>
+          </div>
+          <div class="fragment" data-fragment-index="3">
+            <pre><code class="scala" data-trim>PairRDDFunctions[K, V]::reduceByKey(fn: (V, V) =&gt; V)</code></pre>
+            <small>Spark: <em>Merge the values for each key using an associative reduce function</em></small>
+          </div>
+          <small class="fragment" data-fragment-index="4">All of them work on both mapper and reducer side</small>
+        </section>
+
+        <section>
+          <h4>My story</h4>
+          <div class="fragment">
+          <p>Before</p>
+          <ul>
+            <li>Mostly Python/C++ (and PHP...)</li>
+            <li>No Java experience at all</li>
+            <li>Started using Scala early 2013</li>
+          </ul>
+          </div>
+          <div class="fragment">
+          <p>Now</p>
+          <ul>
+            <li>Discovery's<sup>*</sup> Java backend/riemann guy</li>
+            <li>The Scalding/Spark/Storm guy</li>
+            <li>Contributor to Spark, chill, cascading.avro</li>
+          </ul>
+          <small>* Spotify's machine learning and recommendation team</small>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why this talk?</h4>
+          <ul>
+            <li>Not a tutorial</li>
+            <li>Discovery's experience</li>
+            <li>Why FP matters</li>
+            <li>Why Scala matters</li>
+            <li>Common misconceptions</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>What we already use</h4>
+          <ul>
+            <li>Kafka</li>
+            <li>Scalding</li>
+            <li>Spark / MLLib</li>
+            <li>Stratosphere</li>
+            <li>Storm / Riemann (Clojure)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>What we want to investigate</h4>
+          <ul>
+            <li>Summingbird (Scala for Storm + Hadoop)</li>
+            <li>Spark Streaming</li>
+            <li>Shark / SparkSQL</li>
+            <li>GraphX (Spark)</li>
+            <li>BIDMach (GPU ML with GPU)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Discovery</h4>
+          <ul>
+            <li>Mid 2013: 100+ Python jobs</li>
+            <li>10+ hires since (half since new year)</li>
+            <li>Few with Java experience, none with Scala</li>
+            <li>As of May 2014: ~100 Scalding jobs &amp; 90 tests</li>
+            <li>More uncommited ad-hoc jobs</li>
+            <li>12+ commiters, 4+ using Spark</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Discovery</h4>
+          <p>rec-sys-scalding.git</p>
+          <img src="images/rec-sys-scalding.jpg" alt="rec-sys-scalding" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+        </section>
+
+        <section>
+          <h4>Discovery</h4>
+          <h3>Guess how many jobs<br/>written by yours truely?</h3>
+          <h1 class="fragment">3</h1>
+        </section>
+
+        <section>
+          <h4>Why Functional</h4>
+          <ul>
+            <li>Immutable data</li>
+            <li>Copy and transform</li>
+            <li>Not mutate in place</li>
+            <li>HDFS with M/R jobs</li>
+            <li>Storm tuples, Riemann streams</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Why Functional</h4>
+          <ul>
+            <li>Higher order functions</li>
+            <li>Expressions, not statements</li>
+            <li>Focus on problem solving</li>
+            <li>Not solving programming problems</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Why Functional</h4>
+          <p>Word count in Python</p>
+<pre><code class="scala" data-trim>lyrics = ["We all live in Amerika", "Amerika ist wunderbar"]
+wc = defaultdict(int)
+for l in lyrics:
+  for w in l.split():
+    wc[w] += 1
+</code></pre>
+          <small>Screen too small for the Java version</small>
+        </section>
+
+        <section>
+          <h4>Why Functional</h4>
+          <p>Map and reduce are key concepts in FP</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>val lyrics = List("We all live in Amerika", "Amerika ist wunderbar")
+lyrics.flatMap(_.split(" "))               // map
+      .groupBy(identity)                   // shuffle
+      .map { case (k, g) =&gt; (k, g.size) }  // reduce
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="clojure" data-trim>(def lyrics ["We all live in Amerika" "Amerika ist wunderbar"])
+(-&gt;&gt; lyrics (mapcat #(clojure.string/split % #"\s"))
+            (group-by identity)
+            (map (fn [[k g]] [k (count g)])))
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="haskell" data-trim>import Control.Arrow
+import Data.List
+let lyrics = ["We all live in Amerika", "Amerika ist wunderbar"]
+map words >>> concat
+          >>> sort >>> group
+          >>> map (\x -> (head x, length x)) $ lyrics
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Functional</h4>
+          <small>Linear equation in <a href="https://datajobs.com/data-science-repo/Recommender-Systems-%5BNetflix%5D.pdf">ALS matrix factorization</a><br/>
+          \(x_u=(Y^TY + Y^T(C^u-I)Y)^{-1} Y^TC^up(u)\)</small>
+          <div class="fragment">
+<pre><code class="scala" data-trim>vectors.map { case (id, vec) => (id, vec * vec.T) }  // YtY
+       .map(_._2).reduce(_ + _)
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="scala" data-trim>ratings.keyBy(fixedKey).join(outerProducts)  // YtCuIY
+       .map { case (_, (r, op)) => (solveKey(r), op * (r.rating * alpha)) }
+       .reduceByKey(_ + _)
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="scala" data-trim>ratings.keyBy(fixedKey).join(vectors)  // YtCupu
+       .map { case (_, (r, vec)) =>
+         val Cui = r.rating * alpha + 1
+         val pui = if (Cui > 0.0) 1.0 else 0.0
+         (solveKey(r), vec * (Cui * pui))
+       }.reduceByKey(_ + _)
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <ul>
+            <li>JVM - libraries and tools</li>
+            <li>Pythonesque syntax</li>
+            <li>Static typing with inference</li>
+            <li>Transition from imperative to FP</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Performance vs. agility</p>
+          <img src="images/performance.png" alt="performance" style="border: 0px; background: rgba(0,0,0,0.0); box-shadow: 0 0 0px rgba(0,0,0,0.0)"/>
+          <small><a href="http://nicholassterling.wordpress.com/2012/11/16/scala-performance/">http://nicholassterling.wordpress.com/2012/11/16/scala-performance/</a></small>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Type inference</p>
+<pre><code class="java" data-trim>class ComplexDecorationService {
+  public List&lt;ListenableFuture&lt;Map&lt;String, Metadata&gt;&gt;&gt;
+  lookupMetadata(List&lt;String&gt; keys) { /* ... */ }
+}
+</code></pre>
+          <div class="fragment">
+<pre><code class="scala" data-trim>val data = service.lookupMetadata(keys)
+
+type DF = List[ListenableFuture[Map[String, Track]]]
+def process(data: DF) = { /* ... */ }
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Higher order functions</p>
+<pre><code class="java" data-trim>List&lt;Integer&gt; list = Lists.newArrayList(1, 2, 3);
+Lists.transform(list, new Function&lt;Integer, Integer&gt;() {
+  @Override
+  public Integer apply(Integer input) {
+    return input + 1;
+  }
+});
+</code></pre>
+          <div class="fragment">
+<pre><code class="scala" data-trim>val list = List(1, 2, 3)
+list.map(_ + 1)  // List(2, 3, 4)
+</code></pre>
+          </div>
+          <div class="fragment">
+            <small>And then imagine if you have to chain or nested functions</small>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Collections API</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>val l = List(1, 2, 3, 4, 5)
+l.map(_ + 1)                      // List(2, 3, 4, 5, 6)
+l.filter(_ &gt; 3)                   // 4 5
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="scala" data-trim>l.zip(List("a", "b", "c")).toMap  // Map(1 -&gt; a, 2 -&gt; b, 3 -&gt; c)
+l.partition(_ % 2 == 0)           // (List(2, 4),List(1, 3, 5))
+List(l, l.map(_ * 2)).flatten     // List(1, 2, 3, 4, 5, 2, 4, 6, 8, 10)
+
+l.reduce(_ + _)                   // 15
+l.fold(100)(_ + _)                // 115
+</code></pre>
+          </div>
+          <div class="fragment">
+<pre><code class="scala" data-trim>"We all live in Amerika".split(" ").groupBy(_.size)
+// Map(2 -&gt; Array(We, in), 4 -&gt; Array(live),
+//     7 -&gt; Array(Amerika), 3 -&gt; Array(all))
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Scalding field based word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>TextLine(path))
+  .flatMap('line -&gt; 'word) { line: String =&gt; line.split("""\W+""") }
+  .groupBy('word) { _.size }
+</code></pre>
+          </div>
+          <p>Scalding type-safe word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>TextLine(path).read.toTypedPipe[String](Fields.ALL)
+  .flatMap(_.split(""\W+""))
+  .groupBy(identity).size
+</code></pre>
+          </div>
+          <p>Scrunch word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>read(from.textFile(file))
+  .flatMap(_.split("""\W+""")
+  .count
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Summingbird word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>source
+  .flatMap { line: String => line.split("""\W+""").map((_, 1)) }
+  .sumByKey(store)
+</code></pre>
+          </div>
+          <p>Spark word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>sc.textFile(path)
+  .flatMap(_.split("""\W+"""))
+  .map(word =&gt; (word, 1))
+  .reduceByKey(_ + _)
+</code></pre>
+          </div>
+          <p>Stratosphere word count</p>
+          <div class="fragment">
+<pre><code class="scala" data-trim>TextFile(textInput)
+  .flatMap(_.split("""\W+"""))
+  .map(word =&gt; (word, 1))
+  .groupBy(_._1)
+  .reduce { (w1, w2) =&gt; (w1._1, w1._2 + w2._2) }
+</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h4>Why Scala</h4>
+          <p>Many patterns also common in Java</p>
+          <ul>
+            <li>Java 8 lambdas and streams</li>
+            <li>Guava, Crunch, etc.</li>
+            <li>Optional, Predicate</li>
+            <li>Collection transformations</li>
+            <li>ListenableFuture and transform</li>
+            <li>parallelDo, DoFn, MapFn, CombineFn</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Common misconceptions</h4>
+          <p>It's complex</p>
+          <ul>
+            <li>True for language features</li>
+            <li>Not from user's perspective</li>
+            <li>We only use 20% features</li>
+            <li>Not more than needed in Java</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Common misconceptions</h4>
+          <p>It's slow</p>
+          <ul>
+            <li>No slower than Python</li>
+            <li>Depend on how pure FP</li>
+            <li>Trade off with productivity</li>
+            <li>Drop down to Java or native libraries</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Common misconceptions</h4>
+          <p>I don't want to learn a new language</p>
+          <ul>
+            <li>How about flatMap, reduce, fold, etc.?</li>
+            <li>Unnecessary overhead <br/>interfacing with Python or Java</li>
+            <li>You've used monoids, monads, <br/>or higher order functions already</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>The End</h2>
+          <h3>Thank You</h3>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          //{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

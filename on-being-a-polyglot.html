@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>On being a polyglot - Das Keyboard Shredder</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="./on-being-a-polyglot.html">
+
+        <meta name="author" content="Neville Li" />
+        <meta name="keywords" content="c,cpp,python,javascript,scala,java,clojure,haskell" />
+        <meta name="description" content="I’m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong CS fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly ..." />
+
+        <meta property="og:site_name" content="Das Keyboard Shredder" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="On being a polyglot"/>
+        <meta property="og:url" content="./on-being-a-polyglot.html"/>
+        <meta property="og:description" content="I’m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong CS fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly ..."/>
+        <meta property="article:published_time" content="2014-08-21" />
+            <meta property="article:section" content="code" />
+            <meta property="article:tag" content="c" />
+            <meta property="article:tag" content="cpp" />
+            <meta property="article:tag" content="python" />
+            <meta property="article:tag" content="javascript" />
+            <meta property="article:tag" content="scala" />
+            <meta property="article:tag" content="java" />
+            <meta property="article:tag" content="clojure" />
+            <meta property="article:tag" content="haskell" />
+            <meta property="article:author" content="Neville Li" />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="./theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="./theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="./theme/css/pygments/monokai.css" rel="stylesheet">
+        <link href="./theme/css/typogrify.css" rel="stylesheet">
+    <link rel="stylesheet" href="./theme/css/style.css" type="text/css"/>
+
+        <link href="./feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Das Keyboard Shredder ATOM Feed"/>
+
+
+
+        <link href="./feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Das Keyboard Shredder code ATOM Feed"/>
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="./" class="navbar-brand">
+Das Keyboard Shredder            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="./pages/about-me.html">
+                             About&nbsp;Me
+                          </a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="./archives.html"><i class="fa fa-th-list"></i><span class="icon-label">Archives</span></a></li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="./on-being-a-polyglot.html"
+                       rel="bookmark"
+                       title="Permalink to On being a polyglot">
+                        On being a&nbsp;polyglot
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2014-08-21T21:26:00-04:00"> Thu 21 August 2014</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="./category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="./tag/c.html">c</a>
+        /
+	<a href="./tag/cpp.html">cpp</a>
+        /
+	<a href="./tag/python.html">python</a>
+        /
+	<a href="./tag/javascript.html">javascript</a>
+        /
+	<a href="./tag/scala.html">scala</a>
+        /
+	<a href="./tag/java.html">java</a>
+        /
+	<a href="./tag/clojure.html">clojure</a>
+        /
+	<a href="./tag/haskell.html">haskell</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p>I&#8217;m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong <span class="caps">CS</span> fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly C/C++/Python many years ago. Over the course of the last three years at my current job I coded seven languages professionally, some out of interest and some necessity. I enjoyed the experience learning all these different things and want to share my experience here, what I learned from each one of them and how it helps me becoming a better&nbsp;engineer.</p>
+<h2>C</h2>
+<p>The first language I used seriously, apart from <span class="caps">LOGO</span> <span class="amp">&amp;</span> <span class="caps">BASIC</span> when I was a kid of course. It&#8217;s probably the closest thing one can get to the operating system and bare metal without dropping down to assembly (while you still can in C). It&#8217;s a simple language whose syntax served as the basis of many successors like C++ <span class="amp">&amp;</span> Java. It doesn&#8217;t offer any fancy features like <span class="caps">OOP</span> or namespaces, but rather depends on the developer&#8217;s skill for organizing large code base (think Linux kernel or&nbsp;git).</p>
+<p>Memory management is probably the biggest thing one get from learning the language, and to this day I&#8217;m still glad that I learned data structures in C. There are also other low level stuff like interrupts, system calls, and multi-threading which are often abstracted away in higher level languages. For these reasons I would argue that any professional developer should know some&nbsp;C.</p>
+<p>I still remember programming my 9-pin dot-matrix printer with bit operators and ports; my first pre-Windows <span class="caps">GUI</span> with interrupts and <span class="caps">VGA</span> memory access; first e-mail client with <span class="caps">UNIX</span> sockets; first shell with all those Unix system calls; and learning two-phase commit by implementing it for <a href="http://www.sqlite.org/">SQLite</a>. While I rarely use C nowadays, many concepts pop up in day to day work and are essential in understanding much more complex&nbsp;systems.</p>
+<h2>C++</h2>
+<p>A natural next step after C, C++ adds <span class="caps">OOP</span> and many more features like streams, operator overloading, and templates. Several books were instrumental to understanding the language better, including Scott Meyers&#8217; <a href="http://www.amazon.com/Effective-Specific-Improve-Programs-Designs/dp/0321334876">Effective C++</a> series, and Stanley Lippman&#8217;s <a href="http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545">Inside the C++ Object Model</a>. The former is regarded as a must read for all C++ programmers, while the latter dig into the language implementation of some mysterious features like object construction, virtual methods, and multiple inheritance. I actually read Effective C++ before studying the language. The first pass was not 100% clear but combined with practise and real world experience, the second read made a lot more sense and really made me comfortable with the&nbsp;language.</p>
+<p>I started using it mostly in school for scientific computing, as &#8220;C with classes&#8221;, where one rarely relies on auto memory management <span class="amp">&amp;</span> threading. Memory were allocated in big chunks, or managed with <span class="caps">STL</span> collections, and often read-only once loaded. And processing large amount of data is often embarrassingly parallel, i.e. crunching through input files in&nbsp;threads.</p>
+<p>Fast forward to my current job, C++ is mostly used in the desktop application, heavily threaded with many small objects encapsulating asynchronous backend requests and JavaScript bridge with <a href="https://code.google.com/p/chromiumembedded/"><span class="caps">CEF</span></a>. Race conditions, memory leaks and null pointer crashes are common problems and I started to appreciate mutexes <span class="amp">&amp;</span> <a href="http://www.boost.org/doc/libs/1_56_0/libs/smart_ptr/smart_ptr.htm">boost smart pointers</a>. Features like <a href="http://www.cprogramming.com/tutorial/template_specialization.html">template specialization</a> also helps in creating generic <span class="amp">&amp;</span> performant code while paving the way for understanding type classes in Scala <span class="amp">&amp;</span>&nbsp;Haskell.</p>
+<h2>Python</h2>
+<p>Probably the most popular of the bunch, Python is favored by many data scientists for its wide range of data processing libraries and I originally picked it up for information retrieval. It&#8217;s easy to learn, concise, and perfect for ad-hoc analysis or as a utility language. A colleague once said that any competent programmer should know one static and one dynamic language well, and in that case Python would be many people&#8217;s choice for the dynamic&nbsp;one.</p>
+<p>When it comes to implementing complex algorithms quickly, list comprehension got me hooked first. Then it was lambda, map, reduce, filter, zip and that was when I discovered functional programming. After that came things like <a href="https://docs.python.org/2/library/itertools.html">itertools</a> and <a href="https://docs.python.org/2/library/functools.html">functools</a>. To me Python was the gateway language to functional&nbsp;programming.</p>
+<p>I also did a lot of backend work in Python, and learn to hate <a href="https://wiki.python.org/moin/GlobalInterpreterLock"><span class="caps">GIL</span></a> and love <a href="http://www.gevent.org/">gevent</a>. Performance was still an issue and significant amount of time was spent profiling and optimizing code. And through the process I got a much better understanding of the non-blocking event-driven concurrency&nbsp;model.</p>
+<h2>JavaScript</h2>
+<p>JavaScript is a language that I write out of necessity, mostly when working with <a href="https://developer.spotify.com/technologies/apps/">Spotify Apps</a> and my <a href="http://labs.spotify.com/2013/11/14/announcing-spotify-visualization-api-beta/">audio visualization</a> hack project. It&#8217;s one of those languages that I never learned properly. While the language isn&#8217;t drastically different from the previous ones, I did have to wrap my head around various (ab)uses of closure and the whole async requests and callbacks concept, and you learn to organize the code around that to make it more&nbsp;maintainable.</p>
+<h2>Scala</h2>
+<p>I introduced Scala back to my current job and use it on a daily basis. There are a lot of controversy around the language, mostly due to its steep learn curve and complexity. Learning curve was not so much of a problem for someone who already knows Python and C++, although there are still concepts harder to digest, like variances, bounds and type classes. Complexity, <span class="caps">IMHO</span>, was partly due to the limitation of the <span class="caps">JVM</span>, e.g. erasure and boxed primitives. Despite these problems, Scala seems to have found a sweet spot in the domain of big data, where it allows both development agility and performance, plus interoperability with other <span class="caps">JVM</span> system (Hadoop, Storm, Cassandra, etc.). Apart from powerful generics and operator overloading, Scala took a step further from C++ with implicits, making it easier to extend existing libraries or design new DSLs. <a href="https://github.com/twitter/scalding">Scalding</a>, <a href="http://spark.apache.org/">Spark</a>, and <a href="http://kafka.apache.org/">Kafka</a> are probably the most well known Scala projects, while newcomers like <a href="https://github.com/BIDData/BIDMach">BIDMach</a> are showing a lot of&nbsp;potential.</p>
+<p>When it comes to learning the language, Twitter&#8217;s <a href="https://twitter.github.io/scala_school/">Scala School</a> and Horstmann&#8217;s <a href="http://www.horstmann.com/scala/">Scala for the Impatient</a> are both excellent resources and I enjoyed Joshua Suereth&#8217;s <a href="http://www.manning.com/suereth/">Scala in Depth</a> for advanced topics. The biggest reward, often absent from books <span class="amp">&amp;</span> tutorials however, is abstract algebra and category theory. Sooner or later terms like monoid, semigroup, monad will pop up and you&#8217;ll recognize such patterns in map/reduce, storm, and even Java libraries like <a href="https://code.google.com/p/guava-libraries/">Guava</a>. To me, that&#8217;s the most important thing I learned from using&nbsp;Scala.</p>
+<h2>Java</h2>
+<p>Another language I use out of necessity. It&#8217;s often contempted in the start up world for verbosity and enterprise heritage. Most colleges teach Java in programming 101 and that was my only previous encounter with it (although I skipped most classes in school). The language has a very conservative set of features and probably not a challenge for any seasoned C++ developers. People often associate Java with design patterns, for better or worse, and <span class="caps">IMHO</span> a lot of them, like builder, factory, delegate, were really created to overcome the limitation of the&nbsp;language.</p>
+<p>One area that Java excels in, however, is its ecosystem of libraries, tools, IDEs. Before Java I did almost all coding in Vim, using Xcode or Eclipse occasionally for debugging C++ code. After using <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a> for a few weeks, I&#8217;d say that it&#8217;s probably the biggest attraction for writing Java. Verbosity becomes less of a problem once you get used to the <span class="caps">IDE</span>&#8217;s features for code navigation, completion, and refactoring. Dependency management is also easier without various platform specific packages. And coming from doing backend in a Python world, the quality and maturity of libraries in the <span class="caps">JVM</span> world is so much better. We ended up spending a lot less time struggling with memcached, Cassandra or <span class="caps">HTTP</span>&nbsp;clients.</p>
+<h2>Clojure</h2>
+<p>The latest language I used at work. We use it mainly for defining monitoring rules in <a href="http://riemann.io/">Riemann</a> and I also hacked together a few <a href="http://storm-project.net/">Storm</a> topologies in Clojure. With some Scala experience by the time I picked it up, most concepts are no stranger to me. Syntax is surprisingly simple and consistent. I often joke that it&#8217;s my language of choice on a plane or boat with no internet, since the core language <a href="http://clojure.org/cheatsheet">cheat sheet</a> fits on a single page. And Its inherently lazy sequence library maps naturally to stream processing and is also fun for solving <a href="http://projecteuler.net/">Project Euler</a>&nbsp;problems.</p>
+<p>Some coworkers were appalled by the excessive use of parentheses and existence of plugins like <a href="https://github.com/kien/rainbow_parentheses.vim">rainbow_parentheses.vim</a>. Yes we talk smack about it, joking that 40 columns is enough and one should hook up an elliptical machine to <code>(</code> and <code>)</code>. But I also think of it as a restraint of complexity and break my code down to smaller, reuseable&nbsp;functions.</p>
+<p>Clojure is also the first time I was exposed to macros (not the <code>#define</code> kind in C/C++), <a href="http://en.wikipedia.org/wiki/Software_transactional_memory">software transactional memory</a>, and <a href="http://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a> programming languages. Concepts that broadened my understanding of programming language&nbsp;design.</p>
+<h2>(Bonus)&nbsp;Haskell</h2>
+<p>I always regretted not learning Haskell ever since switching to <a href="http://xmonad.org/">XMonad</a> as my window manager. If Python was my gateway drug to functional programming, then Scala, and more specifically <a href="https://github.com/scalaz/scalaz">scalaz</a>, are my gateway drug to Haskell, the pure functional programming language with strong academic&nbsp;background.</p>
+<p>I recently picked up the language again, going through the excellent free book <a href="http://learnyouahaskell.com/">Learn You a Haskell for Great Good!</a> side by side with <a href="http://eed3si9n.com/learning-scalaz/index.html">learning scalaz</a>. It&#8217;s easy to see the parallel between the two, how some concepts built into the Haskell language are implemented with generics and implicits in scala(z). It&#8217;s also not hard to see why Haskell attracts interest, with its powerful type inferences, type classes, lazy evaluation and many other&nbsp;features.</p>
+<p>I probably won&#8217;t use Haskell for real any time soon. I probably won&#8217;t even use those features in scalaz or <a href="https://github.com/milessabin/shapeless">shapeless</a> in production. Nevertheless I really enjoyed learning these concepts and see how they solve problems with&nbsp;elegance.</p>
+<h2>Final&nbsp;words</h2>
+<p>You might also say that I&#8217;m a jack of all trades and master of none. This is very true and I never became a master of any of these languages and created a framework or library. On the other hand this also allows me to pick up any task or role within the team and quickly become productive. And I often found myself applying techniques from one language to another. All in all I believe it&#8217;s much more beneficial to be a polyglot than sticking to one language and&nbsp;platform.</p>
+            </div>
+            <!-- /.entry-content -->
+    <hr />
+    <!-- AddThis Button BEGIN -->
+    <div class="addthis_toolbox addthis_default_style">
+            <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+            <a class="addthis_button_tweet"></a>
+            <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    </div>
+    <!-- AddThis Button END -->
+    <hr/>
+    <section class="comments" id="comments">
+        <h2>Comments</h2>
+
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
+
+                    var disqus_identifier = 'on-being-a-polyglot';
+                var disqus_url = './on-being-a-polyglot.html';
+
+            var disqus_config = function () {
+                this.language = "en";
+            };
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                var dsq = document.createElement('script');
+                dsq.type = 'text/javascript';
+                dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by
+            Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    </section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<div id="aboutme">
+    <p>
+        <strong>About Neville Li</strong><br/>
+        
+Software engineer at Spotify, part-time coder, full-time keyboard shredder.
+
+    </p>
+</div>
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="http://open.spotify.com/user/sinisa_lyh"><i class="fa fa-spotify fa-lg"></i> Spotify</a></li>
+                <li class="list-group-item"><a href="https://github.com/nevillelyh"><i class="fa fa-github-square fa-lg"></i> GitHub</a></li>
+                <li class="list-group-item"><a href="https://twitter.com/sinisa_lyh"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+                <li class="list-group-item"><a href="https://www.linkedin.com/in/nevillelyh"><i class="fa fa-linkedin-square fa-lg"></i> LinkedIn</a></li>
+                <li class="list-group-item"><a href="http://www.slideshare.net/sinisalyh"><i class="fa fa-slideshare fa-lg"></i> SlideShare</a></li>
+                <li class="list-group-item"><a href="http://stackoverflow.com/users/3880836/neville-li"><i class="fa fa-stack-overflow fa-lg"></i> Stack-Overflow</a></li>
+                <li class="list-group-item"><a href="https://www.facebook.com/neville.lyh"><i class="fa fa-facebook-square fa-lg"></i> Facebook</a></li>
+                <li class="list-group-item"><a href="https://plus.google.com/+NevilleLiYH"><i class="fa fa-google-plus-square fa-lg"></i> Google+</a></li>
+                <li class="list-group-item"><a href="https://www.youtube.com/user/sinisalyh/videos"><i class="fa fa-youtube-square fa-lg"></i> YouTube</a></li>
+                <li class="list-group-item"><a href="https://www.flickr.com/photos/sinisa_lyh"><i class="fa fa-flickr fa-lg"></i> Flickr</a></li>
+              </ul>
+            </li>
+
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
+                <ul class="list-group" id="recentposts">
+                    <li class="list-group-item">
+                        <a href="./semigroups.html">
+                            Semigroups
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="./scio-a-scala-api-for-google-cloud-dataflow.html">
+                            Scio, a Scala <span class="caps">API</span> for Google Cloud&nbsp;Dataflow
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="./scala-data-pipelines-spotify.html">
+                            Scala Data Pipelines @&nbsp;Spotify
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="./primitives.html">
+                            Primitives
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="./type-classes.html">
+                            Type&nbsp;Classes
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="list-group-item"><a href="./"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4></a>
+                <ul class="list-group" id="categories">
+                    <li class="list-group-item">
+                        <a href="./category/code.html">
+                            <i class="fa fa-folder-open fa-lg"></i> code
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="./category/misc.html">
+                            <i class="fa fa-folder-open fa-lg"></i> misc
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
+
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Neville Li
+            &middot; Powered by <a href="https://github.com/DandyDev/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>              <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="./theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="./theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="./theme/js/respond.min.js"></script>
+
+    <!-- Disqus -->
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.type = 'text/javascript';
+            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+    </script>
+    <!-- End Disqus Code -->
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-6988688-5']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    <!-- End Google Analytics Code -->
+
+        <script type="text/javascript">var addthis_config = {"data_track_addressbar": true};</script>
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=sinisalyh"></script>
+</body>
+</html>
