@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Joins</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Advanced Scala
+## Joins
+Neville Li
+
+@sinisa_lyh
+
+Apr 2017
+
+---
+
+# Join in Map/Reduce
+
+--
+
+- ## No join primitive in Map/Reduce
+
+--
+
+- ## N-way join:
+  ## Map with N inputs
+  ## Reduce with the same key
+
+---
+
+# Imagine a fake Scala M/R framework Scuigi
+
+```scala
+def map[I, K, V](input: Iterable[I]): Iterable[(K, V)]
+def reduce[K, V, O](key: K, values: Iterable[V]): Iterable[O]
+```
+
+--
+
+## And two inputs
+
+```scala
+case class Metadata(trackId: Long, artistId: String)
+case class Audio(trackId: Long, tempo: Double)
+```
+
+---
+
+# Join metadata and audio attributes
+
+- ### In: metadata JOIN audio ON trackId, Out: trackId -> (artistId, tempo)
+
+--
+
+- ### Mapper
+
+```scala
+// metadata
+def map[Metadata, Long, String](input: Iterable[Metadata]): Iterable[(Long, String)] =
+  input.map(m => (m.trackId, m.artistId))
+```
+
+```scala
+// audio
+def map[Audio, Long, Double](input: Iterable[Audio]): Iterable[(Long, Double)] =
+  input.map(a => (a.trackId, a.tempo))
+```
+
+--
+
+- ### Reducer
+
+```scala
+def reduce[Long, ???, ???](key: Long, values: Iterable[???]): Iterable[???]
+```
+
+---
+
+# Second try with Either
+
+- ### Mapper
+
+```scala
+// metadata
+def map(input: Iterable[Metadata]): Iterable[(Long, Either[String, Double])] =
+  input.map(m => (m.trackId, Left(m.artistId)))
+```
+
+```scala
+// audio
+def map(input: Iterable[Audio]): Iterable[(Long, Either[String, Double])] =
+  input.map(a => (a.trackId, Right(a.tempo)))
+```
+
+--
+
+- ### Reducer
+
+```scala
+def reduce(key: Long, values: Iterable[Either[String, Double]]): Iterable[(Long, (String, Double))] = {
+  val (lhsE, rhsE) = values.partition(_.isLeft)  // split inputs
+  val lhs = lhsE.map(_.left.get)   // Either[String, Double] => String
+  val rhs = rhsE.map(_.right.get)  // Either[String, Double] => Double
+  for (l &lt;- lhs; r &lt;- rhs) yield (key, (l, r))  // cartesian product
+}
+```
+
+---
+
+# Cartesian product
+
+- ### `(K, V)` JOIN `(K, W)`
+
+```scala
+val key: K = ...
+val lhs: Iterable[V] = ...  // m elements
+val rhs: Iterable[W] = ...  // n elements
+for (l &lt;- lhs; r &lt;- rhs) yield (key, (l, r))
+```
+
+--
+
+## O(mn)!
+
+---
+
+# Three-way cartesian product
+
+- ### `(K, V1)` JOIN `(K, V2)` JOIN `(K, V3)`
+
+```scala
+val key: K = ...
+val v1s: Iterable[V1] = ...  // m elements
+val v2s: Iterable[V2] = ...  // n elements
+val v3s: Iterable[V3] = ...  // o elements
+for (v1 &lt;- v1s; v2 &lt;- v2s; v3 &lt;- v3s) yield (key, (v1, v2, v3))  // O(mno)
+```
+
+--
+
+## O(mno)!
+
+--
+
+## Exponential!
+
+---
+
+# What about the for?
+
+```scala
+for (l &lt;- lhs; r &lt;- rhs) yield (key, (l, r))
+```
+
+--
+
+equals
+
+```scala
+lhs.flatMap(l => rhs.map(r => (key, (l, r))))
+```
+
+--
+
+equals
+
+```scala
+val lhs = Iterable(l1, l2, l3, l4, l5, ...)
+rhs.map(r => (key, l1, r)) ++ rhs.map(r => (key, l2, r)) ++ rhs.map(r => (key, l3, r)) ++
+rhs.map(r => (key, l4, r)) ++ rhs.map(r => (key, l5, r)) ++ ...
+```
+
+http://www.lyh.me/slides/for-yield.html
+
+---
+
+# Concat vs map
+
+## For LHS of size 1,000,000 and RHS of size 1
+
+- ### 1,000,000 concatenations of map over `Iterable`s of 1 element
+
+--
+
+## For LHS of size 1 and RHS of size 1,000,000:
+
+- ### no concatenation, map over one large `Iterable` (applied lazily)
+
+---
+
+# Joins are not symmetrical!
+
+- ## `lhs` JOIN `rhs`
+- ## Large LHS is more common
+- ## logs (growning) JOIN metadata (finite)
+- ## `lhs.hashJoin(rhs)` (tiny RHS)
+- ## `lhs.skewJoin(rhs)` (skewed RHS with hot keys)
+
+---
+
+# Joins in Scio
+
+--
+```scala
+// 2-way
+for {
+  b &lt;- bs
+  a &lt;- as
+} yield (key, (a, b))
+```
+
+--
+
+```scala
+// 3-way
+for {
+  c &lt;- cs
+  b &lt;- bs
+  a &lt;- as
+} yield (key, (a, b, c))
+```
+
+--
+
+```scala
+// 4-way
+for {
+  d &lt;- ds
+  c &lt;- cs
+  b &lt;- bs
+  a &lt;- as
+} yield (key, (a, b, c, d))
+```
+--
+
+Favors large LHS, further inside the loop == fewer concatenations
+
+---
+
+# Hash join
+
+- ## Large LHS and tiny RHS that fits in memory
+- ## RHS as a map side input, replicated to all workers
+- ## No shuffle for LHS
+
+--
+
+For LHS of size `X` and RHS of size `Y`
+
+Shuffle cost `Y * N` instead of `X + Y` for `N` workers
+
+---
+
+# Skew join
+
+- ## Large skewed (some hot keys) LHS and small RHS
+- ## 1st pass over LHS with CountMinSketch => key frequency histogram
+- ## Split LHS &amp; RHS into hot &amp; chill
+- ## (hot LHS hash join hot RHS) union (chill LHS regular join chill RHS)
+
+--
+
+No shuffle for hot LHS, tiny hot RHS fits in memory
+
+---
+
+class: center, middle
+# The End
+## Thanks for Joining
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>
