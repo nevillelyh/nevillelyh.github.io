@@ -52,9 +52,6 @@ Das Keyboard Shredder            </a>
         </div>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                         <li><a href="../pages/about-me.html">
-                             About&nbsp;Me
-                          </a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li><a href="../archives.html"><i class="fa fa-th-list"></i><span class="icon-label">Archives</span></a></li>
@@ -68,6 +65,33 @@ Das Keyboard Shredder            </a>
 <div class="container">
     <div class="row">
         <div class="col-sm-9">
+            <article>
+                <h2><a href="../for-comprehensions.html">For&nbsp;comprehensions</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2017-03-28T12:23:00-04:00"> Tue 28 March 2017</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="../category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="../tag/scala.html">scala</a>
+        /
+	<a href="../tag/fp.html">fp</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>I made these <a href="/slides/for-yield.html">slides</a> on for comprehension a while ago but forgot to post them but here you&nbsp;go.</p>
+<iframe src="/slides/for-yield.html" width="800" height="450"></iframe>
+                    <a class="btn btn-default btn-xs" href="../for-comprehensions.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
             <article>
                 <h2><a href="../scio-at-scala-by-the-bay.html">Scio at Scala by the&nbsp;Bay</a></h2>
                     <div class="well well-sm">
@@ -91,7 +115,7 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on ...</p>
+                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on …</p>
                     <a class="btn btn-default btn-xs" href="../scio-at-scala-by-the-bay.html">more ...</a>
                 </div>
             </article>
@@ -154,7 +178,7 @@ Das Keyboard Shredder            </a>
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/rRPUB4cSAvgF8M" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
 
 <p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/from-stream-to-recommendation-using-apache-beam-with-cloud-pubsub-and-cloud-dataflow" title="From stream to recommendation using apache beam with cloud pubsub and cloud dataflow" target="_blank">From stream to recommendation using apache beam with cloud pubsub and cloud dataflow</a> </strong> from <strong><a href="//www.slideshare.net/sinisalyh" target="_blank">Neville Li</a></strong> </div></p>
-<p>The first half of the talk covers our experiments ...</p>
+<p>The first half of the talk covers our experiments …</p>
                     <a class="btn btn-default btn-xs" href="../scio-a-scala-api-for-google-cloud-dataflow.html">more ...</a>
                 </div>
             </article>
@@ -304,7 +328,7 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I recently had some fun building <a href="https://github.com/nevillelyh/parquet-avro-extra">parquet-avro-extra</a>, an add-on module for <a href="https://github.com/Parquet/parquet-mr/tree/master/parquet-avro">parquet-avro</a> using <a href="http://scalamacros.org/">Scala macros</a>. I did it mainly to learn Scala macros but also to make it easier to use <a href="http://parquet.incubator.apache.org/">Parquet</a> with <a href="http://avro.apache.org/">Avro</a> in a data&nbsp;pipeline.</p>
 <h2>Parquet and&nbsp;Avro</h2>
-<p>Parquet is a columnar storage system designed for <span class="caps">HDFS ...</span></p>
+<p>Parquet is a columnar storage system designed for <span class="caps">HDFS …</span></p>
                     <a class="btn btn-default btn-xs" href="../fun-with-macros-and-parquet-avro.html">more ...</a>
                 </div>
             </article>
@@ -331,37 +355,8 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p><em>This article was written in collaboration with <a href="https://www.hakkalabs.co">Hakka Labs</a> (<a href="https://www.hakkalabs.co/articles/three-reasons-data-eng-learn-scala">original link</a>)</em></p>
-<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing ...</p>
+<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing …</p>
                     <a class="btn btn-default btn-xs" href="../three-reasons-a-data-engineer-should-learn-scala.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
-            <article>
-                <h2><a href="../scala-workshop.html">Scala&nbsp;Workshop</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2014-10-04T21:52:00-04:00"> Sat 04 October 2014</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="../category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="../tag/fp.html">fp</a>
-        /
-	<a href="../tag/scala.html">scala</a>
-        /
-	<a href="../tag/data.html">data</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>While there are many Scala tutorials and books available, very few of them focus on big data. I did a couple of workshops at Spotify focusing on these areas and here are the <a href="/slides/workshop.html">slides</a>.</p>
-<iframe src="/slides/workshop.html" width="800" height="450"></iframe>
-                    <a class="btn btn-default btn-xs" href="../scala-workshop.html">more ...</a>
                 </div>
             </article>
             <hr/>
@@ -406,6 +401,11 @@ Software engineer at Spotify, part-time coder, full-time keyboard shredder.
             <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="../for-comprehensions.html">
+                            For&nbsp;comprehensions
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="../scio-at-scala-by-the-bay.html">
                             Scio at Scala by the&nbsp;Bay
                         </a>
@@ -423,11 +423,6 @@ Software engineer at Spotify, part-time coder, full-time keyboard shredder.
                     <li class="list-group-item">
                         <a href="../scala-data-pipelines-spotify.html">
                             Scala Data Pipelines @&nbsp;Spotify
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="../primitives.html">
-                            Primitives
                         </a>
                     </li>
                 </ul>
@@ -460,7 +455,7 @@ Software engineer at Spotify, part-time coder, full-time keyboard shredder.
    <div class="container">
       <hr>
       <div class="row">
-         <div class="col-xs-10">&copy; 2016 Neville Li
+         <div class="col-xs-10">&copy; 2017 Neville Li
             &middot; Powered by <a href="https://github.com/DandyDev/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
             <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
             <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>              <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>
