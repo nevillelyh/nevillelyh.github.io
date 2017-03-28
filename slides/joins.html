@@ -187,6 +187,7 @@ lhs.flatMap(l => rhs.map(r => (key, (l, r))))
 equals
 
 ```scala
+val lhs = Iterable(l1, l2, l3, l4, l5, ...)
 rhs.map(r => (key, l1, r)) ++ rhs.map(r => (key, l2, r)) ++ rhs.map(r => (key, l3, r)) ++
 rhs.map(r => (key, l4, r)) ++ rhs.map(r => (key, l5, r)) ++ ...
 ```
@@ -197,15 +198,15 @@ http://www.lyh.me/slides/for-yield.html
 
 # Concat vs map
 
-## For `lhs` of size 1,000,000 and `rhs` of size 1
+## For LHS of size 1,000,000 and RHS of size 1
 
 - ### 1,000,000 concatenations of map over `Iterable`s of 1 element
 
 --
 
-## For `lhs` of size 1 and `rhs` of size 1,000,000:
+## For LHS of size 1 and RHS of size 1,000,000:
 
-- ### no concatenation, map over one large `Iterable` (lazy)
+- ### no concatenation, map over one large `Iterable` (applied lazily)
 
 ---
 
@@ -214,8 +215,8 @@ http://www.lyh.me/slides/for-yield.html
 - ## `lhs` JOIN `rhs`
 - ## Large LHS is more common
 - ## logs (growning) JOIN metadata (finite)
-- ## `lhs.hashJoin(rhs)` (tiny `rhs`)
-- ## `lhs.skewJoin(rhs)` (skewed `lhs` with hot keys)
+- ## `lhs.hashJoin(rhs)` (tiny RHS)
+- ## `lhs.skewJoin(rhs)` (skewed RHS with hot keys)
 
 ---
 
@@ -252,8 +253,36 @@ for {
   a &lt;- as
 } yield (key, (a, b, c, d))
 ```
+--
 
-### LHS further inside the loop == less concatenation
+Favors large LHS, further inside the loop == fewer concatenations
+
+---
+
+# Hash join
+
+- ## Large LHS and tiny RHS that fits in memory
+- ## RHS as a map side input, replicated to all workers
+- ## No shuffle for LHS
+
+--
+
+For LHS of size `X` and RHS of size `Y`
+
+Shuffle cost `Y * N` instead of `X + Y` for `N` workers
+
+---
+
+# Skew join
+
+- ## Large skewed (some hot keys) LHS and small RHS
+- ## 1st pass over LHS with CountMinSketch => key frequency histogram
+- ## Split LHS &amp; RHS into hot &amp; chill
+- ## (hot LHS hash join hot RHS) union (chill LHS regular join chill RHS)
+
+--
+
+No shuffle for hot LHS, tiny hot RHS fits in memory
 
 ---
 
