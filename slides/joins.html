@@ -129,6 +129,33 @@ def reduce(key: Long, values: Iterable[Either[String, Double]]): Iterable[(Long,
 
 ---
 
+# That's a cogroup
+
+- ### LHS: `[K -> V1, K -> V2, K -> V3, ...]`
+- ### RHS: `[K -> W1, K -> W2, K -> W3, ...]`
+
+--
+
+```scala
+def cogroup[K, V, W](lhs: Iterable[(K, V)], rhs: Iterable[(K, W)]): Iterable[(K, Iterable[V], Iterable[W])]
+```
+
+- ### CoGrouped: `K, [V1, V2, V3, ...], [W1, W2, W3, ...]`
+
+--
+
+```scala
+val lhs: Iterable[(K, V)] = ...
+val rhs: Iterable[(K, W)] = ...
+cogroup(lhs, rhs).flatMap { case (key, lValues, rValues) =>
+  for (l &lt;- lValues; r &lt;- rValues) yield (key, l, r)
+}
+```
+
+All joins are implemented with cogroup
+
+---
+
 # Cartesian product
 
 - ### `(K, V)` JOIN `(K, W)`
