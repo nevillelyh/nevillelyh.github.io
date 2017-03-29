@@ -155,7 +155,7 @@ val key: K = ...
 val v1s: Iterable[V1] = ...  // m elements
 val v2s: Iterable[V2] = ...  // n elements
 val v3s: Iterable[V3] = ...  // o elements
-for (v1 &lt;- v1s; v2 &lt;- v2s; v3 &lt;- v3s) yield (key, (v1, v2, v3))  // O(mno)
+for (v1 &lt;- v1s; v2 &lt;- v2s; v3 &lt;- v3s) yield (key, (v1, v2, v3))
 ```
 
 --
