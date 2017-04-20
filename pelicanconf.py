@@ -52,7 +52,7 @@ TYPOGRIFY = True
 
 # pelican-bootstrap3
 ABOUT_ME = '''
-Software engineer at Spotify, part-time coder, full-time keyboard shredder.
+Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, das keyboard shredder, author of <a href="https://github.com/spotify/scio">Scio</a>
 '''
 # AVATAR = ('https://en.gravatar.com/userimage/'
 #           '617848/35e202c9eea4168a35703a4c40f57473.jpg')
