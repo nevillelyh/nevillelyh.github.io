@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
 <head>
-    <title>Light Table - Das Keyboard Shredder</title>
+    <title>Scio at Philly ETE - Das Keyboard Shredder</title>
     <!-- Using the latest rendering mode for IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
@@ -9,22 +9,22 @@
 
 
 
-<link rel="canonical" href="./light-table.html">
+<link rel="canonical" href="./scio-at-philly-ete.html">
 
         <meta name="author" content="Neville Li" />
-        <meta name="keywords" content="clojure,intellij-idea,light-table" />
-        <meta name="description" content="I recently picked up Light Table for Clojure development and liked it. Form evaluation works out of the box and indentation is better than that in La Clojure plugin for IntelliJ IDEA. I particularly like the idea of command bar, which allows you to search for Light Table commands by …" />
+        <meta name="keywords" content="data,scala,scio" />
+        <meta name="description" content="It’s been another 6 months since my talk about Scio at Scala by the Bay. We’ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within Spotify. A lot of other companies are using and contributing to it …" />
 
         <meta property="og:site_name" content="Das Keyboard Shredder" />
         <meta property="og:type" content="article"/>
-        <meta property="og:title" content="Light Table"/>
-        <meta property="og:url" content="./light-table.html"/>
-        <meta property="og:description" content="I recently picked up Light Table for Clojure development and liked it. Form evaluation works out of the box and indentation is better than that in La Clojure plugin for IntelliJ IDEA. I particularly like the idea of command bar, which allows you to search for Light Table commands by …"/>
-        <meta property="article:published_time" content="2014-07-28" />
+        <meta property="og:title" content="Scio at Philly ETE"/>
+        <meta property="og:url" content="./scio-at-philly-ete.html"/>
+        <meta property="og:description" content="It’s been another 6 months since my talk about Scio at Scala by the Bay. We’ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within Spotify. A lot of other companies are using and contributing to it …"/>
+        <meta property="article:published_time" content="2017-04-20" />
             <meta property="article:section" content="code" />
-            <meta property="article:tag" content="clojure" />
-            <meta property="article:tag" content="intellij-idea" />
-            <meta property="article:tag" content="light-table" />
+            <meta property="article:tag" content="data" />
+            <meta property="article:tag" content="scala" />
+            <meta property="article:tag" content="scio" />
             <meta property="article:author" content="Neville Li" />
 
 
@@ -78,10 +78,10 @@ Das Keyboard Shredder            </a>
         <article>
             <header class="page-header">
                 <h1>
-                    <a href="./light-table.html"
+                    <a href="./scio-at-philly-ete.html"
                        rel="bookmark"
-                       title="Permalink to Light Table">
-                        Light&nbsp;Table
+                       title="Permalink to Scio at Philly ETE">
+                        Scio at Philly <span class="caps">ETE</span>
                     </a>
                 </h1>
             </header>
@@ -91,7 +91,7 @@ Das Keyboard Shredder            </a>
 <footer class="post-info">
     <span class="label label-default">Date</span>
     <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2014-07-28T00:01:00-04:00"> Mon 28 July 2014</time>
+        <i class="fa fa-calendar"></i><time datetime="2017-04-20T11:12:00-04:00"> Thu 20 April 2017</time>
     </span>
 
 
@@ -101,31 +101,37 @@ Das Keyboard Shredder            </a>
 
 
 <span class="label label-default">Tags</span>
-	<a href="./tag/clojure.html">clojure</a>
+	<a href="./tag/data.html">data</a>
         /
-	<a href="./tag/intellij-idea.html">intellij-idea</a>
+	<a href="./tag/scala.html">scala</a>
         /
-	<a href="./tag/light-table.html">light-table</a>
+	<a href="./tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
                 </div>
-                <p>I recently picked up <a href="http://www.lighttable.com/">Light Table</a> for <a href="http://clojure.org/">Clojure</a> development and liked it. Form evaluation works out of the box and indentation is better than that in <a href="http://plugins.jetbrains.com/plugin/?id=4050">La Clojure</a> plugin for <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a>.</p>
-<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by name and execute them quickly. I was already used to <span class="caps">IDEA</span>&#8217;s key map though (<code>Mac OS X 10.5+</code> which is more natural to Mac users than the default <code>Mac OS X</code>), and wanted something similar. The setting files are in Clojure so it&#8217;s easy to customize. This is what I got so far for <code>user.keymap</code>:</p>
-<div class="highlight"><pre><span></span><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
+                <p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other <a href="https://cloud.google.com/solutions/big-data/">Google Cloud Big Data</a> products instead of Hadoop, Scalding and&nbsp;Hive.</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Spotify data university round 3 <span class="amp">&amp;</span> 1st time covering Scio, <a href="https://twitter.com/ApacheBeam">@ApacheBeam</a> <span class="amp">&amp;</span> <a href="https://twitter.com/GCPBigData">@GCPBigData</a> 👋 Hadoop, <span class="caps">HDFS</span>, M/R, <span class="caps">YARN</span> 🍾 batch + streaming <a href="https://t.co/1gWIEbN0mW">pic.twitter.com/1gWIEbN0mW</a></p>&mdash; Neville Li (@sinisa_lyh) <a href="https://twitter.com/sinisa_lyh/status/846549633367265281">March 28, 2017</a></blockquote>
 
-     <span class="ss">:editor</span> <span class="p">{</span><span class="s">&quot;alt-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.watch-selection</span><span class="p">]</span>
-              <span class="s">&quot;alt-shift-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.unwatch</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-alt-i&quot;</span> <span class="p">[</span><span class="ss">:smart-indent-selection</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-alt-c&quot;</span> <span class="p">[</span><span class="ss">:toggle-console</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-shift-j&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.joinLines</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-d&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.duplicateLine</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-shift-up&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineUp</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-shift-down&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineDown</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-/&quot;</span> <span class="p">[</span><span class="ss">:toggle-comment-selection</span> <span class="ss">:editor.line-down</span><span class="p">]}}}</span>
-</pre></div>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
+<p>And here&#8217;s a list of some notable improvements in&nbsp;Scio.</p>
+<ul>
+<li>Master branch is now based on <a href="https://beam.apache.org/">Apache&nbsp;Beam</a></li>
+<li>Graduate type safe BigQuery <span class="caps">API</span> form experimental to&nbsp;stable</li>
+<li><a href="https://github.com/spotify/sparkey-java">Sparkey</a> side input&nbsp;support</li>
+<li><a href="https://www.tensorflow.org/">TensorFlow</a> TFRecord file <span class="caps">IO</span></li>
+<li><a href="https://cloud.google.com/pubsub/">Cloud Pub/Sub</a> attributes&nbsp;support</li>
+<li>Named transformations for streaming&nbsp;update</li>
+<li>Safe-guard against malformed tests and better error&nbsp;messages</li>
+<li>Flexible custom <span class="caps">IO</span>&nbsp;wiring</li>
+<li>KryoRegistrar for custom Kryo&nbsp;serialization</li>
+<li>Table description for type-safe&nbsp;BigQuery</li>
+<li>Lots of performance improvements and bug&nbsp;fixes</li>
+</ul>
+<p>I talked about Scio at <a href="http://2017.phillyemergingtech.com/">Philly <span class="caps">ETE</span></a> last week and here are the&nbsp;slides.</p>
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/15xefjkymEWvVV" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
 
-<p>Apart from these, I found myself using <code>"pmeta-enter" [:eval-editor-form]</code> and <code>"ctrl-d" [:editor.doc.toggle]</code> most when writing Clojure code. After all they are probably the most essential ones no matter what editor you use&nbsp;:)</p>
+<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scio-moving-to-google-cloud-a-spotify-story" title=" Scio - Moving to Google Cloud, A Spotify Story" target="_blank"> Scio - Moving to Google Cloud, A Spotify Story</a> </strong> from <strong><a target="_blank" href="https://www.slideshare.net/sinisalyh">Neville Li</a></strong> </div></p>
             </div>
             <!-- /.entry-content -->
     <hr />
@@ -145,8 +151,8 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'light-table';
-                var disqus_url = './light-table.html';
+                    var disqus_identifier = 'scio-at-philly-ete';
+                var disqus_url = './scio-at-philly-ete.html';
 
             var disqus_config = function () {
                 this.language = "en";
