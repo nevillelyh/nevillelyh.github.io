@@ -88,7 +88,36 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>In this post we&#8217;re going to take a closer look at Scala implicits and various use&nbsp;cases.</p>
 <h2>Basics</h2>
-<p>Let&#8217;s first look at the basics. There&#8217;re 3 main basic uses of implicits, as an argument, as a conversion method, and enhancing an existing class, a.k.a. the …</p>
+<p>Let&#8217;s first look at the basics. There&#8217;re 3 main basic uses of implicits, as an argument, as a conversion method, and enhancing an existing class, a.k.a. the &#8220;Pimp My Library&#8221;&nbsp;pattern.</p>
+<h3>Implicit&nbsp;arguments</h3>
+<p>Suppose we have a basic function like&nbsp;this.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">plus</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">plus</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="c1">// =&gt; 11</span>
+</pre></div>
+
+
+<p>We can add a second argument and make it a curried&nbsp;function.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">plus</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)(</span><span class="n">y</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="n">plus</span><span class="o">(</span><span class="mi">10</span><span class="o">)(</span><span class="mi">1</span><span class="o">)</span> <span class="c1">// =&gt; 11</span>
+</pre></div>
+
+
+<p>We can then make the second argument implicit and supply it via an <code>implicit val</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">plus</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">one</span> <span class="k">=</span> <span class="mi">1</span>
+<span class="n">plus</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="c1">// =&gt; 11</span>
+</pre></div>
+
+
+<p>Since <code>plus</code> needs an implicit argument of type <code>Int</code> and there happens to be one in the scope, <code>one</code> is applied automatically. However it won&#8217;t work if there are multiple <code>implicit val</code>s.</p>
+<div class="highlight"><pre><span></span><span class="k">implicit</span> <span class="k">val</span> <span class="n">one</span> <span class="k">=</span> <span class="mi">1</span>
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">two</span> <span class="k">=</span> <span class="mi">2</span>
+<span class="n">plus</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="c1">// =&gt; ambiguous implicit values</span>
+</pre></div>
+
+
+<p>This example isn&#8217;t very interesting and one can usually use argument with a default value instead. However implicit arguments are handy for decoupling behavior …</p>
                     <a class="btn btn-default btn-xs" href="../implicits.html">more ...</a>
                 </div>
             </article>

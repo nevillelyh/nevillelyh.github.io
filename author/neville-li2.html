@@ -122,7 +122,15 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I recently had some fun building <a href="https://github.com/nevillelyh/parquet-avro-extra">parquet-avro-extra</a>, an add-on module for <a href="https://github.com/Parquet/parquet-mr/tree/master/parquet-avro">parquet-avro</a> using <a href="http://scalamacros.org/">Scala macros</a>. I did it mainly to learn Scala macros but also to make it easier to use <a href="http://parquet.incubator.apache.org/">Parquet</a> with <a href="http://avro.apache.org/">Avro</a> in a data&nbsp;pipeline.</p>
 <h2>Parquet and&nbsp;Avro</h2>
-<p>Parquet is a columnar storage system designed for <span class="caps">HDFS …</span></p>
+<p>Parquet is a columnar storage system designed for <span class="caps">HDFS</span>. It offers some nice improvements over row-major systems including better compression and less I/O with column projection and predicate pushdown. Avro is a data serialization system that enables type-safe access to structured data with complex schema. The <code>parquet-avro</code> module makes it possible to store data in Parquet format on disk and process them as Avro objects inside a <span class="caps">JVM</span> data pipeline like <a href="https://github.com/twitter/scalding">Scalding</a> or <a href="http://spark.apache.org/">Spark</a>.</p>
+<h2>Projection</h2>
+<p>Parquet allows reading only a subset of columns via projection. Here&#8217;s an Scalding <a href="https://github.com/epishkin/scalding/tree/parquet_avro/scalding-parquet">example</a> from <a href="http://www.tapad.com/">Tapad</a>.</p>
+<div class="highlight"><pre><span></span><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="s">&quot;field1&quot;</span><span class="o">,</span> <span class="s">&quot;field2.field2a&quot;</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Note that fields specifications are strings even though the <span class="caps">API</span> has access to Avro type <code>Signal</code> which has strongly typed getter&nbsp;methods.</p>
+<p>This is slightly counter-intuitive since most Scala developers are used to transformations like <code>pipe.map(_.getField)</code>. It&#8217;s however can be easily solved with macro since the syntax tree of is accessible. A modified version has signature of …</p>
                     <a class="btn btn-default btn-xs" href="../fun-with-macros-and-parquet-avro.html">more ...</a>
                 </div>
             </article>
@@ -149,7 +157,16 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p><em>This article was written in collaboration with <a href="https://www.hakkalabs.co">Hakka Labs</a> (<a href="https://www.hakkalabs.co/articles/three-reasons-data-eng-learn-scala">original link</a>)</em></p>
-<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing …</p>
+<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing tools and libraries, while some praise its elegant syntax, powerful type system, and good fit for domain-specific&nbsp;languages.</p>
+<p>However most of the discussions seem based on experiences building production backend or web systems where there are a lot of other options already. There are mature, battle tested options like Java, Erlang or even <span class="caps">PHP</span>, and there are Go, node.js, or Python for those who are more adventurous or prefer agility over&nbsp;performance.</p>
+<p>Here I want to argue that there&#8217;s a best tool for every job, and Scala shines for data processing and machine learning, for the following&nbsp;reasons:</p>
+<ul>
+<li>good balance between productivity and&nbsp;performance</li>
+<li>integration with big data&nbsp;ecosystem</li>
+<li>functional&nbsp;paradigm</li>
+</ul>
+<h2>Productivity without sacrificing&nbsp;performance</h2>
+<p>In the big data <span class="amp">&amp;</span> machine learning world where most developers are from Python/R/Matlab background, Scala&#8217;s syntax, or the subset needed for the domain, is a lot less intimidating than that …</p>
                     <a class="btn btn-default btn-xs" href="../three-reasons-a-data-engineer-should-learn-scala.html">more ...</a>
                 </div>
             </article>
@@ -205,7 +222,29 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>We use <a href="http://cassandra.apache.org/">Cassandra</a> extensively <a href="http://www.slideshare.net/JimmyMrdell/playlists-at-spotify-cassandra-summit-london-2013?related=1">at work</a>, and up till recently we&#8217;ve been using mostly Cassandra 1.2 with <a href="https://github.com/Netflix/astyanax">Astyanax</a> and <a href="https://thrift.apache.org/">Thrift</a> protocol in Java applications. Very recently we started adopting Cassandra 2.0 with <span class="caps">CQL</span>, <a href="https://github.com/datastax/java-driver">DataStax Java Driver</a> and binary&nbsp;protocol.</p>
-<p>While one should move to <span class="caps">CQL</span> schema to …</p>
+<p>While one should move to <span class="caps">CQL</span> schema to take full advantage of the new protocol and storage engine, it&#8217;s still possible to use <span class="caps">CQL</span> and the new driver on existing clusters. Say we have a legacy column family with <code>UTF8Type</code> for row/column keys and <code>BytesType</code> for values, it would look like this in <code>cassandra-cli</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">create</span> <span class="k">column</span> <span class="n">family</span> <span class="k">data</span>
+  <span class="k">with</span> <span class="n">column_type</span> <span class="o">=</span> <span class="s1">&#39;Standard&#39;</span>
+  <span class="k">and</span> <span class="n">comparator</span> <span class="o">=</span> <span class="s1">&#39;UTF8Type&#39;</span>
+  <span class="k">and</span> <span class="n">default_validation_class</span> <span class="o">=</span> <span class="s1">&#39;BytesType&#39;</span>
+  <span class="k">and</span> <span class="n">key_validation_class</span> <span class="o">=</span> <span class="s1">&#39;UTF8Type&#39;</span><span class="p">;</span>
+</pre></div>
+
+
+<p>And this in <code>cqlsh</code> after setting <code>start_native_transport: true</code> in <code>cassandra.yaml</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">data</span> <span class="p">(</span>
+  <span class="k">key</span> <span class="nb">text</span><span class="p">,</span>
+  <span class="n">column1</span> <span class="nb">text</span><span class="p">,</span>
+  <span class="n">value</span> <span class="nb">blob</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="k">key</span><span class="p">,</span> <span class="n">column1</span><span class="p">)</span>
+<span class="p">)</span> <span class="k">WITH</span> <span class="n">COMPACT</span> <span class="k">STORAGE</span><span class="p">;</span>
+</pre></div>
+
+
+<p>In this table, <code>key</code> and <code>column1</code> corresponds to row and column keys in the legacy column family and <code>value</code> corresponds to column&nbsp;value.</p>
+<p>Queries to look up a column value, an entire row, and selected columns in a row would look like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">value</span> <span class="k">FROM</span> <span class="n">mykeyspace</span><span class="p">.</span><span class="k">data</span> <span class="k">WHERE</span> <span class="k">key</span> <span class="o">=</span> <span class="s1">&#39;rowkey&#39;</span> <span class="k">AND</span> <span class="n">column1</span> <span class="o">=</span> <span class="s1">&#39;colkey&#39;</span><span class="p">;</span>
+<span class="k">SELECT</span> <span class="n">column1</span><span class="p">,</span> <span class="n">value</span> <span class="k">FROM</span> <span class="n">mykeyspace …</span></pre></div>
                     <a class="btn btn-default btn-xs" href="../using-cql-with-legacy-column-families.html">more ...</a>
                 </div>
             </article>
@@ -234,7 +273,9 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I&#8217;ve been using my current <a href="../dotfiles.html">dotfiles</a> setup for a while and felt it&#8217;s time to freshen up. I focused on updating the look and feel of Vim and tmux this&nbsp;round.</p>
-<p>First I switched to <a href="https://github.com/tomasr/molokai">molokai</a> color theme for Vim, <a href="http://macromates.com/">TextMate</a> (monokai) and <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a> (using <a href="https://github.com/y3sh/Intellij-Colors-Sublime-Monokai">this</a>). I …</p>
+<p>First I switched to <a href="https://github.com/tomasr/molokai">molokai</a> color theme for Vim, <a href="http://macromates.com/">TextMate</a> (monokai) and <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a> (using <a href="https://github.com/y3sh/Intellij-Colors-Sublime-Monokai">this</a>). I guess I grew tired of the old trusted <a href="http://ethanschoonover.com/solarized">solarized</a>, plus with my new MacBook Pro 13&#8221; at highest resolution, it just doesn&#8217;t feel sharp&nbsp;enough.</p>
+<p>The <a href="https://github.com/Lokaltog/vim-powerline">vim-powerline</a> plugin I was using is being deprecated and replaced by <a href="https://github.com/Lokaltog/powerline">powerline</a>, which supports vim, tmux, zsh, and many others. However it requires Python and I had trouble using it with some really old Vim versions at work. So instead I switched to a pure VimL plugin, <a href="https://github.com/bling/vim-airline">vim-airline</a>. Not surprisingly there&#8217;s a companion plugin, <a href="https://github.com/edkolev/tmuxline.vim">tmuxline</a> for tmux as well. Both have no extra dependencies which is a big plus for me since I use the same dotfiles on Mac, my Ubuntu Trusty destop at work, and many Debian Squeeze&nbsp;servers.</p>
+<p>I also updated a couple of other Vim plugins along the process, replacing <a href="https://github.com/garbas/vim-snipmate">vim-snipmate</a> with <a href="https://github.com/SirVer/ultisnips">ultisnips</a>, <a href="https://github.com/bitc/vim-bad-whitespace">vim-bad-whitespace</a> with <a href="https://github.com/ntpeters/vim-better-whitespace">vim-better-whitespace</a> (no pun intended), and adding <a href="https://github.com/airblade/vim-gitgutter">vim-gutter</a>. The biggest discovery is <a href="https://github.com/Lokaltog/vim-easymotion">vim-easymotion</a> though, perfect …</p>
                     <a class="btn btn-default btn-xs" href="../dotfiles-update.html">more ...</a>
                 </div>
             </article>
@@ -272,7 +313,9 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/haskell.html">haskell</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>I&#8217;m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong <span class="caps">CS</span> fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly …</p>
+                <div class="summary"><p>I&#8217;m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong <span class="caps">CS</span> fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly C/C++/Python many years ago. Over the course of the last three years at my current job I coded seven languages professionally, some out of interest and some necessity. I enjoyed the experience learning all these different things and want to share my experience here, what I learned from each one of them and how it helps me becoming a better&nbsp;engineer.</p>
+<h2>C</h2>
+<p>The first language I used seriously, apart from <span class="caps">LOGO</span> <span class="amp">&amp;</span> <span class="caps">BASIC</span> when I was a kid of course. It&#8217;s probably the closest thing one can get to the operating system and bare metal without dropping down to assembly (while you still can in C). It&#8217;s a simple language whose syntax served as the basis of many successors like C++ <span class="amp">&amp;</span> Java. It doesn&#8217;t offer any fancy features like <span class="caps">OOP</span> or namespaces, but rather depends on the developer&#8217;s skill for organizing large code base (think …</p>
                     <a class="btn btn-default btn-xs" href="../on-being-a-polyglot.html">more ...</a>
                 </div>
             </article>
@@ -300,7 +343,28 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scala.html">scala</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>One topic that came up a lot when optimizing Scala data applications is the performance of standard collections, or the hidden cost of temporary copies. The collections <span class="caps">API</span> is easy to learn and maps well to many Python concepts where a lot of data engineers are familiar with. But the …</p>
+                <div class="summary"><p>One topic that came up a lot when optimizing Scala data applications is the performance of standard collections, or the hidden cost of temporary copies. The collections <span class="caps">API</span> is easy to learn and maps well to many Python concepts where a lot of data engineers are familiar with. But the performance penalty can be pretty big when it&#8217;s repeated over millions of records in a <span class="caps">JVM</span> with limited&nbsp;heap.</p>
+<h2>Mapping&nbsp;values</h2>
+<p>Let&#8217;s take a look at one most naive example first, mapping the values of a <code>Map</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mi">2</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mi">3</span><span class="o">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">toList</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">t</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">_1</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">_2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)).</span><span class="n">toMap</span>
+</pre></div>
+
+
+<p>Looks simple enough but obviously not optimal. Two temporary <code>List[(String, Int)]</code> were created, one from <code>toList</code> and one from <code>map</code>. <code>map</code> also creates 3 copies of <code>(String, Int)</code>.</p>
+<p>There are a few commonly seen variations. These don&#8217;t create temporary collections but still key-value&nbsp;tuples.</p>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">((</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="n">m</span><span class="o">)</span> <span class="k">yield</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">}</span>
+</pre></div>
+
+
+<p>If one reads the <a href="http://www.scala-lang.org/api/2.10.4/index.html#scala.collection.immutable.Map">ScalaDoc</a> closely, there&#8217;s a <code>mapValues</code> method already and it probably is the shortest and most&nbsp;performant.</p>
+<div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">mapValues</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div>
+
+
+<h2>Java&nbsp;conversion</h2>
+<p>Similar problem exists …</p>
                     <a class="btn btn-default btn-xs" href="../how-many-copies.html">more ...</a>
                 </div>
             </article>
@@ -358,7 +422,22 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I recently picked up <a href="http://www.lighttable.com/">Light Table</a> for <a href="http://clojure.org/">Clojure</a> development and liked it. Form evaluation works out of the box and indentation is better than that in <a href="http://plugins.jetbrains.com/plugin/?id=4050">La Clojure</a> plugin for <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a>.</p>
-<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by …</p>
+<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by name and execute them quickly. I was already used to <span class="caps">IDEA</span>&#8217;s key map though (<code>Mac OS X 10.5+</code> which is more natural to Mac users than the default <code>Mac OS X</code>), and wanted something similar. The setting files are in Clojure so it&#8217;s easy to customize. This is what I got so far for <code>user.keymap</code>:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
+
+     <span class="ss">:editor</span> <span class="p">{</span><span class="s">&quot;alt-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.watch-selection</span><span class="p">]</span>
+              <span class="s">&quot;alt-shift-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.unwatch</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-alt-i&quot;</span> <span class="p">[</span><span class="ss">:smart-indent-selection</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-alt-c&quot;</span> <span class="p">[</span><span class="ss">:toggle-console</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-shift-j&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.joinLines</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-d&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.duplicateLine</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-shift-up&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineUp</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-shift-down&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineDown</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-/&quot;</span> <span class="p">[</span><span class="ss">:toggle-comment-selection</span> <span class="ss">:editor.line-down</span><span class="p">]}}}</span>
+</pre></div>
+
+
+<p>Apart from these, I found myself using <code>"pmeta-enter" [:eval-editor-form]</code> and <code>"ctrl-d" [:editor.doc.toggle]</code> most when writing Clojure code. After all they are probably the most essential ones no matter what editor you use&nbsp;:)</p>
                     <a class="btn btn-default btn-xs" href="../light-table.html">more ...</a>
                 </div>
             </article>

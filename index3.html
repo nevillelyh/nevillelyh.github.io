@@ -95,7 +95,16 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>My <a href="https://github.com/nevillelyh/dotfiles/">dotfiles</a> is probably the most copied code among my coworkers and today I will give a little break down of the code&nbsp;base.</p>
 <h2>zsh</h2>
-<p>I switched to <a href="http://www.zsh.org/">zsh</a> 3 years ago and never looked back. There&#8217;s also <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>, a framework for managing <span class="caps">ZSH</span> configuration. The features I found …</p>
+<p>I switched to <a href="http://www.zsh.org/">zsh</a> 3 years ago and never looked back. There&#8217;s also <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>, a framework for managing <span class="caps">ZSH</span> configuration. The features I found most useful&nbsp;are:</p>
+<ul>
+<li>Tab completion, including hostnames and&nbsp;arguments</li>
+<li>History across multiple&nbsp;sessions</li>
+<li>Plugins and&nbsp;themes</li>
+</ul>
+<p>My <a href="https://github.com/nevillelyh/dotfiles/blob/master/.zshrc">.zshrc</a> is mostly out of the box with some <a href="https://github.com/nevillelyh/dotfiles/blob/master/.dotfiles/zsh/zshrc">aliases</a> and a few plugins thrown in but decided to create my own <a href="https://github.com/nevillelyh/dotfiles/blob/master/.dotfiles/zsh/sinisa.zsh-theme">theme</a>. I use colors for hostname in the prompt, green for local and red for remote. I also tweaked <code>git</code> status a bit to show untracked files (red dots), unstaged (yellow) <span class="amp">&amp;</span> staged (green) changes, plus number stashed changes since that&#8217;s the one thing I keep doing and forgetting&nbsp;about.</p>
+<h2>git</h2>
+<p>I use <code>git</code> both for work and personal projects, plus contributing to open source projects on <a href="https://github.com/">GitHub</a>. My <a href="https://github.com/nevillelyh/dotfiles/blob/master/.gitconfig">.gitconfig</a> includes both a global <code>gitignore</code> file and a <code>templatedir</code>, which includes hooks for <a href="http://ctags.sourceforge.net/">ctags</a> and <a href="https://code.google.com/p/gerrit/">Gerrit</a>. The hooks are installed automatically for every&nbsp;repo.</p>
+<p>Since I type hundreds of <code>git</code> commands on a daily basis, I aliased <code>git</code> to simply <code>g …</code></p>
                     <a class="btn btn-default btn-xs" href="./dotfiles.html">more ...</a>
                 </div>
             </article>
@@ -123,7 +132,9 @@ Das Keyboard Shredder            </a>
 	<a href="./tag/virtualenv.html">virtualenv</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>Finally decided to jump (back) on the blogging bandwagon. This time I decided to use a static site generator, since that seems the cool thing to do these days, and found this <a href="https://www.staticgen.com/">site</a>. I want something in a language I know well, so Ruby or JavaScript is out. It should …</p>
+                <div class="summary"><p>Finally decided to jump (back) on the blogging bandwagon. This time I decided to use a static site generator, since that seems the cool thing to do these days, and found this <a href="https://www.staticgen.com/">site</a>. I want something in a language I know well, so Ruby or JavaScript is out. It should also be actively maintained, so Scala is out since <a href="https://github.com/wspringer/monkeyman">monkeyman</a>, the only entry there, seems abandoned. I eventually settled on <a href="http://blog.getpelican.com/">Pelican</a>, the top ranked Python&nbsp;framework.</p>
+<p>I set up a new <a href="http://virtualenv.readthedocs.org/en/latest/">virtualenv</a> with <a href="http://virtualenvwrapper.readthedocs.org/en/latest/">virtualenvwrapper</a> and also discovered <a href="https://github.com/kennethreitz/autoenv">autoenv</a> along the way. It was easy to get started with the <code>pelican-quickstart</code> script and in a few minutes I have a working site already. Next I went shopping for themes in <a href="https://github.com/getpelican/pelican-themes">pelican-themes</a> and picked <a href="https://github.com/DandyDev/pelican-bootstrap3.git">pelican-bootstrap3</a>. Turns out it doesn&#8217;t work with <a href="https://www.spotify.com">Spotify</a> icon yet so I forked the repo and made a quick <a href="https://github.com/DandyDev/pelican-bootstrap3/pull/115"><span class="caps">PR</span></a>.</p>
+<p>After some further tweaking with the settings I was pretty happy with the results. I went on to set up <a href="https://disqus.com/">Disqus</a> and <a href="http://www.google.com/analytics/">Google Analytics</a> for the site, and published it to my <a href="https://www.linode.com/">Linode</a> with <code>make ssh_upload</code>.</p>
                     <a class="btn btn-default btn-xs" href="./first-real-post-with-pelican.html">more ...</a>
                 </div>
             </article>

@@ -88,7 +88,26 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it …</p>
+                <div class="summary"><p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other <a href="https://cloud.google.com/solutions/big-data/">Google Cloud Big Data</a> products instead of Hadoop, Scalding and&nbsp;Hive.</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Spotify data university round 3 <span class="amp">&amp;</span> 1st time covering Scio, <a href="https://twitter.com/ApacheBeam">@ApacheBeam</a> <span class="amp">&amp;</span> <a href="https://twitter.com/GCPBigData">@GCPBigData</a> 👋 Hadoop, <span class="caps">HDFS</span>, M/R, <span class="caps">YARN</span> 🍾 batch + streaming <a href="https://t.co/1gWIEbN0mW">pic.twitter.com/1gWIEbN0mW</a></p>&mdash; Neville Li (@sinisa_lyh) <a href="https://twitter.com/sinisa_lyh/status/846549633367265281">March 28, 2017</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>And here&#8217;s a list of some notable improvements in&nbsp;Scio.</p>
+<ul>
+<li>Master branch is now based on <a href="https://beam.apache.org/">Apache&nbsp;Beam</a></li>
+<li>Graduate type safe BigQuery <span class="caps">API</span> form experimental to&nbsp;stable</li>
+<li><a href="https://github.com/spotify/sparkey-java">Sparkey</a> side input&nbsp;support</li>
+<li><a href="https://www.tensorflow.org/">TensorFlow</a> TFRecord file <span class="caps">IO</span></li>
+<li><a href="https://cloud.google.com/pubsub/">Cloud Pub/Sub</a> attributes&nbsp;support</li>
+<li>Named transformations for streaming&nbsp;update</li>
+<li>Safe-guard against malformed tests and better error&nbsp;messages</li>
+<li>Flexible custom <span class="caps">IO</span>&nbsp;wiring</li>
+<li>KryoRegistrar for custom Kryo&nbsp;serialization</li>
+<li>Table description for type-safe&nbsp;BigQuery</li>
+<li>Lots of performance improvements and bug&nbsp;fixes</li>
+</ul>
+<p>I talked about …</p>
                     <a class="btn btn-default btn-xs" href="../scio-at-philly-ete.html">more ...</a>
                 </div>
             </article>
@@ -116,7 +135,24 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on …</p>
+                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on <a href="http://cloud.google.com/">Google Cloud Platform</a>. We&#8217;ve also made 19 released and added tons of features and improvements. Below is a list of some notable&nbsp;ones.</p>
+<ul>
+<li>Interactive <span class="caps">REPL</span></li>
+<li>Type safe BigQuery macro improvements and <a href="https://github.com/spotify/scio-idea-plugin">Scio-<span class="caps">IDEA</span>-plugin</a></li>
+<li>BigQuery <a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/">standard <span class="caps">SQL</span> 2011 syntax</a>&nbsp;support</li>
+<li><span class="caps">HDFS</span> source and&nbsp;sink</li>
+<li>Avro file compression&nbsp;support</li>
+<li>Bigtable multi-table sink and utility for cluster&nbsp;scaling</li>
+<li>Protobuf file support and usability&nbsp;improvements</li>
+<li>Accumulator usability&nbsp;improvements</li>
+<li>End-to-end testing utilities and matchers&nbsp;improvements</li>
+<li>Join performance improvements and skewed&nbsp;join</li>
+<li>Metrics interface and&nbsp;enhancements</li>
+</ul>
+<p>I talked about Scio at <a href="http://scala.bythebay.io/">Scala by the Bay</a> last week and here are the&nbsp;slides.</p>
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/13tC6anQaZpNE8" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+
+<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scio-a-scala-api-for-google-cloud-dataflow-apache-beam" title="Scio - A Scala API for Google Cloud Dataflow &amp; Apache Beam" target="_blank">Scio - A Scala <span class="caps">API</span> for Google Cloud Dataflow <span class="amp">&amp;</span> Apache Beam</a> </strong> from <strong><a target="_blank" href="//www.slideshare.net/sinisalyh">Neville Li</a></strong> </div></p>
                     <a class="btn btn-default btn-xs" href="../scio-at-scala-by-the-bay.html">more ...</a>
                 </div>
             </article>
@@ -179,7 +215,7 @@ Das Keyboard Shredder            </a>
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/rRPUB4cSAvgF8M" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
 
 <p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/from-stream-to-recommendation-using-apache-beam-with-cloud-pubsub-and-cloud-dataflow" title="From stream to recommendation using apache beam with cloud pubsub and cloud dataflow" target="_blank">From stream to recommendation using apache beam with cloud pubsub and cloud dataflow</a> </strong> from <strong><a href="//www.slideshare.net/sinisalyh" target="_blank">Neville Li</a></strong> </div></p>
-<p>The first half of the talk covers our experiments …</p>
+<p>The first half of the talk covers our experiments with Dataflow and Pub/Sub for streaming application while the second half covers Scio and BigQuery for batch analysis and machine&nbsp;learning.</p>
                     <a class="btn btn-default btn-xs" href="../scio-a-scala-api-for-google-cloud-dataflow.html">more ...</a>
                 </div>
             </article>

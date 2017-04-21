@@ -88,7 +88,26 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it …</p>
+                <div class="summary"><p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other <a href="https://cloud.google.com/solutions/big-data/">Google Cloud Big Data</a> products instead of Hadoop, Scalding and&nbsp;Hive.</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Spotify data university round 3 <span class="amp">&amp;</span> 1st time covering Scio, <a href="https://twitter.com/ApacheBeam">@ApacheBeam</a> <span class="amp">&amp;</span> <a href="https://twitter.com/GCPBigData">@GCPBigData</a> 👋 Hadoop, <span class="caps">HDFS</span>, M/R, <span class="caps">YARN</span> 🍾 batch + streaming <a href="https://t.co/1gWIEbN0mW">pic.twitter.com/1gWIEbN0mW</a></p>&mdash; Neville Li (@sinisa_lyh) <a href="https://twitter.com/sinisa_lyh/status/846549633367265281">March 28, 2017</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>And here&#8217;s a list of some notable improvements in&nbsp;Scio.</p>
+<ul>
+<li>Master branch is now based on <a href="https://beam.apache.org/">Apache&nbsp;Beam</a></li>
+<li>Graduate type safe BigQuery <span class="caps">API</span> form experimental to&nbsp;stable</li>
+<li><a href="https://github.com/spotify/sparkey-java">Sparkey</a> side input&nbsp;support</li>
+<li><a href="https://www.tensorflow.org/">TensorFlow</a> TFRecord file <span class="caps">IO</span></li>
+<li><a href="https://cloud.google.com/pubsub/">Cloud Pub/Sub</a> attributes&nbsp;support</li>
+<li>Named transformations for streaming&nbsp;update</li>
+<li>Safe-guard against malformed tests and better error&nbsp;messages</li>
+<li>Flexible custom <span class="caps">IO</span>&nbsp;wiring</li>
+<li>KryoRegistrar for custom Kryo&nbsp;serialization</li>
+<li>Table description for type-safe&nbsp;BigQuery</li>
+<li>Lots of performance improvements and bug&nbsp;fixes</li>
+</ul>
+<p>I talked about …</p>
                     <a class="btn btn-default btn-xs" href="../scio-at-philly-ete.html">more ...</a>
                 </div>
             </article>
@@ -145,7 +164,24 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scio.html">scio</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on …</p>
+                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on <a href="http://cloud.google.com/">Google Cloud Platform</a>. We&#8217;ve also made 19 released and added tons of features and improvements. Below is a list of some notable&nbsp;ones.</p>
+<ul>
+<li>Interactive <span class="caps">REPL</span></li>
+<li>Type safe BigQuery macro improvements and <a href="https://github.com/spotify/scio-idea-plugin">Scio-<span class="caps">IDEA</span>-plugin</a></li>
+<li>BigQuery <a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/">standard <span class="caps">SQL</span> 2011 syntax</a>&nbsp;support</li>
+<li><span class="caps">HDFS</span> source and&nbsp;sink</li>
+<li>Avro file compression&nbsp;support</li>
+<li>Bigtable multi-table sink and utility for cluster&nbsp;scaling</li>
+<li>Protobuf file support and usability&nbsp;improvements</li>
+<li>Accumulator usability&nbsp;improvements</li>
+<li>End-to-end testing utilities and matchers&nbsp;improvements</li>
+<li>Join performance improvements and skewed&nbsp;join</li>
+<li>Metrics interface and&nbsp;enhancements</li>
+</ul>
+<p>I talked about Scio at <a href="http://scala.bythebay.io/">Scala by the Bay</a> last week and here are the&nbsp;slides.</p>
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/13tC6anQaZpNE8" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+
+<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scio-a-scala-api-for-google-cloud-dataflow-apache-beam" title="Scio - A Scala API for Google Cloud Dataflow &amp; Apache Beam" target="_blank">Scio - A Scala <span class="caps">API</span> for Google Cloud Dataflow <span class="amp">&amp;</span> Apache Beam</a> </strong> from <strong><a target="_blank" href="//www.slideshare.net/sinisalyh">Neville Li</a></strong> </div></p>
                     <a class="btn btn-default btn-xs" href="../scio-at-scala-by-the-bay.html">more ...</a>
                 </div>
             </article>
@@ -208,7 +244,7 @@ Das Keyboard Shredder            </a>
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/rRPUB4cSAvgF8M" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
 
 <p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/from-stream-to-recommendation-using-apache-beam-with-cloud-pubsub-and-cloud-dataflow" title="From stream to recommendation using apache beam with cloud pubsub and cloud dataflow" target="_blank">From stream to recommendation using apache beam with cloud pubsub and cloud dataflow</a> </strong> from <strong><a href="//www.slideshare.net/sinisalyh" target="_blank">Neville Li</a></strong> </div></p>
-<p>The first half of the talk covers our experiments …</p>
+<p>The first half of the talk covers our experiments with Dataflow and Pub/Sub for streaming application while the second half covers Scio and BigQuery for batch analysis and machine&nbsp;learning.</p>
                     <a class="btn btn-default btn-xs" href="../scio-a-scala-api-for-google-cloud-dataflow.html">more ...</a>
                 </div>
             </article>
@@ -266,7 +302,16 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p><em>This article was written in collaboration with <a href="https://www.hakkalabs.co">Hakka Labs</a> (<a href="https://www.hakkalabs.co/articles/three-reasons-data-eng-learn-scala">original link</a>)</em></p>
-<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing …</p>
+<p>There has been a lot of debate over Scala lately, including criticisms like <a href="http://java.dzone.com/articles/i-dont-scala">this</a>, <a href="http://overwatering.org/blog/2013/12/scala-1-star-would-not-program-again/">this</a>, <a href="http://www.infoq.com/news/2011/11/yammer-scala">this</a>, and defenses like <a href="http://blog.gridgainsystems.com/in-defense-of-scala-response-to-i-dont-like-scala/">this</a> and <a href="http://blog.gridgainsystems.com/in-defense-of-scala-part-2/">this</a>. Most of the criticisms seem to focus on the language&#8217;s complexity, performance, and integration with existing tools and libraries, while some praise its elegant syntax, powerful type system, and good fit for domain-specific&nbsp;languages.</p>
+<p>However most of the discussions seem based on experiences building production backend or web systems where there are a lot of other options already. There are mature, battle tested options like Java, Erlang or even <span class="caps">PHP</span>, and there are Go, node.js, or Python for those who are more adventurous or prefer agility over&nbsp;performance.</p>
+<p>Here I want to argue that there&#8217;s a best tool for every job, and Scala shines for data processing and machine learning, for the following&nbsp;reasons:</p>
+<ul>
+<li>good balance between productivity and&nbsp;performance</li>
+<li>integration with big data&nbsp;ecosystem</li>
+<li>functional&nbsp;paradigm</li>
+</ul>
+<h2>Productivity without sacrificing&nbsp;performance</h2>
+<p>In the big data <span class="amp">&amp;</span> machine learning world where most developers are from Python/R/Matlab background, Scala&#8217;s syntax, or the subset needed for the domain, is a lot less intimidating than that …</p>
                     <a class="btn btn-default btn-xs" href="../three-reasons-a-data-engineer-should-learn-scala.html">more ...</a>
                 </div>
             </article>
@@ -323,7 +368,28 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/scala.html">scala</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>One topic that came up a lot when optimizing Scala data applications is the performance of standard collections, or the hidden cost of temporary copies. The collections <span class="caps">API</span> is easy to learn and maps well to many Python concepts where a lot of data engineers are familiar with. But the …</p>
+                <div class="summary"><p>One topic that came up a lot when optimizing Scala data applications is the performance of standard collections, or the hidden cost of temporary copies. The collections <span class="caps">API</span> is easy to learn and maps well to many Python concepts where a lot of data engineers are familiar with. But the performance penalty can be pretty big when it&#8217;s repeated over millions of records in a <span class="caps">JVM</span> with limited&nbsp;heap.</p>
+<h2>Mapping&nbsp;values</h2>
+<p>Let&#8217;s take a look at one most naive example first, mapping the values of a <code>Map</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mi">2</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mi">3</span><span class="o">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">toList</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">t</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">_1</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">_2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)).</span><span class="n">toMap</span>
+</pre></div>
+
+
+<p>Looks simple enough but obviously not optimal. Two temporary <code>List[(String, Int)]</code> were created, one from <code>toList</code> and one from <code>map</code>. <code>map</code> also creates 3 copies of <code>(String, Int)</code>.</p>
+<p>There are a few commonly seen variations. These don&#8217;t create temporary collections but still key-value&nbsp;tuples.</p>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">((</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="n">m</span><span class="o">)</span> <span class="k">yield</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">}</span>
+</pre></div>
+
+
+<p>If one reads the <a href="http://www.scala-lang.org/api/2.10.4/index.html#scala.collection.immutable.Map">ScalaDoc</a> closely, there&#8217;s a <code>mapValues</code> method already and it probably is the shortest and most&nbsp;performant.</p>
+<div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">mapValues</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div>
+
+
+<h2>Java&nbsp;conversion</h2>
+<p>Similar problem exists …</p>
                     <a class="btn btn-default btn-xs" href="../how-many-copies.html">more ...</a>
                 </div>
             </article>

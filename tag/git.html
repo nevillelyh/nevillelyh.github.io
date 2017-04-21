@@ -96,7 +96,16 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>My <a href="https://github.com/nevillelyh/dotfiles/">dotfiles</a> is probably the most copied code among my coworkers and today I will give a little break down of the code&nbsp;base.</p>
 <h2>zsh</h2>
-<p>I switched to <a href="http://www.zsh.org/">zsh</a> 3 years ago and never looked back. There&#8217;s also <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>, a framework for managing <span class="caps">ZSH</span> configuration. The features I found …</p>
+<p>I switched to <a href="http://www.zsh.org/">zsh</a> 3 years ago and never looked back. There&#8217;s also <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>, a framework for managing <span class="caps">ZSH</span> configuration. The features I found most useful&nbsp;are:</p>
+<ul>
+<li>Tab completion, including hostnames and&nbsp;arguments</li>
+<li>History across multiple&nbsp;sessions</li>
+<li>Plugins and&nbsp;themes</li>
+</ul>
+<p>My <a href="https://github.com/nevillelyh/dotfiles/blob/master/.zshrc">.zshrc</a> is mostly out of the box with some <a href="https://github.com/nevillelyh/dotfiles/blob/master/.dotfiles/zsh/zshrc">aliases</a> and a few plugins thrown in but decided to create my own <a href="https://github.com/nevillelyh/dotfiles/blob/master/.dotfiles/zsh/sinisa.zsh-theme">theme</a>. I use colors for hostname in the prompt, green for local and red for remote. I also tweaked <code>git</code> status a bit to show untracked files (red dots), unstaged (yellow) <span class="amp">&amp;</span> staged (green) changes, plus number stashed changes since that&#8217;s the one thing I keep doing and forgetting&nbsp;about.</p>
+<h2>git</h2>
+<p>I use <code>git</code> both for work and personal projects, plus contributing to open source projects on <a href="https://github.com/">GitHub</a>. My <a href="https://github.com/nevillelyh/dotfiles/blob/master/.gitconfig">.gitconfig</a> includes both a global <code>gitignore</code> file and a <code>templatedir</code>, which includes hooks for <a href="http://ctags.sourceforge.net/">ctags</a> and <a href="https://code.google.com/p/gerrit/">Gerrit</a>. The hooks are installed automatically for every&nbsp;repo.</p>
+<p>Since I type hundreds of <code>git</code> commands on a daily basis, I aliased <code>git</code> to simply <code>g …</code></p>
                     <a class="btn btn-default btn-xs" href="../dotfiles.html">more ...</a>
                 </div>
             </article>

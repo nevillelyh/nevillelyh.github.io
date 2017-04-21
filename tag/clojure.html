@@ -98,7 +98,9 @@ Das Keyboard Shredder            </a>
 	<a href="../tag/haskell.html">haskell</a>
     
 </footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>I&#8217;m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong <span class="caps">CS</span> fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly …</p>
+                <div class="summary"><p>I&#8217;m kind of known as a polyglot among coworkers. We would often argue that instead of hiring great Java/Python/C++ developers, we should rather strive to hire great engineers with strong <span class="caps">CS</span> fundamentals who can pick up any language easily. I came from scientific computing background, doing mostly C/C++/Python many years ago. Over the course of the last three years at my current job I coded seven languages professionally, some out of interest and some necessity. I enjoyed the experience learning all these different things and want to share my experience here, what I learned from each one of them and how it helps me becoming a better&nbsp;engineer.</p>
+<h2>C</h2>
+<p>The first language I used seriously, apart from <span class="caps">LOGO</span> <span class="amp">&amp;</span> <span class="caps">BASIC</span> when I was a kid of course. It&#8217;s probably the closest thing one can get to the operating system and bare metal without dropping down to assembly (while you still can in C). It&#8217;s a simple language whose syntax served as the basis of many successors like C++ <span class="amp">&amp;</span> Java. It doesn&#8217;t offer any fancy features like <span class="caps">OOP</span> or namespaces, but rather depends on the developer&#8217;s skill for organizing large code base (think …</p>
                     <a class="btn btn-default btn-xs" href="../on-being-a-polyglot.html">more ...</a>
                 </div>
             </article>
@@ -127,7 +129,22 @@ Das Keyboard Shredder            </a>
     
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I recently picked up <a href="http://www.lighttable.com/">Light Table</a> for <a href="http://clojure.org/">Clojure</a> development and liked it. Form evaluation works out of the box and indentation is better than that in <a href="http://plugins.jetbrains.com/plugin/?id=4050">La Clojure</a> plugin for <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a>.</p>
-<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by …</p>
+<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by name and execute them quickly. I was already used to <span class="caps">IDEA</span>&#8217;s key map though (<code>Mac OS X 10.5+</code> which is more natural to Mac users than the default <code>Mac OS X</code>), and wanted something similar. The setting files are in Clojure so it&#8217;s easy to customize. This is what I got so far for <code>user.keymap</code>:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
+
+     <span class="ss">:editor</span> <span class="p">{</span><span class="s">&quot;alt-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.watch-selection</span><span class="p">]</span>
+              <span class="s">&quot;alt-shift-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.unwatch</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-alt-i&quot;</span> <span class="p">[</span><span class="ss">:smart-indent-selection</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-alt-c&quot;</span> <span class="p">[</span><span class="ss">:toggle-console</span><span class="p">]</span>
+              <span class="s">&quot;ctrl-shift-j&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.joinLines</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-d&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.duplicateLine</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-shift-up&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineUp</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-shift-down&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineDown</span><span class="p">]</span>
+              <span class="s">&quot;pmeta-/&quot;</span> <span class="p">[</span><span class="ss">:toggle-comment-selection</span> <span class="ss">:editor.line-down</span><span class="p">]}}}</span>
+</pre></div>
+
+
+<p>Apart from these, I found myself using <code>"pmeta-enter" [:eval-editor-form]</code> and <code>"ctrl-d" [:editor.doc.toggle]</code> most when writing Clojure code. After all they are probably the most essential ones no matter what editor you use&nbsp;:)</p>
                     <a class="btn btn-default btn-xs" href="../light-table.html">more ...</a>
                 </div>
             </article>
