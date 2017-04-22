@@ -47,7 +47,7 @@ RELATIVE_URLS = True
 
 FEED_DOMAIN = SITEURL
 TWITTER_USERNAME = 'sinisa_lyh'
-THEME = 'theme'
+THEME = 'pelican-themes/pelican-bootstrap3'
 TYPOGRIFY = True
 
 # pelican-bootstrap3
@@ -69,3 +69,7 @@ CC_LICENSE = 'CC-BY-NC'
 PYGMENTS_STYLE = 'monokai'
 
 SUMMARY_MAX_LENGTH = 200
+# pelican-bootstrap3
+JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
+PLUGIN_PATHS = ['pelican-plugins']
+PLUGINS = ['i18n_subsites']
