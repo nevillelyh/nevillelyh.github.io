@@ -319,6 +319,7 @@
 &lt;li&gt;&lt;a href="http://www.scala-lang.org/api/current/scala/math/Ordering.html"&gt;Ordering&lt;/a&gt; and &lt;a href="http://www.scala-lang.org/api/current/scala/math/Numeric.html"&gt;Numeric&lt;/a&gt; type classes in&amp;nbsp;Scala&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/twitter/algebird"&gt;Algebird&lt;/a&gt; - Abstract Algebra for&amp;nbsp;Scala&lt;/li&gt;
 &lt;li&gt;My slides on &lt;a href="http://www.lyh.me/slides/type-classes.html"&gt;type classes&lt;/a&gt; and &lt;a href="http://www.lyh.me/slides/semigroups.html"&gt;semigroups&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Another excellent &lt;a href="http://www.lihaoyi.com/post/ImplicitDesignPatternsinScala.html"&gt;blog post&lt;/a&gt; on implicit design patterns by Li&amp;nbsp;Haoyi&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;We didn&amp;#8217;t discuss some more advanced topics like implicit resolution precedence and priority trick. Here are some more&amp;nbsp;references.&lt;/p&gt;
 &lt;ul&gt;
