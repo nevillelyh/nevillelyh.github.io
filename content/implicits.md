@@ -333,6 +333,7 @@ That summarizes some main use cases of implicits. Here are some references.
 - [Ordering](http://www.scala-lang.org/api/current/scala/math/Ordering.html) and [Numeric](http://www.scala-lang.org/api/current/scala/math/Numeric.html) type classes in Scala
 - [Algebird](https://github.com/twitter/algebird) - Abstract Algebra for Scala
 - My slides on [type classes](http://www.lyh.me/slides/type-classes.html) and [semigroups](http://www.lyh.me/slides/semigroups.html)
+- Another excellent [blog post](http://www.lihaoyi.com/post/ImplicitDesignPatternsinScala.html) on implicit design patterns by Li Haoyi
 
 We didn't discuss some more advanced topics like implicit resolution precedence and priority trick. Here are some more references.
 
