@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scio - Post Hadoop Processing</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Scio
+# Post Hadoop Processing
+Neville Li
+
+May 2017
+
+---
+
+class: center, middle
+# Scio
+# A Scala API for Apache Beam and Google Cloud Dataflow
+# https://github.com/spotify/scio
+
+---
+
+class: center, middle
+# THIS IS NOT A JOKE
+
+---
+
+class: center, middle
+# DoFn
+# Pronounced _Do Fun_
+
+---
+
+class: center, middle
+# A Deep Dive into DoFn
+# And have Fun with DoFn
+
+---
+
+class: center, middle
+# Code in Scala
+
+---
+
+class: center, middle
+# By really Java in Scala
+
+---
+
+class: center, middle
+# How to do things in parallel?
+
+---
+
+# Functions and DoFns
+
+## Scio
+
+```scala
+sc.parallelize(1 to 10)
+  .map(_ * 10)
+```
+
+--
+
+## Beam
+
+```scala
+sc.pipeline
+  .apply(Create.of((1 to 10).asJava))
+  .apply(ParDo.of(new DoFn[Int, Int] {
+    @ProcessElement
+    def processElement(c: DoFn[Int, Int]#ProcessContext): Unit = {
+      c.output(c.element() * 10)
+    }
+  }))
+```
+
+---
+
+class: center, middle
+![dofn](images/dofn-serde.png)
+
+---
+
+class: center, middle
+![smith](images/smith.png)
+
+---
+
+class: center, middle
+# DoFns are single-threaded
+
+---
+
+class: center, middle
+# DoFns must be serializable
+
+---
+
+# DoFn annotated
+
+```scala
+abstract class MyDoFn extends DoFn[String, String] {
+
+  @Setup
+  def setup(): Unit
+
+  @Teardown
+  def teardown(): Unit
+
+  @StartBundle
+  def startBundle(c: DoFn[String, String]#Context): Unit
+
+  @FinishBundle
+  def finishBundle(c: DoFn[String, String]#Context): Unit
+
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit
+
+}
+```
+
+---
+
+# Setup and teardown
+
+- ## @Setup
+### to prepare an instance for processing bundles of elements
+
+- ## @Teardown
+### to clean up this instance after processing bundles of elements
+
+--
+
+- ## Called once per clone (CPU) per worker
+
+---
+
+# Start and finish bundles
+
+- ## Bundle - a batch of elements for processing
+
+- ## @StartBundle
+### to prepare an instance for processing a batch of elements
+
+- ## @FinishBundle
+### to finish processing a batch of elements
+
+--
+
+- ## Called multiple times per clone (CPU) per worker
+
+---
+
+# @ProcessElement
+
+- ## Process a single element
+
+--
+
+- ## map - 1 to 1
+
+- ## flatMap - 1 to n
+
+- ## filter - 1 to [0, 1]
+
+--
+
+- ## Called multiple times per bundle
+
+---
+
+class: center, middle
+![dofn](images/dofn-lifecycle.png)
+
+---
+
+# What's wrong with this?
+
+```scala
+class HttpDoFn extends DoFn[String, String] {
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    import org.http4s.client.blaze._
+    // Doc: This client will create a new connection for every request.
+    val response = defaultClient.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+# One new connection per element!
+
+---
+
+# How about this?
+
+```scala
+class HttpDoFn extends DoFn[String, String] {
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    import org.http4s.client.blaze._
+    // Doc: Create a HTTP1 client which will attempt to recycle connections
+    val client = PooledHttp1Client()
+    val response = client.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+# One new client instance per element!
+
+---
+
+class: center, middle
+# DoFn is a Java object
+# And Java objects can have states
+
+---
+
+# How about now?
+
+```scala
+class HttpDoFn extends DoFn[String, String] {
+  // class constructor, happens on local machine
+  import org.http4s.client.blaze._
+  val client = PooledHttp1Client()
+
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    val response = client.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+# PooledHttp1Client may not be serializable!
+
+---
+
+class: center, middle
+![prestige](images/prestige.jpg)
+
+---
+
+# What about delaying client creation?
+
+```scala
+class HttpDoFn extends DoFn[String, String] {
+  // start uninitialized
+  import org.http4s.client.blaze._
+  var client: PooledHttp1Client = _
+
+  @Setup
+  def setup(): Unit = {
+    this.client = PooledHttp1Client(maxTotalConnections = 100)
+  }
+
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    val response = client.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+# Max total connections = # workers x # CPUs x 100!
+
+---
+
+# We need a global singleton!
+
+```scala
+object HttpClientSingleton {
+  import org.http4s.client.Client
+  import org.http4s.client.blaze._
+  var _instance: Client = _
+  def instance = this.synchronized {
+    if (_instance == null) {
+      _instance = PooledHttp1Client()
+    }
+    _instance
+  }
+}
+
+class HttpDoFn extends DoFn[String, String] {
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    val response = HttpClientSingleton.instance.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+# Synchronize on client creation!
+
+---
+
+# Can we generalize this?
+
+# With a thread-safe collection?
+--
+
+```scala
+object ResourceManager {
+  private val resources = Maps.newConcurrentMap[String, Any]()
+  def get[T](key: String, f: () => T): T =
+    resources.computeIfAbsent(key, new JFunction[String, T] {
+      override def apply(t: String): T = f()
+    }).asInstanceOf[T]
+}
+
+class HttpDoFn extends DoFn[String, String] {
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    val client = ResourceManager.get("http", () => PooledHttp1Client())
+    val response = client.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+---
+
+# What are we sharing here?
+
+```scala
+val url = "http://httpstat.us/"
+
+sc.parallelize(400 to 450)
+  .map(url + _)
+  .apply(ParDo.of(new HttpDoFn()))
+
+sc.parallelize(500 to 550)
+  .map(url + _)
+  .apply(ParDo.of(new HttpDoFn()))
+```
+
+--
+
+- ## Two HttpDoFn instances
+- ## Same resource key "http"
+- ## Same client per worker JVM
+
+---
+
+# What if we want clients with different configurations?
+
+--
+
+```scala
+class HttpDoFn(val maxTotalConnections: Int) extends DoFn[String, String] {
+  // unique ID at instance creation site
+  private val resourceId = "http-" + UUID.randomUUID().toString
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val url = c.element
+    val client = ResourceManager.get(resourceId, () => PooledHttp1Client(maxTotalConnections))
+    val response = client.expect[String](url).run
+    c.output(response)
+  }
+}
+```
+
+--
+
+## Unique resource IDs, separate clients
+
+```scala
+val url = "http://httpstat.us/"
+sc.parallelize(400 to 450).map(url + _).apply(ParDo.of(new HttpDoFn(10)))
+sc.parallelize(500 to 550).map(url + _).apply(ParDo.of(new HttpDoFn(20)))
+```
+
+---
+
+class: center, middle
+# What other resource can we manage?
+
+---
+
+class: center, middle
+# On Cloud Dataflow
+# DoFns run in a JVM
+# In a Debian Wheezy Docker
+# In a Google Compute Engine Instance
+
+---
+
+class: center, middle
+# As root
+---
+
+class: center, middle
+![eminem](images/eminem.jpg)
+
+---
+
+class: center, middle
+# Not just any Apache
+
+---
+
+# Apache and Post Hadoop Processing
+
+```scala
+class PhpDoFn(val maxTotalConnections: Int) extends DoFn[String, String] {
+  private val uuid = UUID.randomUUID().toString
+
+  @Setup
+  def setup(): Unit = {
+    ResourceManager.get("setup-" + uuid, () => {
+      import sys.process._
+      "apt-get update" #&& "apt-get install -y apache2 php5" #&& "/etc/init.d/apache2 start" !!
+
+      Files.write("""<?php echo $_GET["input"] . "!!!"; ?>""",
+                  new File("/var/www/html/process.php"),
+                  Charsets.UTF_8)
+    })
+  }
+
+  @ProcessElement
+  def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+    val client = ResourceManager.get("http-" + uuid, () => PooledHttp1Client(maxTotalConnections))
+    val input = c.element()
+    val response = client.expect[String]("http://localhost/process.php?input=" + input).run
+    c.output(response)
+  }
+}
+```
+
+---
+
+# Did you spot a performance issue?
+
+```scala
+client.expect[String]("http://localhost/process.php?input=" + input).run
+```
+
+--
+
+## Blocking requests in a single-threaded environment!
+
+```scala
+/**
+ * Run this `Task` and block until its result is available.
+ */
+def run: A = // ...
+```
+
+--
+
+## Non-blocking IO to the rescue!
+
+```scala
+val future = client.expect[String]("http://localhost/process.php?input=" + input).async
+```
+
+```scala
+def async: Future[A] = // ...
+```
+
+---
+
+class: center, middle
+# Remember that DoFns are single-threaded?
+
+---
+
+# Will this work?
+
+```scala
+@ProcessElement
+def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+  val client = ResourceManager.get("http-" + uuid, () => PooledHttp1Client(maxTotalConnections))
+  val input = c.element()
+  val future = client.expect[String]("http://localhost/process.php?input=" + input).async
+
+  // Callback on a executor thread
+  future.onComplete {
+    case Success(r) => c.output(r)
+    case Failure(e) => throw e
+  }
+}
+
+@FinishBundle
+def finishBundle(c: DoFn[String, String]#Context): Unit = { /* ... */ }
+
+@Teardown
+def teardown(): Unit = { /* ... */ }
+```
+
+---
+
+class: center, middle
+# NO
+
+---
+
+# See where c.output(r) is?
+
+```scala
+future.onComplete { // -> Client worker pool thread
+  case Success(r) => c.output(r)
+  case Failure(e) => throw e
+}
+```
+
+--
+
+# Output buffer non-thread-safe for throughput
+# ProcessContext#output not thread-safe
+
+---
+
+# What happens after the last element?
+
+```scala
+@ProcessElement
+def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+  // ...
+  val future = // ...
+  future.onComplete { /* ... */ }
+}
+
+@FinishBundle
+def finishBundle(c: DoFn[String, String]#Context): Unit = { /* ... */ }
+
+@Teardown
+def teardown(): Unit = { /* ... */ }
+```
+
+--
+
+# FinishBundle or Teardown may happen
+# Before all futures are complete
+
+---
+
+class: center, middle
+# MORE DATA LOSS!
+
+---
+
+class: center, middle
+# POTENTIALLY SILENT!
+
+---
+
+# java.io.IOException: DATA_LOSS
+
+## [http://stackoverflow.com/questions/37163200](http://stackoverflow.com/questions/37163200)
+
+```java
+someList
+  .parallelStream()
+  .forEach(e -> c.output(e));
+```
+
+---
+
+class: center, middle
+![cds](images/cds.jpg)
+
+---
+
+# What do we do now?
+
+--
+
+- # Create futures on main thread
+
+--
+
+- # Handle callbacks on worker thread
+
+--
+
+- # Pass result back to main thread
+
+--
+
+- # Handle pending results and errors
+
+---
+
+# Keeping track of pending futures, results and errors
+
+```scala
+class PhpDoFn(val maxTotalConnections: Int) extends DoFn[String, String] {
+  private val futures = Maps.newConcurrentMap[UUID, Future[String]]
+  private val results = Queues.newConcurrentLinkedQueue[String]()
+  private val errors = Queues.newConcurrentLinkedQueue[Throwable]()
+  // ...
+}
+```
+
+--
+
+# Reset every bundle
+
+```scala
+@StartBundle
+def startBundle(c: DoFn[String, String]#Context): Unit = {
+  futures.clear()
+  results.clear()
+  errors.clear()
+}
+```
+
+---
+
+# Callback take 2
+
+```scala
+@ProcessElement
+def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+  // ...
+  val fid = UUID.randomUUID()
+  val future = client.expect[String](url).async
+  future.onComplete {
+    case Success(r) =>
+      results.add(r)
+      futures.remove(fid)
+    case Failure(e) =>
+      errors.add(e)
+      futures.remove(fid)
+    }
+  futures.put(fid, future)
+  flush(c) // flush pending results and errors
+}
+```
+
+--
+
+- ## Flush after every element
+- ## Reduce latency and queue sizes
+
+---
+
+# Flush pending results and errors
+
+```scala
+private def flush(c: DoFn[String, String]#Context): Unit = {
+  if (!errors.isEmpty) {
+    val e = new RuntimeException("Failed to process futures")
+    errors.asScala.foreach(e.addSuppressed)
+    throw e
+  }
+  var r = results.poll()
+  while (r != null) {
+    c.output(r)
+    r = results.poll()
+  }
+}
+```
+
+--
+
+# Wait for pending futures and flush
+
+```scala
+@FinishBundle
+def finishBundle(c: DoFn[String, String]#Context): Unit = {
+  Await.ready(Future.sequence(futures.values().asScala), Duration.Inf)
+  flush(c)
+}
+```
+
+---
+
+class: center, middle
+# How else can we abuse DoFn?
+
+---
+
+class: center, middle
+# What about some streaming?
+
+---
+
+# Python streaming I mean!
+
+```scala
+class PyDoFn(val code: String) extends DoFn[String, String] {
+  private val uuid = UUID.randomUUID()
+  private var file: File = _
+  // ...
+
+  @Setup
+  def setup(): Unit = {
+    ResourceManager.get("setup-" + uuid, () => {
+      import sys.process._
+      "apt-get update" #&& "apt-get install -y python" !!
+    })
+    file = new File(sys.props("java.io.tmpdir"), s"$uuid.py")
+    Files.write(code, file, Charsets.UTF_8)
+  }
+
+  @Teardown
+  def teardown(): Unit = {
+    file.delete()
+  }
+
+  // ...
+}
+```
+
+---
+
+# Data pipeline!
+
+```scala
+private var writer: PrintWriter = _
+private var future: Future[Unit] = _
+
+@StartBundle
+def startBundle(c: DoFn[String, String]#Context): Unit = {
+  val pos = new PipedOutputStream()
+  val pis = new PipedInputStream(pos)
+  writer = new PrintWriter(pos, true)
+  future = Future {
+    import sys.process._
+    (s"python $file" #< pis lineStream).foreach(c.output)
+  }
+}
+
+@ProcessElement
+def processElement(c: DoFn[String, String]#ProcessContext): Unit = {
+  writer.println(c.element())
+}
+
+@FinishBundle
+def finishBundle(c: DoFn[String, String]#Context): Unit = {
+  writer.close()
+  Await.ready(future, Duration.Inf)
+}
+```
+
+---
+
+# Wait, didn't you say futures are bad?
+
+```scala
+future = Future {
+  import sys.process._
+  (s"python $file" #< pis lineStream).foreach(c.output)
+}
+```
+
+--
+
+# One future per bundle
+# ProcessContext#output from one thread
+# Block on FinishBundle
+
+---
+
+# Putting it all together
+
+```scala
+object ScioJob {
+  def main(cmdlineArgs: Array[String]): Unit = {
+    val (sc, args) = ContextAndArgs(cmdlineArgs)
+
+    val f = sc.parallelize(Seq("hello", "world", "scio", "post", "hadoop", "processing"))
+      .applyTransform(ParDo.of(new PhpDoFn(100)))
+      .applyTransform(ParDo.of(new PyDoFn(
+        """
+          |import sys
+          |for l in sys.stdin:
+          |    print l.rstrip().upper()
+        """.stripMargin)))
+      .materialize
+
+    sc.close()
+    f.waitForResult().value.foreach(println)
+  }
+}
+```
+
+https://github.com/nevillelyh/scio-playground/blob/master/src/main/scala/ScioJob.scala
+
+---
+
+class: center, middle
+![dofn](images/wordcloud.png)
+
+---
+
+class: center, middle
+# Further Reading
+# [Dude Where's My Closure?](https://docs.google.com/presentation/d/1hx2WTyY_SC9cpcwpbcwqZc9nVKTyOmUkaosnF4reLpM/edit)
+# More transforms in [scio-extra](https://github.com/spotify/scio/tree/master/scio-extra/src/main)
+
+---
+
+class: center, middle
+# The End
+## Happy Processing
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+var slideshow = remark.create({
+ratio: '16:9',
+navigation: {
+scroll: false
+}
+});
+
+// Setup MathJax
+MathJax.Hub.Config({
+tex2jax: {
+skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+}
+});
+MathJax.Hub.Queue(function() {
+    $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+      return(elem.SourceElement());
+      }).parent().addClass('has-jax');
+    });
+
+MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>
