@@ -70,6 +70,76 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
+                <h2><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2017-05-06T17:14:00-04:00"> Sat 06 May 2017</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>I was bored today and decided to decompile some Scala code for fun and profit. I&#8217;m using Scala 2.12.2 and Java&nbsp;1.8.0_121.</p>
+<h2>Scala&nbsp;object</h2>
+<div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">javap</span>
+
+<span class="k">object</span> <span class="nc">Test01</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="nc">Unit</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">javap</span><span class="o">.</span><span class="na">Test01$</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="n">javap</span><span class="o">.</span><span class="na">Test01$</span> <span class="n">MODULE$</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="o">{};</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">String</span><span class="o">[]);</span>
+  <span class="kd">private</span> <span class="n">javap</span><span class="o">.</span><span class="na">Test01$</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">javap</span><span class="o">.</span><span class="na">Test01</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">String</span><span class="o">[]);</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>As we can see a Scala object is compiled to 2 Java classes, <code>Test01</code> with static methods for Java compatibility and a <code>Test01$</code> with a static instance of itself as <code>MODULE$</code>, so that <code>Test01</code> can be used as an instance value in&nbsp;Scala.</p>
+<h2>Class&nbsp;constructors</h2>
+<div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">javap</span>
+
+<span class="k">class</span> <span class="nc">Test02</span><span class="o">(</span><span class="k">val</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="k">val</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">z</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="k">this</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">=</span> <span class="k">this</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">javap</span><span class="o">.</span><span class="na">Test02</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">x</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">y</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">x</span><span class="o">();</span>
+  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">y</span><span class="o">();</span>
+  <span class="kd">public</span> <span class="n">javap</span><span class="o">.</span><span class="na">Test02</span><span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="kt">int</span><span class="o">);</span>
+  <span class="kd">public</span> <span class="n">javap</span><span class="o">.</span><span class="na">Test02</span><span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">int</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>Looks like the default constructor <code>(val x: Int, val y: Int, z: Int)</code> and the overloaded one <code>(x: Int, y: Int)</code> each generated a Java constructor. However only <code>x</code> and <code>y …</code></p>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/decompiling-scala-code.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
                 <h2><a href="http://www.lyh.me/implicits.html">Implicits</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -397,33 +467,6 @@ Das Keyboard Shredder            </a>
                 </div>
             </article>
             <hr/>
-            <article>
-                <h2><a href="http://www.lyh.me/type-classes.html">Type&nbsp;Classes</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2015-04-20T15:39:00-04:00"> Mon 20 April 2015</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="http://www.lyh.me/category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/scala.html">scala</a>
-        /
-	<a href="http://www.lyh.me/tag/fp.html">fp</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>I started giving more Scala talks internally at <a href="http://www.spotify.com/">Spotify</a>. The first one is on type classes and here are the <a href="/slides/type-classes.html">slides</a></p>
-<iframe src="/slides/type-classes.html" width="800" height="450"></iframe>
-                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/type-classes.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
 
         <ul class="pagination">
                 <li class="prev disabled"><a href="#">&laquo;</a></li>
@@ -472,11 +515,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/implicits.html">Implicits</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/scio-at-philly-ete.html">Scio at Philly <span class="caps">ETE</span></a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/joins.html">Joins</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/for-comprehensions.html">For&nbsp;comprehensions</a></li>
-    <li class="list-group-item"><a href="http://www.lyh.me/scio-at-scala-by-the-bay.html">Scio at Scala by the&nbsp;Bay</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->

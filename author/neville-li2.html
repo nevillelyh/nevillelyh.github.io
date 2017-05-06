@@ -67,6 +67,33 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
+                <h2><a href="http://www.lyh.me/type-classes.html">Type&nbsp;Classes</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2015-04-20T15:39:00-04:00"> Mon 20 April 2015</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>I started giving more Scala talks internally at <a href="http://www.spotify.com/">Spotify</a>. The first one is on type classes and here are the <a href="/slides/type-classes.html">slides</a></p>
+<iframe src="/slides/type-classes.html" width="800" height="450"></iframe>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/type-classes.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
                 <h2><a href="http://www.lyh.me/nescala-2015-talk.html">NEScala 2015&nbsp;talk</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -400,50 +427,6 @@ Das Keyboard Shredder            </a>
                 </div>
             </article>
             <hr/>
-            <article>
-                <h2><a href="http://www.lyh.me/light-table.html">Light&nbsp;Table</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2014-07-28T00:01:00-04:00"> Mon 28 July 2014</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="http://www.lyh.me/category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/clojure.html">clojure</a>
-        /
-	<a href="http://www.lyh.me/tag/intellij-idea.html">intellij-idea</a>
-        /
-	<a href="http://www.lyh.me/tag/light-table.html">light-table</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>I recently picked up <a href="http://www.lighttable.com/">Light Table</a> for <a href="http://clojure.org/">Clojure</a> development and liked it. Form evaluation works out of the box and indentation is better than that in <a href="http://plugins.jetbrains.com/plugin/?id=4050">La Clojure</a> plugin for <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a>.</p>
-<p>I particularly like the idea of command bar, which allows you to search for Light Table commands by name and execute them quickly. I was already used to <span class="caps">IDEA</span>&#8217;s key map though (<code>Mac OS X 10.5+</code> which is more natural to Mac users than the default <code>Mac OS X</code>), and wanted something similar. The setting files are in Clojure so it&#8217;s easy to customize. This is what I got so far for <code>user.keymap</code>:</p>
-<div class="highlight"><pre><span></span><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
-
-     <span class="ss">:editor</span> <span class="p">{</span><span class="s">&quot;alt-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.watch-selection</span><span class="p">]</span>
-              <span class="s">&quot;alt-shift-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.unwatch</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-alt-i&quot;</span> <span class="p">[</span><span class="ss">:smart-indent-selection</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-alt-c&quot;</span> <span class="p">[</span><span class="ss">:toggle-console</span><span class="p">]</span>
-              <span class="s">&quot;ctrl-shift-j&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.joinLines</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-d&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.duplicateLine</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-shift-up&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineUp</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-shift-down&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineDown</span><span class="p">]</span>
-              <span class="s">&quot;pmeta-/&quot;</span> <span class="p">[</span><span class="ss">:toggle-comment-selection</span> <span class="ss">:editor.line-down</span><span class="p">]}}}</span>
-</pre></div>
-
-
-<p>Apart from these, I found myself using <code>"pmeta-enter" [:eval-editor-form]</code> and <code>"ctrl-d" [:editor.doc.toggle]</code> most when writing Clojure code. After all they are probably the most essential ones no matter what editor you use&nbsp;:)</p>
-                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/light-table.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
 
         <ul class="pagination">
                 <li class="prev"><a href="http://www.lyh.me/author/neville-li.html">&laquo;</a>
@@ -493,11 +476,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/implicits.html">Implicits</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/scio-at-philly-ete.html">Scio at Philly <span class="caps">ETE</span></a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/joins.html">Joins</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/for-comprehensions.html">For&nbsp;comprehensions</a></li>
-    <li class="list-group-item"><a href="http://www.lyh.me/scio-at-scala-by-the-bay.html">Scio at Scala by the&nbsp;Bay</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
