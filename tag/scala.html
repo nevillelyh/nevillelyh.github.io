@@ -104,12 +104,12 @@ Das Keyboard Shredder            </a>
 <p>However <code>map(Seq(1, 2, 3), _ + 0.1)</code> now fails to compile with a message <code>missing parameter type for expanded function ((x$1) =&gt; x$1.$plus(10))</code></p>
 <p>This is because inference of <code>A</code> in <code>f: A =&gt; B</code> depends on the type of <code>xs: Seq[A]</code>, and limitation of Scala type inference. A common workaround is to curry&nbsp;arguments.</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
-<span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">))(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">10</span><span class="o">)</span>
+<span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">))(</span><span class="k">_</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">)</span>
 </pre></div>
 
 
 <p>Similar pattern is commonly seen in Scala, like <code>foldLeft(z: B)(op: (B, A) =&gt; B)</code>. Another benefit is we can now write <code>f</code> in a multi-line <code>{}</code> block more&nbsp;elegantly.</p>
-<div class="highlight"><pre><span></span><span class="n">map</span><span class="o">(</span><span class="nc">Seq …</span></pre></div>
+<div class="highlight"><pre><span></span><span class="n">map …</span></pre></div>
                     <a class="btn btn-default btn-xs" href="http://www.lyh.me/canbuildfrom.html">more ...</a>
                 </div>
             </article>
