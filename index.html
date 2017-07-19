@@ -67,6 +67,63 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
+                <h2><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2017-07-19T11:23:00-04:00"> Wed 19 July 2017</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/scio.html">scio</a>
+        /
+	<a href="http://www.lyh.me/tag/data.html">data</a>
+        /
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>I spent a couple hours yesterday debugging what I thought was a Protobuf serialization issue, which turns out to be an unlawful Monoid-like use of <code>aggregateByKey</code> in <a href="https://github.com/spotify/scio">Scio</a>.</p>
+<h2>The&nbsp;Problem</h2>
+<p>Both Scio and Spark have <code>aggregate</code> and <code>aggregateByKey</code> transformations that look like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="c1">// on SCollection[V]</span>
+<span class="k">def</span> <span class="n">aggregate</span><span class="o">[</span><span class="kt">U</span><span class="o">](</span><span class="n">zeroValue</span><span class="k">:</span> <span class="kt">U</span><span class="o">)(</span><span class="n">seqOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">V</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">,</span> <span class="n">combOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">U</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">)</span><span class="k">:</span> <span class="kt">SCollection</span><span class="o">[</span><span class="kt">U</span><span class="o">]</span>
+
+<span class="c1">// on SCollection[(K, V)]</span>
+<span class="k">def</span> <span class="n">aggregateByKey</span><span class="o">[</span><span class="kt">U</span><span class="o">](</span><span class="n">zeroValue</span><span class="k">:</span> <span class="kt">U</span><span class="o">)(</span><span class="n">seqOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">V</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">,</span> <span class="n">combOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">U</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">)</span><span class="k">:</span> <span class="kt">SCollection</span><span class="o">[(</span><span class="kt">K</span>, <span class="kt">U</span><span class="o">)]</span>
+</pre></div>
+
+
+<p>And we have some business logic that looks like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Count</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">z</span> <span class="k">=</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span> <span class="c1">// zeroValue</span>
+<span class="k">def</span> <span class="n">seqOp</span><span class="o">(</span><span class="n">acc</span><span class="k">:</span> <span class="kt">Count</span><span class="o">,</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Count</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Count</span><span class="o">(</span><span class="n">v</span><span class="o">.</span><span class="n">id</span><span class="o">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">v</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
+<span class="k">def</span> <span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Count</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Count</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Count</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="o">,</span> <span class="n">x</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">10</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">100</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="mi">5</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="mi">50</span><span class="o">)))</span>
+  <span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">id</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">aggregateByKey</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">,</span> <span class="n">combOp</span><span class="o">)</span>
+</pre></div>
+
+
+<p>This code however, only works correctly locally with <code>DirectRunner</code> and always produces results with <code>id == ""</code> when running on Dataflow service with the <code>DataflowRunner</code>. Can you spot the&nbsp;bug?</p>
+<h2>Monoid&nbsp;laws</h2>
+<p>You might notice that <code>zeroValue</code> and <code>combOp</code> together resemble a <a href="https://en.wikipedia.org/wiki/Monoid">Monoid</a>, which should satisfy the identity&nbsp;law:</p>
+<div class="highlight"><pre><span></span><span class="n">combOp</span><span class="o">(</span><span class="n">zeroValue …</span></pre></div>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
                 <h2><a href="http://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -451,37 +508,6 @@ Das Keyboard Shredder            </a>
                 </div>
             </article>
             <hr/>
-            <article>
-                <h2><a href="http://www.lyh.me/scala-data-pipelines-spotify.html">Scala Data Pipelines @&nbsp;Spotify</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2015-11-10T11:26:00-05:00"> Tue 10 November 2015</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="http://www.lyh.me/category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/data.html">data</a>
-        /
-	<a href="http://www.lyh.me/tag/scala.html">scala</a>
-        /
-	<a href="http://www.lyh.me/tag/scalding.html">scalding</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been a while since I last updated this blog. I did a talk at <a href="http://bigdatascala.bythebay.io/">Big Data Scala</a> this summer and here are the <a href="http://www.slideshare.net/sinisalyh/scala-data-pipelines-spotify">slides</a></p>
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/10GyruQgE9UUpv" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-
-<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scala-data-pipelines-spotify" title="Scala Data Pipelines @ Spotify" target="_blank">Scala Data Pipelines @ Spotify</a> </strong> from <strong><a href="//www.slideshare.net/sinisalyh" target="_blank">Neville Li</a></strong> </div></p>
-                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/scala-data-pipelines-spotify.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
 
         <ul class="pagination">
                 <li class="prev disabled"><a href="#">&laquo;</a></li>
@@ -498,6 +524,9 @@ Das Keyboard Shredder            </a>
         <div class="col-sm-3" id="sidebar">
             <aside>
 <div id="aboutme">
+        <p>
+            <img width="100%" class="img-thumbnail" src="http://www.lyh.me//avatar.jpg"/>
+        </p>
     <p>
       <strong>About Neville Li</strong><br/>
         
@@ -530,11 +559,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/implicits.html">Implicits</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/scio-at-philly-ete.html">Scio at Philly <span class="caps">ETE</span></a></li>
-    <li class="list-group-item"><a href="http://www.lyh.me/joins.html">Joins</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
@@ -552,6 +581,15 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
   </ul>
 </li>
 <!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/sinisa_lyh">Tweets by sinisa_lyh</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
   </ul>
 </section>
 <!-- End Sidebar -->            </aside>
