@@ -47,6 +47,7 @@ RELATIVE_URLS = True
 
 FEED_DOMAIN = SITEURL
 TWITTER_USERNAME = 'sinisa_lyh'
+TWITTER_WIDGET_ID = '887720870931726336'
 THEME = 'pelican-themes/pelican-bootstrap3'
 TYPOGRIFY = True
 
