@@ -68,6 +68,53 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
+                <h2><a href="http://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2017-08-01T13:51:00-04:00"> Tue 01 August 2017</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/scio.html">scio</a>
+        /
+	<a href="http://www.lyh.me/tag/data.html">data</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>Lambda serialization is one of the more confusion issues in distributed data processing in Scala. No matter which framework you choose, whether it&#8217;s Scalding, Spark, Flink or Scio, sooner or later you&#8217;ll be hit by the dreaded <code>NotSerializableException</code>. In this post we&#8217;ll take a closer look at the common causes and solutions to this&nbsp;problem.</p>
+<h2>Setup</h2>
+<p>To demonstrate the problem, first we need a minimal setup that minics the behavior of a distributed data processing system. We start with a utility method that roundtrips an object throguh Java serialization. Anonymous functions, or lambdas, in such systems are serialized so that they can be distributed to workers for parallel&nbsp;processing.</p>
+<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">java.io.</span><span class="o">{</span><span class="nc">ByteArrayInputStream</span><span class="o">,</span> <span class="nc">ByteArrayOutputStream</span><span class="o">,</span> <span class="nc">ObjectInputStream</span><span class="o">,</span> <span class="nc">ObjectOutputStream</span><span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">SerDeUtil</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">serDe</span><span class="o">[</span><span class="kt">T</span><span class="o">](</span><span class="n">obj</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">T</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">buffer</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ByteArrayOutputStream</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">out</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ObjectOutputStream</span><span class="o">(</span><span class="n">buffer</span><span class="o">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">writeObject</span><span class="o">(</span><span class="n">obj</span><span class="o">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+
+    <span class="k">val</span> <span class="n">in</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ObjectInputStream</span><span class="o">(</span><span class="k">new</span> <span class="nc">ByteArrayInputStream</span><span class="o">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">toByteArray</span><span class="o">))</span>
+    <span class="n">in</span><span class="o">.</span><span class="n">readObject</span><span class="o">().</span><span class="n">asInstanceOf</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>Next we create a bare minimal <code>Collection[T]</code> type that mimics an abstract distributed data set, akin to <code>TypedPipe</code>, <code>RDD</code>, or <code>SCollection</code> in Scalding, Spark or Scio respectively. Our implementation is backed by a local in-memory <code>Seq[T]</code> but does pass the function <code>f</code> through serialization like …</p>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/lambda-serialization.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
                 <h2><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -319,11 +366,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/scio-at-philly-ete.html">Scio at Philly <span class="caps">ETE</span></a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/scio-at-scala-by-the-bay.html">Scio at Scala by the&nbsp;Bay</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/semigroups.html">Semigroups</a></li>
-    <li class="list-group-item"><a href="http://www.lyh.me/scio-a-scala-api-for-google-cloud-dataflow.html">Scio, a Scala <span class="caps">API</span> for Google Cloud&nbsp;Dataflow</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
