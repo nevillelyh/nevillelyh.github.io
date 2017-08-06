@@ -1,0 +1,79 @@
+==================================================================
+https://keybase.io/neville
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://www.lyh.me
+  * I am neville (https://keybase.io/neville) on keybase.
+  * I have a public key with fingerprint 2B6E E888 8B79 1D6F C494  5D3E 4D1A CB6B 1195 29E3
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0101325a9a8beca62d892826743b48413b2653280c3067aca41f55893244daa3efe90a",
+      "fingerprint": "2b6ee8888b791d6fc4945d3e4d1acb6b119529e3",
+      "host": "keybase.io",
+      "key_id": "4d1acb6b119529e3",
+      "kid": "0101325a9a8beca62d892826743b48413b2653280c3067aca41f55893244daa3efe90a",
+      "uid": "2d8f65dd1823032650f1686443c06519",
+      "username": "neville"
+    },
+    "merkle_root": {
+      "ctime": 1501977731,
+      "hash_meta": "c574e4cc5492e98a1f20c59328dbf0d8d763433b6efd564d81333be5239bf363",
+      "seqno": 1307320
+    },
+    "revoke": {
+      "sig_ids": [
+        "6560c07fb8652907e1cef6856516bc7bffa43164e61252a8b54921fe81a631480f"
+      ]
+    },
+    "service": {
+      "hostname": "www.lyh.me",
+      "protocol": "http:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1501977760,
+  "expire_in": 157680000,
+  "prev": "8b41ce3a6b38c571f0c118cb3de0cdda4ec45b5fae05f446528ba84f9d65ddf5",
+  "seqno": 14,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+
+owGtU21oVWUcv2uTlhjtik6IDDo2TF3rec7zcp4z1ExkRCgWYS/YvDyv2+nenXM7
+53jXZawgsNcpzXIL9kVLL0kikkHSh95cGOyLoNiLwy2MdB8aYVokbfWci0JEH3u+
+HJ4/v//v//v9/ud58/bGXHPDljsnivl9qy42TMyI3NMvP/PugCMiVXU6B5yirn90
+SekkLRQD5XQ6AAKIXMJ9zoSWnLqK+S5zqYeRwAxDJFxKkMuARIB6XHIMDSHMRy7G
+inOkjfYBd9odE4Q9Oi7HQZhaWldQrZk9wvOhokZiHxOFNFaQS0EFhD5xfY1sY2+U
+ZB1WnOCJ7ggiW7OXQl3ef+D/Z90763S23VCiFGQuAsi2AgMpoxgjCSiBfgZMdBzy
+Pm3Roa4EpZJ2BtudPh0XS7oQR1GaZSvTIENAAqDveR6C1h9Pegt9OuW2URIPaywl
+wb6rfcahcYEkVhRTwgDFlEcRRsiGZxShWDGI7E0TF/nCIJrZT/RzYWQnIOAhF1gF
+sa5ERZ0NT4Iem1ridG53KKFAfp4AzwhGbXLA01BqQxmxbqiQnjCGYwQp1hS6xLUp
+Zpqg0QxyiiBmwDjdg9m4uBLIOn22qBsB9Pf3d5SqvR320u6U4yiNZFSy9d40LXdm
+saTVch2nReEGQ0EEobL/iG2o6DgJotCasMh/JUZBu6OfLwexLgQZgniUAXuyMbpi
+KZnA1gniVCBm44QGSAiZFEhpIJXiWEtMBDFcA2IwtuaZ4AwbX2X7NeQfEWKrk/dY
+ThtcyNOdsd3owtcaUFOuoTm3vPWepjXh5VffqC6Pxt/uXn/zXS24JXtUuYW3tdys
+HKXNuf337j/yUa1r3fnXe9veb/uk9sKBH5dEV3K7qnt2b16xYcVc4yP67MOXRpe8
+dMexgetr565d/W7ywyNPfn3/Nnj87PTU0N7xQu36mR3DV8jeg2OL0pmh0zPbP1i5
+fkfLl3/O/QVOnDsfDV9YM/VO98ju8dFb09Wzba3JT4Pffzr6+LpVjy07fR/7AZ7r
+PnryKXe69eKZlScubztw7K2+pc9e2/ji1g3h6gcOfbNl3KsV5WI8ctWZ/XnRxB/5
+Wvn4t7/ML1t712ePzk9GaO6JTZdO7jm4qatlYN/HYLrpwRy4MLTx7uHF8wtGt45t
+XrprqmvkFJltOdz40O+/Hf5i7JXJrzyF87+G+bx4z5zKHfob
+=QIlh
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/neville
+
+==================================================================
