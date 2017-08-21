@@ -67,6 +67,37 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
+                <h2><a href="http://www.lyh.me/semigroups.html">Semigroups</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2016-09-21T19:22:00-04:00"> Wed 21 September 2016</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+        /
+	<a href="http://www.lyh.me/tag/scio.html">scio</a>
+        /
+	<a href="http://www.lyh.me/tag/data.html">data</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>It&#8217;s been a while since my last post. Both <a href="https://github.com/spotify/scio">Scio</a> and Scala have been picking up a lot of momentum within <a href="https://www.spotify.com">Spotify</a> and a lot of people are starting to leveraging the power of <a href="https://github.com/twitter/algebird">Algebird</a>. So here&#8217;s another mini-talk on <a href="/slides/semigroups.html">Semigroups</a>.</p>
+<iframe src="/slides/semigroups.html" width="800" height="450"></iframe>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/semigroups.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
                 <h2><a href="http://www.lyh.me/scio-a-scala-api-for-google-cloud-dataflow.html">Scio, a Scala <span class="caps">API</span> for Google Cloud&nbsp;Dataflow</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -370,37 +401,6 @@ Das Keyboard Shredder            </a>
                 </div>
             </article>
             <hr/>
-            <article>
-                <h2><a href="http://www.lyh.me/dotfiles-update.html">dotfiles&nbsp;update</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2014-08-21T22:14:00-04:00"> Thu 21 August 2014</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="http://www.lyh.me/category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/dotfiles.html">dotfiles</a>
-        /
-	<a href="http://www.lyh.me/tag/tmux.html">tmux</a>
-        /
-	<a href="http://www.lyh.me/tag/vim.html">vim</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>I&#8217;ve been using my current <a href="http://www.lyh.me/dotfiles.html">dotfiles</a> setup for a while and felt it&#8217;s time to freshen up. I focused on updating the look and feel of Vim and tmux this&nbsp;round.</p>
-<p>First I switched to <a href="https://github.com/tomasr/molokai">molokai</a> color theme for Vim, <a href="http://macromates.com/">TextMate</a> (monokai) and <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a> (using <a href="https://github.com/y3sh/Intellij-Colors-Sublime-Monokai">this</a>). I guess I grew tired of the old trusted <a href="http://ethanschoonover.com/solarized">solarized</a>, plus with my new MacBook Pro 13&#8221; at highest resolution, it just doesn&#8217;t feel sharp&nbsp;enough.</p>
-<p>The <a href="https://github.com/Lokaltog/vim-powerline">vim-powerline</a> plugin I was using is being deprecated and replaced by <a href="https://github.com/Lokaltog/powerline">powerline</a>, which supports vim, tmux, zsh, and many others. However it requires Python and I had trouble using it with some really old Vim versions at work. So instead I switched to a pure VimL plugin, <a href="https://github.com/bling/vim-airline">vim-airline</a>. Not surprisingly there&#8217;s a companion plugin, <a href="https://github.com/edkolev/tmuxline.vim">tmuxline</a> for tmux as well. Both have no extra dependencies which is a big plus for me since I use the same dotfiles on Mac, my Ubuntu Trusty destop at work, and many Debian Squeeze&nbsp;servers.</p>
-<p>I also updated a couple of other Vim plugins along the process, replacing <a href="https://github.com/garbas/vim-snipmate">vim-snipmate</a> with <a href="https://github.com/SirVer/ultisnips">ultisnips</a>, <a href="https://github.com/bitc/vim-bad-whitespace">vim-bad-whitespace</a> with <a href="https://github.com/ntpeters/vim-better-whitespace">vim-better-whitespace</a> (no pun intended), and adding <a href="https://github.com/airblade/vim-gitgutter">vim-gutter</a>. The biggest discovery is <a href="https://github.com/Lokaltog/vim-easymotion">vim-easymotion</a> though, perfect …</p>
-                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/dotfiles-update.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
 
         <ul class="pagination">
                 <li class="prev"><a href="http://www.lyh.me/author/neville-li.html">&laquo;</a>
@@ -450,11 +450,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">Automatic type-class derivation with&nbsp;Shapeless</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
-    <li class="list-group-item"><a href="http://www.lyh.me/implicits.html">Implicits</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->

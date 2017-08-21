@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Automatic type-class derivation with Shapeless - Das Keyboard Shredder</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">
+
+        <meta name="author" content="Neville Li" />
+        <meta name="keywords" content="scala,fp" />
+        <meta name="description" content="We had a knowledge sharing session at work recently on Shapeless for automatic type class derivation. Here is a little write-up for the topic. Scala List First let’s review how List works in Scala. A List is a linked list with head and tail, plus Nil for empty list. It can be represented with the following abstract data type: sealed trait List[+A] { def ::[B &gt;: A](head: B): List[B] = Cons(head, this) } case object Nil extends List[Nothing] // Nothing is a sub-type of every other type case class Cons[+A](head: A, tail: List[A]) extends List[A] Notice that ::, the list concatenation operation, is just a method on trait List[+A]. Since Scala operators that end with : are right-associative, we can conveniently create lists by chaining multiple ::s. Therefore the following expressions are equivalent: 1 :: 2 :: Nil 1 :: (2 :: Nil) Nil.::(2).::(1) Cons(1, Cons(2, Nil)) It’s important to point out here that Scala List is homogeneous, i.e. it has a single type parameter A and thus can only store elements of A and its sub-types. On the other hand, it can have varying numbers of elements at runtime. Shapeless HList Since List …" />
+
+        <meta property="og:site_name" content="Das Keyboard Shredder" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Automatic type-class derivation with Shapeless"/>
+        <meta property="og:url" content="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html"/>
+        <meta property="og:description" content="We had a knowledge sharing session at work recently on Shapeless for automatic type class derivation. Here is a little write-up for the topic. Scala List First let’s review how List works in Scala. A List is a linked list with head and tail, plus Nil for empty list. It can be represented with the following abstract data type: sealed trait List[+A] { def ::[B &gt;: A](head: B): List[B] = Cons(head, this) } case object Nil extends List[Nothing] // Nothing is a sub-type of every other type case class Cons[+A](head: A, tail: List[A]) extends List[A] Notice that ::, the list concatenation operation, is just a method on trait List[+A]. Since Scala operators that end with : are right-associative, we can conveniently create lists by chaining multiple ::s. Therefore the following expressions are equivalent: 1 :: 2 :: Nil 1 :: (2 :: Nil) Nil.::(2).::(1) Cons(1, Cons(2, Nil)) It’s important to point out here that Scala List is homogeneous, i.e. it has a single type parameter A and thus can only store elements of A and its sub-types. On the other hand, it can have varying numbers of elements at runtime. Shapeless HList Since List …"/>
+        <meta property="article:published_time" content="2017-08-21" />
+            <meta property="article:section" content="code" />
+            <meta property="article:tag" content="scala" />
+            <meta property="article:tag" content="fp" />
+            <meta property="article:author" content="Neville Li" />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="http://www.lyh.me/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="http://www.lyh.me/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="http://www.lyh.me/theme/css/pygments/monokai.css" rel="stylesheet">
+        <link href="http://www.lyh.me/theme/css/typogrify.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://www.lyh.me/theme/css/style.css" type="text/css"/>
+
+        <link href="http://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Das Keyboard Shredder ATOM Feed"/>
+
+
+
+        <link href="http://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Das Keyboard Shredder code ATOM Feed"/>
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="http://www.lyh.me/" class="navbar-brand">
+Das Keyboard Shredder            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="http://www.lyh.me/pages/about-me.html">
+                             About&nbsp;Me
+                          </a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html"
+                       rel="bookmark"
+                       title="Permalink to Automatic type-class derivation with Shapeless">
+                        Automatic type-class derivation with&nbsp;Shapeless
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2017-08-21T09:30:00-04:00"> Mon 21 August 2017</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/scala.html">scala</a>
+        /
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p>We had a knowledge sharing session at work recently on <a href="https://github.com/milessabin/shapeless/">Shapeless</a> for automatic type class derivation. Here is a little write-up for the&nbsp;topic.</p>
+<h2>Scala&nbsp;List</h2>
+<p>First let&#8217;s review how <code>List</code> works in Scala. A <code>List</code> is a linked list with <code>head</code> and <code>tail</code>, plus <code>Nil</code> for empty list. It can be represented with the following abstract data&nbsp;type:</p>
+<div class="highlight"><pre><span></span><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">List</span><span class="o">[</span><span class="kt">+A</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="o">::[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">head</span><span class="k">:</span> <span class="kt">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">head</span><span class="o">,</span> <span class="k">this</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">case</span> <span class="k">object</span> <span class="nc">Nil</span> <span class="k">extends</span> <span class="nc">List</span><span class="o">[</span><span class="kt">Nothing</span><span class="o">]</span> <span class="c1">// Nothing is a sub-type of every other type</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Cons</span><span class="o">[</span><span class="kt">+A</span><span class="o">](</span><span class="n">head</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">tail</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span> <span class="k">extends</span> <span class="nc">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+</pre></div>
+
+
+<p>Notice that <code>::</code>, the list concatenation operation, is just a method on trait <code>List[+A]</code>. Since Scala operators that end with <code>:</code> are right-associative, we can conveniently create lists by chaining multiple <code>::</code>s. Therefore the following expressions are&nbsp;equivalent:</p>
+<div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">::</span> <span class="mi">2</span> <span class="o">::</span> <span class="nc">Nil</span>
+<span class="mi">1</span> <span class="o">::</span> <span class="o">(</span><span class="mi">2</span> <span class="o">::</span> <span class="nc">Nil</span><span class="o">)</span>
+<span class="nc">Nil</span><span class="o">.::(</span><span class="mi">2</span><span class="o">).::(</span><span class="mi">1</span><span class="o">)</span>
+<span class="nc">Cons</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="nc">Cons</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="nc">Nil</span><span class="o">))</span>
+</pre></div>
+
+
+<p>It&#8217;s important to point out here that Scala <code>List</code> is homogeneous, i.e. it has a single type parameter <code>A</code> and thus can only store elements of <code>A</code> and its sub-types. On the other hand, it can have varying numbers of elements at&nbsp;runtime.</p>
+<h2>Shapeless&nbsp;HList</h2>
+<p>Since <code>List</code> is homogeneous, the most common way to represent lists of different types in Scala is tuples. However, since tuples of different arities are different types (<code>Tuple2[A, B]</code>, <code>Tuple3[A, B, C]</code>, &#8230;) and limited to 22 elements, it&#8217;s hard to write generic code that operates on tuples of varying&nbsp;arities.</p>
+<p>Heterogenous list, or <code>HList</code>, is the core type in Shapeless and can represent lists of varying lengths with different element&nbsp;types.</p>
+<div class="highlight"><pre><span></span><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">HList</span>
+
+<span class="c1">// HNil is both a type (trait) and an object</span>
+<span class="k">sealed</span> <span class="k">trait</span> <span class="nc">HNil</span> <span class="k">extends</span> <span class="nc">HList</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="o">::[</span><span class="kt">H</span><span class="o">](</span><span class="n">head</span><span class="k">:</span> <span class="kt">H</span><span class="o">)</span><span class="k">:</span> <span class="kt">H</span> <span class="kt">::</span> <span class="kt">HNil</span> <span class="o">=</span> <span class="k">new</span> <span class="o">::(</span><span class="n">head</span><span class="o">,</span> <span class="k">this</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">case</span> <span class="k">object</span> <span class="nc">HNil</span> <span class="k">extends</span> <span class="nc">HNil</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">::</span><span class="o">[</span><span class="kt">+H</span>, <span class="kt">+T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">head</span><span class="k">:</span> <span class="kt">H</span><span class="o">,</span> <span class="n">tail</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">HList</span>
+
+<span class="k">implicit</span> <span class="k">class</span> <span class="nc">HListOps</span><span class="o">[</span><span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="k">val</span> <span class="n">self</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">AnyVal</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="o">::[</span><span class="kt">H</span><span class="o">](</span><span class="n">head</span><span class="k">:</span> <span class="kt">H</span><span class="o">)</span><span class="k">:</span> <span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span> <span class="o">=</span> <span class="k">new</span> <span class="o">::(</span><span class="n">head</span><span class="o">,</span> <span class="n">self</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>And the following expressions are&nbsp;equivalent:</p>
+<div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="kc">true</span> <span class="o">::</span> <span class="nc">HNil</span>
+<span class="mi">1</span> <span class="o">::</span> <span class="o">(</span><span class="mf">3.14</span> <span class="o">::</span> <span class="o">(</span><span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="o">(</span><span class="kc">true</span> <span class="o">::</span> <span class="nc">HNil</span><span class="o">)))</span>
+<span class="nc">HNil</span><span class="o">.::(</span><span class="kc">true</span><span class="o">).::(</span><span class="s">&quot;foo&quot;</span><span class="o">).::(</span><span class="mf">3.14</span><span class="o">).::(</span><span class="mi">1</span><span class="o">)</span>
+<span class="o">::(</span><span class="mi">1</span><span class="o">,</span> <span class="o">::(</span><span class="mf">3.14</span><span class="o">,</span> <span class="o">::(</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="o">::(</span><span class="kc">true</span><span class="o">,</span> <span class="nc">HNil</span><span class="o">))))</span>
+</pre></div>
+
+
+<p>Note that there are two <code>::(head: H)</code> implementations with different return types <code>H :: HNil</code> and <code>H :: T</code>. This way types of all elements are retained and not erased to <code>HList</code> if <code>::</code> was only defined in <code>trait HList</code>.</p>
+<p>Also note that in Scala, generic types with 2 type paramemters can be used in an infix position, i.e. <code>::[H, T]</code> == <code>H :: T</code>, and those that end with <code>:</code> are right-associative, we can conveniently create unique <code>HList</code> types in a syntax similar to <code>List</code> creation.</p>
+<div class="highlight"><pre><span></span><span class="c1">// ::[Int, ::[Double, HNil]]</span>
+<span class="k">type</span> <span class="kt">L1</span> <span class="o">=</span> <span class="nc">Int</span> <span class="o">::</span> <span class="nc">Double</span> <span class="o">::</span> <span class="nc">HNil</span>
+
+<span class="c1">// ::(1, ::(3.14, HNil))</span>
+<span class="k">val</span> <span class="n">l1</span><span class="k">:</span> <span class="kt">L1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="nc">HNil</span>
+
+<span class="c1">// ::[Int, ::[Double, ::[String, HNil]]]</span>
+<span class="k">type</span> <span class="kt">L2</span> <span class="o">=</span> <span class="nc">Int</span> <span class="o">::</span> <span class="nc">Double</span> <span class="o">::</span> <span class="nc">String</span> <span class="o">::</span> <span class="nc">HNil</span>
+
+<span class="c1">// ::(1, ::(3.14, ::(&quot;foo&quot;, HNil)))</span>
+<span class="k">val</span> <span class="n">l2</span><span class="k">:</span> <span class="kt">L2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="nc">HNil</span>
+
+<span class="c1">// ::[Int, ::[Double, ::[String, ::[Boolean, HNil]]]]</span>
+<span class="k">type</span> <span class="kt">L3</span> <span class="o">=</span> <span class="nc">Int</span> <span class="o">::</span> <span class="nc">Double</span> <span class="o">::</span> <span class="nc">String</span> <span class="o">::</span> <span class="nc">Boolean</span> <span class="o">::</span> <span class="nc">HNil</span>
+
+<span class="c1">// ::(1, ::(3.14, ::(&quot;foo&quot;, ::(true, HNil))))</span>
+<span class="k">val</span> <span class="n">l3</span><span class="k">:</span> <span class="kt">L3</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="kc">true</span> <span class="o">::</span> <span class="nc">HNil</span>
+</pre></div>
+
+
+<p>We can see that each <code>HList</code> instance, i.e. <code>L1</code>, <code>L2</code>, <code>L3</code>, is a unique type with fixed but varying number of element types determined at compile time. But since all of them are instances of <code>HList</code> and recursively <code>H :: T</code>, we can operate them in a generic way with&nbsp;implicits.</p>
+<h2>Implicit type-class&nbsp;derivation</h2>
+<p>Now let&#8217;s look at how we can operate <code>HList</code> by recursively process <code>head</code> and <code>tail</code>. Say we have a <code>Flip[T]</code> type class that flips the value of type <code>T</code>, and implicit instances for <code>Int</code>, <code>Double</code>, <code>Boolean</code> and <code>String</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">T</span>
+<span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">Flip</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">[</span><span class="kt">T</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">T</span> <span class="o">=&gt;</span> <span class="n">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">T</span> <span class="o">=</span> <span class="n">f</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">intFlip</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">Int</span><span class="o">](-</span><span class="k">_</span><span class="o">)</span>
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">doubleFlip</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">Double</span><span class="o">](-</span><span class="k">_</span><span class="o">)</span>
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">booleanFlip</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">Boolean</span><span class="o">](!</span><span class="k">_</span><span class="o">)</span>
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">stringFlip</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="k">_</span><span class="o">.</span><span class="n">reverse</span><span class="o">)</span>
+</pre></div>
+
+
+<p>And we want to apply <code>Flip[T]</code> to an <code>Hlist</code> of arbitrary length and types. For an <code>HList</code> of <code>A :: B :: C :: D :: HNil</code>, we want to recursively summon implicit instances of <code>Flip[T]</code> for the heads, i.e. <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>, and the tails, i.e. <code>B :: C :: D :: HNil</code>, <code>C :: D :: HNil</code>, <code>D :: HNil</code>, <code>HNil</code>. As any recursive approach it&#8217;s easy to start with the terminal case <code>HNil</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">shapeless._</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">hnilFlip</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">HNil</span><span class="o">](</span><span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">HNil</span><span class="o">)</span>
+
+<span class="k">implicit</span> <span class="k">def</span> <span class="n">hconsFlip</span><span class="o">[</span><span class="kt">H</span>, <span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">]</span>
+<span class="o">(</span><span class="k">implicit</span> <span class="n">hf</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span><span class="o">],</span> <span class="n">tf</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span> <span class="c1">// summon implicit instances, tf is computed recursively</span>
+<span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span> <span class="o">=</span> <span class="n">hf</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">head</span><span class="o">)</span> <span class="o">::</span> <span class="n">tf</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>Now we can summon an implicit <code>Flip[T]</code> with any <code>HList</code> instances.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">flip</span><span class="o">[</span><span class="kt">T</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span> <span class="k">=</span> <span class="n">f</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+
+<span class="n">flip</span><span class="o">(</span><span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="kc">true</span> <span class="o">::</span> <span class="nc">HNil</span><span class="o">)</span>
+<span class="c1">// Int :: Double :: String :: Boolean :: HNil = -1 :: -3.14 :: &quot;oof&quot; :: false :: HNil</span>
+</pre></div>
+
+
+<p>The above code is expanded at compile time&nbsp;to:</p>
+<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">f</span> <span class="k">=</span> <span class="n">hconsFlip</span><span class="o">(</span><span class="n">intFlip</span><span class="o">,</span>
+  <span class="n">hconsFlip</span><span class="o">(</span><span class="n">doubleFlip</span><span class="o">,</span>
+    <span class="n">hconsFlip</span><span class="o">(</span><span class="n">stringFlip</span><span class="o">,</span>
+      <span class="n">hconsFlip</span><span class="o">(</span><span class="n">booleanFlip</span><span class="o">,</span> <span class="n">hnilFlip</span><span class="o">))))</span>
+<span class="n">f</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">1</span> <span class="o">::</span> <span class="mf">3.14</span> <span class="o">::</span> <span class="s">&quot;foo&quot;</span> <span class="o">::</span> <span class="kc">true</span> <span class="o">::</span> <span class="nc">HNil</span><span class="o">)</span>
+</pre></div>
+
+
+<h2>Generic and&nbsp;LabelledGeneric</h2>
+<p>Now that we know how to operate <code>HList</code>s in a generic way, Shapeless also offers <code>Generic</code> and <code>LabelledGeneric</code> for operating tuples and case classes in the same manner. <code>Generic</code> is a type-class for conversion between Scala types and <code>HList</code>s.</p>
+<div class="highlight"><pre><span></span><span class="c1">// (Int, Double, String, Boolean) &lt;=&gt; Int :: Double :: String :: Boolean :: HNil</span>
+<span class="k">val</span> <span class="n">gen</span> <span class="k">=</span> <span class="nc">Generic</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">Double</span>, <span class="kt">String</span>, <span class="kt">Boolean</span><span class="o">)]</span>
+
+<span class="k">val</span> <span class="n">l</span> <span class="k">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">to</span><span class="o">((</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="c1">// 1 :: 3.14 :: &quot;foo&quot; :: true :: HNil</span>
+<span class="k">val</span> <span class="n">t</span> <span class="k">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">from</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="c1">// (1, 3.14, &quot;foo&quot;, true)</span>
+</pre></div>
+
+
+<p>We can now extend <code>flip</code> to any&nbsp;tuples.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">flip</span><span class="o">[</span><span class="kt">T</span>, <span class="kt">L</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span>
+                       <span class="o">(</span><span class="k">implicit</span> <span class="n">gen</span><span class="k">:</span> <span class="kt">Generic.Aux</span><span class="o">[</span><span class="kt">T</span>, <span class="kt">L</span><span class="o">],</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">L</span><span class="o">])</span><span class="k">:</span> <span class="kt">T</span> <span class="o">=</span>
+  <span class="n">gen</span><span class="o">.</span><span class="n">from</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="n">gen</span><span class="o">.</span><span class="n">to</span><span class="o">(</span><span class="n">x</span><span class="o">)))</span>
+
+<span class="c1">// T = (Int, Double, String, Boolean)</span>
+<span class="c1">// L = Int :: Double :: String :: Boolean :: HNil</span>
+<span class="c1">// gen = Generic[(Int, Double, String, Boolean)]</span>
+<span class="c1">// f = implicitly[Flip[Int :: Double :: String :: Boolean :: HNil]]</span>
+<span class="n">flip</span><span class="o">((</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span>
+<span class="c1">// (Int, Double, String, Boolean) = (-1, -3.14, &quot;oof&quot;, false)</span>
+</pre></div>
+
+
+<p><code>Generic</code> also works with case classes, so our <code>flip</code> method works automatically supports them as&nbsp;well.</p>
+<div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Record</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">d</span><span class="k">:</span> <span class="kt">Double</span><span class="o">,</span> <span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+<span class="c1">// Record &lt;=&gt; Int :: Double :: String :: Boolean :: HNil</span>
+<span class="k">val</span> <span class="n">gen</span> <span class="k">=</span> <span class="nc">Generic</span><span class="o">[</span><span class="kt">Record</span><span class="o">]</span>
+<span class="k">val</span> <span class="n">l</span> <span class="k">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">to</span><span class="o">(</span><span class="nc">Record</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="c1">// 1 :: 3.14 :: &quot;foo&quot; :: true :: HNil</span>
+<span class="k">val</span> <span class="n">g</span> <span class="k">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">from</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="c1">// Record(1, 3.14, &quot;foo&quot;, true)</span>
+
+<span class="n">flip</span><span class="o">(</span><span class="nc">Record</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="c1">// Record(-1, -3.14, &quot;oof&quot;, false)</span>
+</pre></div>
+
+
+<p>You might have noticed that so far we&#8217;ve only operated on the types and values of individual fields, but not field names in a case class. <code>LabelledGeneric</code> is designed just for that by giving us access field names via the type&nbsp;system.</p>
+<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">gen</span> <span class="k">=</span> <span class="nc">LabelledGeneric</span><span class="o">[</span><span class="kt">Record</span><span class="o">]</span>
+<span class="c1">// Int with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String(&quot;i&quot;)], Int]</span>
+<span class="c1">// :: Double with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String(&quot;d&quot;)], Double]</span>
+<span class="c1">// :: String with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String(&quot;s&quot;)], String]</span>
+<span class="c1">// :: Boolean with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String(&quot;b&quot;)], Boolean]</span>
+<span class="c1">// :: shapeless.HNil</span>
+</pre></div>
+
+
+<p>Each field type e.g. <code>Int</code>, <code>Double</code> is extended with <code>KeyTag[K, V]</code> where <code>K</code> is a macro generated singleton type that uniquely represents the string value. Without diving too deep into the topic, we can retrieve the field name with the <code>Witness</code> type&nbsp;class.</p>
+<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">shapeless.labelled.FieldType</span>
+
+<span class="k">def</span> <span class="n">name</span><span class="o">[</span><span class="kt">K</span> <span class="k">&lt;:</span> <span class="kt">Symbol</span>, <span class="kt">V</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">FieldType</span><span class="o">[</span><span class="kt">K</span>, <span class="kt">V</span><span class="o">])</span>
+                        <span class="o">(</span><span class="k">implicit</span> <span class="n">wit</span><span class="k">:</span> <span class="kt">Witness.Aux</span><span class="o">[</span><span class="kt">K</span><span class="o">])</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="n">wit</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">name</span>
+
+<span class="c1">// l.head: Int with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String(&quot;i&quot;)], Int]</span>
+<span class="n">name</span><span class="o">(</span><span class="n">l</span><span class="o">.</span><span class="n">head</span><span class="o">)</span> <span class="c1">// &quot;i&quot;</span>
+</pre></div>
+
+
+<p>We can now derive type classes that also depends on field names, for example <code>ToMap[T]</code> that converts <code>T</code> to <code>Map[String, Any]</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">shapeless._</span>
+<span class="k">import</span> <span class="nn">shapeless.labelled.FieldType</span>
+
+<span class="k">trait</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span>
+<span class="o">}</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">hnilToMap</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">HNil</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">HNil</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">.</span><span class="n">empty</span>
+<span class="o">}</span>
+
+<span class="k">implicit</span> <span class="k">def</span> <span class="n">hconsToMap</span><span class="o">[</span><span class="kt">K</span> <span class="k">&lt;:</span> <span class="kt">Symbol</span>, <span class="kt">H</span>, <span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">]</span>
+<span class="o">(</span><span class="k">implicit</span> <span class="n">wit</span><span class="k">:</span> <span class="kt">Witness.Aux</span><span class="o">[</span><span class="kt">K</span><span class="o">],</span> <span class="n">ttm</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span>
+<span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">FieldType</span><span class="o">[</span><span class="kt">K</span>, <span class="kt">H</span><span class="o">]</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">FieldType</span><span class="o">[</span><span class="kt">K</span>, <span class="kt">H</span><span class="o">]</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">FieldType</span><span class="o">[</span><span class="kt">K</span>, <span class="kt">H</span><span class="o">]</span> <span class="o">::</span> <span class="n">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span> <span class="k">=</span>
+    <span class="n">ttm</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span> <span class="o">+</span> <span class="o">(</span><span class="n">wit</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">name</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">toMap</span><span class="o">[</span><span class="kt">T</span>, <span class="kt">L</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span>
+                       <span class="o">(</span><span class="k">implicit</span>
+                        <span class="n">gen</span><span class="k">:</span> <span class="kt">LabelledGeneric.Aux</span><span class="o">[</span><span class="kt">T</span>, <span class="kt">L</span><span class="o">],</span>
+                        <span class="n">tm</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">L</span><span class="o">])</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">tm</span><span class="o">(</span><span class="n">gen</span><span class="o">.</span><span class="n">to</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Record</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">d</span><span class="k">:</span> <span class="kt">Double</span><span class="o">,</span> <span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+<span class="n">toMap</span><span class="o">(</span><span class="nc">Record</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="c1">// Map(&quot;b&quot; -&gt; true, &quot;s&quot; -&gt; &quot;foo&quot;, d -&gt; 3.14, i -&gt; 1)</span>
+</pre></div>
+
+
+<h2>Type class&nbsp;companions</h2>
+<p>Now we know how to write generic code that works with tuples and case classes, but the above examples are still pretty verbose. Luckily there&#8217;re are some helpers in shapeless to reduce boilerplate for these problems, namely <code>ProductTypeClassCompanion</code> and <code>LabelledProductTypeClassCompanion</code>.</p>
+<p>The <code>ProductTypeClassCompanion</code> skeleton for <code>Flip[T]</code> looks like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">shapeless._</span>
+
+<span class="k">object</span> <span class="nc">FlipDerivedOrphans</span> <span class="k">extends</span> <span class="nc">ProductTypeClassCompanion</span><span class="o">[</span><span class="kt">Flip</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">val</span> <span class="n">typeClass</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ProductTypeClass</span><span class="o">[</span><span class="kt">Flip</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">product</span><span class="o">[</span><span class="kt">H</span>, <span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">ch</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span><span class="o">],</span> <span class="n">ct</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">emptyProduct</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">HNil</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">project</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">G</span><span class="o">](</span><span class="n">instance</span><span class="k">:</span> <span class="o">=&gt;</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">G</span><span class="o">],</span> <span class="n">to</span><span class="k">:</span> <span class="kt">F</span> <span class="o">=&gt;</span> <span class="n">G</span><span class="o">,</span> <span class="n">from</span><span class="k">:</span> <span class="kt">G</span> <span class="o">=&gt;</span> <span class="n">F</span><span class="o">)</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>It&#8217;s easy to fill in the&nbsp;blanks.</p>
+<div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">FlipDerivedOrphans</span> <span class="k">extends</span> <span class="nc">ProductTypeClassCompanion</span><span class="o">[</span><span class="kt">Flip</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">val</span> <span class="n">typeClass</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ProductTypeClass</span><span class="o">[</span><span class="kt">Flip</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">product</span><span class="o">[</span><span class="kt">H</span>, <span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">ch</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span><span class="o">],</span> <span class="n">ct</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="k">=</span>
+      <span class="nc">Flip</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">](</span><span class="n">x</span> <span class="k">=&gt;</span> <span class="n">ch</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">head</span><span class="o">)</span> <span class="o">::</span> <span class="n">ct</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">tail</span><span class="o">))</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">emptyProduct</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">HNil</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">HNil</span><span class="o">](</span><span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">HNil</span><span class="o">)</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">project</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">G</span><span class="o">](</span><span class="n">instance</span><span class="k">:</span> <span class="o">=&gt;</span> <span class="nc">Flip</span><span class="o">[</span><span class="kt">G</span><span class="o">],</span> <span class="n">to</span><span class="k">:</span> <span class="kt">F</span> <span class="o">=&gt;</span> <span class="n">G</span><span class="o">,</span> <span class="n">from</span><span class="k">:</span> <span class="kt">G</span> <span class="o">=&gt;</span> <span class="n">F</span><span class="o">)</span><span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="k">=</span>
+      <span class="nc">Flip</span><span class="o">[</span><span class="kt">F</span><span class="o">](</span><span class="n">f</span> <span class="k">=&gt;</span> <span class="n">from</span><span class="o">(</span><span class="n">instance</span><span class="o">(</span><span class="n">to</span><span class="o">(</span><span class="n">f</span><span class="o">))))</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">implicit</span> <span class="k">def</span> <span class="n">deriveFlip</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span>
+<span class="o">(</span><span class="k">implicit</span> <span class="n">orphan</span><span class="k">:</span> <span class="kt">Orphan</span><span class="o">[</span><span class="kt">Flip</span>, <span class="kt">FlipDerivedOrphans.</span><span class="k">type</span>, <span class="kt">T</span><span class="o">])</span>
+<span class="k">:</span> <span class="kt">Flip</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="n">orphan</span><span class="o">.</span><span class="n">instance</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Record</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">d</span><span class="k">:</span> <span class="kt">Double</span><span class="o">,</span> <span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">f</span> <span class="k">=</span> <span class="n">implicitly</span><span class="o">[</span><span class="kt">Flip</span><span class="o">[</span><span class="kt">Record</span><span class="o">]]</span>
+<span class="n">f</span><span class="o">(</span><span class="nc">Record</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span>
+</pre></div>
+
+
+<p>Likewise we can use <code>LabelledProductTypeClassCompanion</code> for <code>ToMap[T]</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">ToMapDerivedOrphans</span> <span class="k">extends</span> <span class="nc">LabelledProductTypeClassCompanion</span><span class="o">[</span><span class="kt">ToMap</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">val</span> <span class="n">typeClass</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">LabelledProductTypeClass</span><span class="o">[</span><span class="kt">ToMap</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">product</span><span class="o">[</span><span class="kt">H</span>, <span class="kt">T</span> <span class="k">&lt;:</span> <span class="kt">HList</span><span class="o">](</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">ch</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">H</span><span class="o">],</span> <span class="n">ct</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">])</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="k">=</span>
+      <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+        <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">H</span> <span class="kt">::</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span> <span class="k">=</span> <span class="n">ct</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span> <span class="o">+</span> <span class="o">(</span><span class="n">name</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
+      <span class="o">}</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">emptyProduct</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">HNil</span><span class="o">]</span> <span class="k">=</span>
+      <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">HNil</span><span class="o">]</span> <span class="o">{</span>
+        <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">HNil</span><span class="o">)</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">.</span><span class="n">empty</span>
+      <span class="o">}</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">project</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">G</span><span class="o">](</span><span class="n">instance</span><span class="k">:</span> <span class="o">=&gt;</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">G</span><span class="o">],</span> <span class="n">to</span><span class="k">:</span> <span class="kt">F</span> <span class="o">=&gt;</span> <span class="n">G</span><span class="o">,</span> <span class="n">from</span><span class="k">:</span> <span class="kt">G</span> <span class="o">=&gt;</span> <span class="n">F</span><span class="o">)</span><span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="k">=</span>
+      <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
+        <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">F</span><span class="o">)</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]</span> <span class="k">=</span> <span class="n">instance</span><span class="o">(</span><span class="n">to</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+      <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">implicit</span> <span class="k">def</span> <span class="n">deriveToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span>
+<span class="o">(</span><span class="k">implicit</span> <span class="n">orphan</span><span class="k">:</span> <span class="kt">Orphan</span><span class="o">[</span><span class="kt">ToMap</span>, <span class="kt">ToMapDerivedOrphans.</span><span class="k">type</span>, <span class="kt">T</span><span class="o">])</span>
+<span class="k">:</span> <span class="kt">ToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="n">orphan</span><span class="o">.</span><span class="n">instance</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Record</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">d</span><span class="k">:</span> <span class="kt">Double</span><span class="o">,</span> <span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">f</span> <span class="k">=</span> <span class="n">implicitly</span><span class="o">[</span><span class="kt">ToMap</span><span class="o">[</span><span class="kt">Record</span><span class="o">]]</span>
+<span class="n">f</span><span class="o">(</span><span class="nc">Record</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mf">3.14</span><span class="o">,</span> <span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span>
+</pre></div>
+
+
+<p>However this doesn&#8217;t work right away. The compiler complains about <code>could not find implicit value for parameter e: ToMap[Record]</code>. Upon closer inspection, we can see that even though the <code>ch: ToMap[H]</code> argument in <code>def product</code> is unused, it&#8217;s still summoning implicits for <code>Int</code>, <code>Double</code>, <code>String</code> and <code>Boolean</code>. This can be worked around by introducing dummy instances like below. Since <code>dummyToMap</code> is in the companion <code>object ToMap</code> which has lower priority than <code>deriveToMap</code> in the current scope, it&#8217;s only used for <code>ch: TopMap[H]</code> and not <code>implicitly[ToMap[Record]]</code>. This is obviously not the most elegant solution and only used here to demonstrate common problems when designing and deriving type classes. A better solution might be using an <span class="caps">ADT</span> as <code>ToMap#apply</code> return type instead of <code>Map[String, Any]</code>, and use pattern matching to handle head (single field) vs. tail (<code>Map</code>)&nbsp;cases.</p>
+<div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">ToMap</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">dummyToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ToMap</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="k">=</span> <span class="o">???</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>This concludes the write-up. However there&#8217;re still some topics not covered, like <code>Coproduct</code> and more complex scenarios for implicit&nbsp;lookup.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0">Shapeless feature&nbsp;overview</a></li>
+<li><a href="https://github.com/milessabin/shapeless/blob/master/examples/src/main/scala/shapeless/examples/shows.scala">Shows</a> and <a href="https://github.com/milessabin/shapeless/blob/master/examples/src/main/scala/shapeless/examples/monoids.scala">Monoid</a> examples in&nbsp;Shapeless</li>
+<li><a href="https://stackoverflow.com/questions/25517069/what-is-the-purpose-of-the-emptycoproduct-and-coproduct-methods-of-the-typeclass">StackOverflow question on&nbsp;Coproduct</a></li>
+<li><a href="http://underscore.io/books/shapeless-guide/">The Type Astronaut&#8217;s Guide to&nbsp;Shapeless</a></li>
+<li><a href="http://eed3si9n.com/implicit-parameter-precedence-again">Implicit parameter precedence&nbsp;again</a></li>
+</ul>
+            </div>
+            <!-- /.entry-content -->
+    <hr />
+    <!-- AddThis Button BEGIN -->
+    <div class="addthis_toolbox addthis_default_style">
+            <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+            <a class="addthis_button_tweet"></a>
+            <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    </div>
+    <!-- AddThis Button END -->
+    <hr/>
+    <section class="comments" id="comments">
+        <h2>Comments</h2>
+
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
+
+                    var disqus_identifier = 'automatic-type-class-derivation-with-shapeless';
+                var disqus_url = 'http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html';
+
+            var disqus_config = function () {
+                this.language = "en";
+            };
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                var dsq = document.createElement('script');
+                dsq.type = 'text/javascript';
+                dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by
+            Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    </section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<div id="aboutme">
+        <p>
+            <img width="100%" class="img-thumbnail" src="http://www.lyh.me//avatar.jpg"/>
+        </p>
+    <p>
+      <strong>About Neville Li</strong><br/>
+        
+Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, das keyboard shredder, author of <a href="https://github.com/spotify/scio">Scio</a>
+
+    </p>
+</div><!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="http://open.spotify.com/user/sinisa_lyh"><i class="fa fa-spotify fa-lg"></i> Spotify</a></li>
+    <li class="list-group-item"><a href="https://github.com/nevillelyh"><i class="fa fa-github-square fa-lg"></i> GitHub</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/sinisa_lyh"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/nevillelyh"><i class="fa fa-linkedin-square fa-lg"></i> LinkedIn</a></li>
+    <li class="list-group-item"><a href="http://www.slideshare.net/sinisalyh"><i class="fa fa-slideshare fa-lg"></i> SlideShare</a></li>
+    <li class="list-group-item"><a href="http://stackoverflow.com/users/3880836/neville-li"><i class="fa fa-stack-overflow fa-lg"></i> Stack-Overflow</a></li>
+    <li class="list-group-item"><a href="https://www.facebook.com/neville.lyh"><i class="fa fa-facebook-square fa-lg"></i> Facebook</a></li>
+    <li class="list-group-item"><a href="https://plus.google.com/+NevilleLiYH"><i class="fa fa-google-plus-square fa-lg"></i> Google+</a></li>
+    <li class="list-group-item"><a href="https://www.youtube.com/user/sinisalyh/videos"><i class="fa fa-youtube-square fa-lg"></i> YouTube</a></li>
+    <li class="list-group-item"><a href="https://www.flickr.com/photos/sinisa_lyh"><i class="fa fa-flickr fa-lg"></i> Flickr</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Recent Posts -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
+  <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">Automatic type-class derivation with&nbsp;Shapeless</a></li>
+    <li class="list-group-item"><a href="http://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
+    <li class="list-group-item"><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
+    <li class="list-group-item"><a href="http://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
+    <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Recent Posts -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="http://www.lyh.me/category/code.html"><i class="fa fa-folder-open fa-lg"></i>code</a>
+    </li>
+    <li class="list-group-item">
+      <a href="http://www.lyh.me/category/misc.html"><i class="fa fa-folder-open fa-lg"></i>misc</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/sinisa_lyh">Tweets by sinisa_lyh</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2017 Neville Li
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/deed.en">Creative Commons Attribution-NonCommercial 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="http://www.lyh.me/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="http://www.lyh.me/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="http://www.lyh.me/theme/js/respond.min.js"></script>
+
+    <!-- Disqus -->
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.type = 'text/javascript';
+            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+    </script>
+    <!-- End Disqus Code -->
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-6988688-5']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    <!-- End Google Analytics Code -->
+
+
+        <script type="text/javascript">var addthis_config = {"data_track_addressbar": true};</script>
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=sinisalyh"></script>
+</body>
+</html>
