@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Featran</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Featran
+## Type safe and generic feature transformation in Scala
+Neville Li
+
+@sinisa_lyh
+
+Nov 2017
+
+---
+
+class: center, middle
+# Feature engineering
+
+_is the process of using domain knowledge of the data to create features that make machine learning algorithms work. Feature engineering is fundamental to the application of machine learning, and is both difficult and expensive._
+
+---
+
+class: center, middle
+
+_Coming up with features is difficult, time-consuming, requires expert knowledge. "Applied machine learning" is basically feature engineering._
+
+&ndash; Andrew Ng, _Machine Learning and AI via Brain simulations_
+
+---
+
+# Let's look at 3 basic feature transformers
+
+- ### Binarizer
+- ### Min-max scaler
+- ### One hot encoder
+
+---
+
+# Binarizer
+
+- ### Input `Double`
+- ### Map `Double => Double`
+
+---
+
+# Min-Max Scaler
+
+- ### Input `Double`
+
+--
+
+- ### Map `Double => (Min[Double], Max[Double])`
+  ### Reduce(semigroup.plus)
+  ### Map `(Min[Double], Max[Double]) => (Double, Double)`
+
+--
+
+- ### Map `Double => Double` with `(Double, Double)`
+
+---
+
+# One Hot Encoder
+
+- ### Input `String`
+
+--
+
+- ### Map `String => Set[String]`
+  ### Reduce(semigroup.plus)
+  ### Map `Set[String] => Array[String]`
+
+--
+
+- ### Map `String => Array[Double]` with `Array[String]`
+
+---
+
+# Transformer
+
+- ### Record `T`
+- ### Extract `T => A`
+
+--
+
+- ### `Aggregator[A, B, C]`
+  - Prepare `A => B`
+  - Reduce `(B, B) => B` // `implicit sg: Semigroup[B]`
+  - Present `B => C` // Settings
+  
+--
+
+- ### Transform `A` with `C`
+
+---
+
+class: center, middle
+# Featran
+
+---
+
+class: center, middle
+# Featran77
+
+---
+
+class: center, middle
+# F77 (get it?)
+
+---
+
+# FeatureSpec
+
+- ### Record `T`
+- ### Extract `T => A`
+- ### Transform `Transform[A, B, C]`
+  
+--
+
+```scala
+class FeatureSpec[T] {
+  def required[A](f: T => A)(t: Transformer[A, _, _])
+  def optional[A](f: T => Option[A], default: Option[A] = None)(t: Transformer[A, _, _])
+}
+```
+  
+```scala
+FeatureSpec.of[Record]
+  .required(_.getDuration)(Binarizer("is_long", 300000.0))
+  .required(_.getDuration)(MinMaxScaler("duration_norm"))
+  .optional(_.getGenre)(OneHotEncoder("genre"))
+```
+
+---
+
+# FeatureExtractor
+
+`FeatureSpec#extract[M[_]: CollectionType](input: M[T]): FeatureExtractor[M, T]`
+
+- ### `featureNames`
+- ### `featureValues`
+- ### `featureSettings` - `C` in `Aggregator[A, B, C]`
+
+--
+
+```scala
+trait CollectionType[M[_]] { self =>
+  def map[A, B](ma: M[A], f: A => B): M[B]
+  def reduce[A](ma: M[A], f: (A, A) => A): M[A]
+  def cross[A, B](ma: M[A], mb: M[B]): M[(A, B)] // map A with C
+}
+```
+
+---
+
+# FeatureBuilder
+
+`FeatureExtractor#featureValues[F: FeatureBuilder]: M[F]`
+
+- ### `Array[T]`, `Traversable[T]`, `DenseVector[T]`
+- ### `Map[String, T]`, `SparseVector[T]`, TensorFlow `Example`
+
+--
+
+```scala
+trait FeatureBuilder[T] { self =>
+  def init(dimension: Int): Unit
+  def add(name: String, value: Double): Unit
+  def skip(): Unit
+  def result: T
+  def map[U](f: T => U): FeatureBuilder[U] = new FeatureBuilder[U] {
+    // ...
+  }
+}
+```
+
+---
+
+# FeatureSettings
+
+- Aggregator map &rarr; reduce &rarr; map
+- Map with settings
+
+```scala
+val training: Seq[T] = // ...
+val spec: FeatureSpec[T]
+val settings = spec.extract(training).featureSettings
+```
+
+--
+
+- No aggregator
+- Map with settings
+
+```scala
+val validation: Seq[T] = // ...
+spec.extractWithSettings(validation, settings)
+```
+
+---
+
+# Other features
+
+- Feature rejection - out of bound, unseen, wrong dimension, etc.
+
+--
+
+- Combining specs
+
+```scala
+val fs1: FeatureSpec.of[Record] = // ...
+val fs2: FeatureSpec.of[Record] = // ...
+MultiFeatureSpec(f1, f2).extract(data)
+```
+
+--
+
+- Feature crossing
+
+```scala
+fs.required(_.userId)(OneHotEncoder("user"))
+  .required(_.trackId)(OneHotEncoder("track"))
+  .cross("user", "track")(_ * _)
+```
+
+--
+
+- Java API
+  - Scio pipeline + TensorFlow &rarr; training
+  - Java backend + TensorFlow Java &rarr; prediction
+
+---
+
+# Available transformers
+
+- Binarizer
+- Bucketizer
+- Hash{OneHot,NHot,NHotWeighted}Encoder
+- HeavyHitters
+- Identity
+- MaxAbsScaler
+- MinMaxScaler
+- {OneHot,NHot,NHotWeighted}Encoder
+- PolynomialExpansion
+- QuantileDiscretizer
+- StandardScaler
+- VectorIdentity
+- VonMisesEvaluator
+
+---
+
+class: center, middle
+# Property-based testing
+## With ScalaCheck
+
+---
+
+## Will it work?
+
+```scala
+import org.scalacheck._
+import org.scalacheck.Prop.forAll
+import org.scalacheck.Prop.BooleanOperators
+
+object NumbersSpec extends Properties("Numbers") {
+  def norm(xs: Seq[Double]): Seq[Double] = xs.map(_ / xs.sum)
+  property("norm") = forAll { xs: Seq[Double] =>
+    norm(xs).sum == 1.0
+  }
+}
+```
+
+--
+
+## Nope
+
+```
+[info] ! Numbers.average: Falsified after 0 passed tests.
+[info] > ARG_0: Vector()
+```
+
+---
+
+## What about this?
+
+```scala
+property("norm") = forAll { xs: Seq[Double] =>
+  xs.nonEmpty ==> (norm(xs).sum == 1.0)
+}
+```
+
+--
+
+## Nope
+
+```
+[info] ! Numbers.average: Falsified after 15 passed tests.
+[info] > ARG_0: Vector(-1.8145861263590573E-5, 3.101917991440561E-5)
+[info] > ARG_0_ORIGINAL: Vector(-1.0642996781996996E249, -7.023164963687812E-263, -1.9836307051090494E-76,
+-2.5295849475521455E-27, 5.000995821866991E260, 3.2867913058433804E-163, 8.62489971039238E-125,
+-7.418410009981383E149, -3.0393193606028294E-55, 3.050613956430345E136, 3.5550746742173184E-238,
+4.2386125276913356E234, 4.39109603426591E-162)
+```
+
+--
+
+## Auto shrinking
+
+```
+[info] > ARG_0: Vector(-1.8145861263590573E-5, 3.101917991440561E-5)
+```
+
+---
+
+# Other interesting properties
+
+- ### ??? `Double.MaxValue + Double.MaxValue`
+- ### ??? `Double.MaxValue + 1 == Double.MaxValue`
+- ### ??? `Double.NaN == Double.NaN`
+
+---
+
+class: center, middle
+# The End
+## Happy Transforming
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>
