@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 mkvirtualenv pelican
 pip install --upgrade pip
