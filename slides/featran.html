@@ -71,28 +71,31 @@ Nov 2017
 
 - ## 100PB+ data, 60TB+ per day log ingestion
 - ## 20K+ jobs per day
-- ## ~300 #Scala, 1K+ unique jobs
-- ## ~300 #ML, Scio, Featran and TensorFlow for ML
+- ## ~300 in #Scala, 1K+ unique jobs
+- ## ~300 in #ML, Scio, Featran and TensorFlow for ML
 
 ---
 
 class: center, middle
 # Feature engineering
 
-## _is the process of using domain knowledge of the data to create features that make machine learning algorithms work_#
+## _is the process of using domain knowledge of the data to create features_
+## _that make machine learning algorithms work_
 
 ---
 
 class: center, middle
 # Feature engineering
 
-##_is fundamental to the application of machine learning and is both difficult and expensive_
+##_is fundamental to the application of machine learning and_
+## _is both difficult and expensive_
 
 ---
 
 class: center, middle
 
-## _Coming up with features is difficult, time-consuming, requires expert knowledge_
+## _Coming up with features is_
+## _difficult, time-consuming, requires expert knowledge_
 ## _"Applied machine learning" is basically feature engineering_
 
 &ndash; Andrew Ng, _Machine Learning and AI via Brain simulations_
@@ -113,6 +116,62 @@ class: center, middle
 - ## Feature values > threshold are binarized to 1.0
 - ## Values <= threshold are binarized to 0.0
 
+---
+
+# Binarizer
+
+## `input = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]`
+## `threshold = 0.5`
+
+--
+
+## `output = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]`
+
+---
+
+# Min-Max Scaler
+
+- ## Rescale each feature to a specific range [min, max] (default [0, 1]).
+
+---
+
+# Min-Max Scaler
+
+## `input = [-10.0, -5.0, 0.0, 5.0, 10.0, 30.0]`
+
+--
+
+## `output = [0.0, 0.125, 0.25, 0.375, 0.5, 1.0]`
+
+---
+
+
+# One Hot Encoder
+
+- ## Transform categorical features to binary columns
+- ## With at most a single one-value
+
+---
+
+# One Hot Encoder
+
+## `input = [a, b, a, c, b, d]`
+
+--
+
+#### `output = [`
+#### `[1.0, 0.0, 0.0, 0.0],  // a`
+#### `[0.0, 1.0, 0.0, 0.0],  // b`
+#### `[1.0, 0.0, 0.0, 0.0],  // a`
+#### `[0.0, 0.0, 1.0, 0.0],  // c`
+#### `[0.0, 1.0, 0.0, 0.0],  // b`
+#### `[0.0, 0.0, 0.0, 1.0]]  // d`
+
+---
+
+class: center, middle
+# Simple Enough?
+# Let's Code It
 
 ---
 
@@ -120,12 +179,6 @@ class: center, middle
 
 - ### Input `Double`
 - ### Map `Double => Double`
-
----
-
-# Min-Max Scaler
-
-- ## Rescale each feature to a specific range [min, max] (default [0, 1]).
 
 ---
 
@@ -142,13 +195,6 @@ class: center, middle
 --
 
 - ### Map `Double => Double` with `(Double, Double)`
-
----
-
-# One Hot Encoder
-
-- ## Transform categorical features to binary columns
-- ## With at most a single one-value
 
 ---
 
@@ -270,6 +316,7 @@ trait FeatureBuilder[T] { self =>
 
 # FeatureSettings
 
+- Fresh data
 - Aggregator map &rarr; reduce &rarr; map
 - Map with settings
 
@@ -281,6 +328,7 @@ val settings = spec.extract(training).featureSettings
 
 --
 
+- Reuse settings
 - No aggregator
 - Map with settings
 
@@ -341,6 +389,33 @@ fs.required(_.userId)(OneHotEncoder("user"))
 
 ---
 
+# Landscape
+
+- ## Spark MLLib
+  - ### Tied to Spark ecosystem, e.g. execution, modeling
+  - ### Hard to use in production services
+--
+
+- ## scikit-learn
+  - ### Python, no Java binding
+  - ### No distributed processing
+
+---
+
+# Featran
+
+- ## Decoupled execution
+  - ### Any system that supports `map`, `reduce`, `cross`
+  - ### Scio, Scalding, Spark, Flink, in-memory collections
+
+--
+
+- ## Decoupled output format
+  - ### Dense array, `Seq`, vector, etc.
+  - ### Sparse vector, `Map`, TensorFlow `Example`, etc.
+
+---
+
 class: center, middle
 # Property-based testing
 ## With ScalaCheck
@@ -349,6 +424,10 @@ class: center, middle
 
 class: center, middle
 # 100% Coverage
+
+---
+
+class: center, middle
 # On the First Try
 
 ---
@@ -428,7 +507,7 @@ property("norm") = forAll { xs: Seq[Double] =>
 
 --
 
-- ## Concurrency and mutable state
+- ## Concurrency and shared mutable states
   - ### `implicit val` &nbsp;&nbsp; vs &nbsp;&nbsp; `implicit def`
 
 ---
