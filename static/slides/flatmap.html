@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>flatMap</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+      @page {
+        size: 1210px 681px;
+        margin: 0;
+      }
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# flatMap
+## A brief history
+Neville Li
+
+---
+
+# History
+
+- ## Mar 2016 - formation, Neville, Rav, Andrew + Nitzan/Josh
+- ## Aug-Oct 2017 - Fallon, Romain, Anna, Rich, etc.
+- ## 3 devs for 18 months
+
+---
+
+# During this time
+
+- ## From ~20 to ~300 users in #scala
+- ## 0 to ~1300 production Scio pipelines
+- ## 10+ external users on Gitter, GCP Slack
+
+Most with no or little Scala and/or big data experience
+
+---
+
+# GitHub commits and ranking among Spotifiers
+
+- ## Neville - 1680, #1
+- ## Rav - 358, #13
+- ## Andrew - 117, #36
+
+As of Dec 21, 2017, excluding GHE commits
+
+---
+
+# GitHub repos
+
+## >20 total
+
+- #### scio - 18 sub-projects, ~1000 total issues and PRs
+- #### scio-idea-lugin, scio-template
+- #### featran, ratatool
+- #### spotify-tensorflow, tfimage
+- #### gcs-tools, big-data-rosetta-code, spark-bigquery
+- #### hype, limbo, shapeless-datatype, parquet-avro-extra, protobuf-generic, xgboost-dist
+- #### scala-luigi, scio-cookie, tf-paved-road, xgboost-paved-road, bazel-pipelines
+
+---
+
+# Repo LOC
+
+- #### scio - 18 sub-projects, 99K
+- #### featran - 8 sub-projects, 13K
+- #### ratatool - 8K
+- #### luigi (python) - 112K
+- #### helios (java) - 116K
+- #### styx (java) - 55K
+- #### apollo (java) - 48K
+- #### spydra (java) - 9K
+
+---
+
+# Upstream repos
+
+- ## Beam - Neville 12+, Rav 13+, Andrew 3+
+- ## chill, algebird, breeze, scalding, spark, zeppelin, parquet
+- ## kryo, sbt\*, bazel\*
+
+---
+
+# To boldly go where no one has gone before
+
+- #### Type macros and IntelliJ plugin
+- #### Type level programming
+- #### Property based testing, 100% coverage
+- #### Micro-benchmark, Java ASM, JNI
+- #### ClassLoader and REPL
+- #### Scala compiler and JVM issues
+- #### Build tools
+
+---
+
+# Education
+
+- ## scio wiki - ~15K words
+- ## big-data-rosetta-code - ~3K LOC
+- ## 20+ blog posts, slidedesks and tech-talks
+- ## 5 week long data university, 2+ devs almost full time
+
+---
+
+# Our roles
+
+- ## Build tools to let users focus on business problem
+- ## Be the experts in the tools our users need
+- ## Educate users on new programming paradigm and best practices
+
+## 33% building, 33% learning, 33% education
+
+---
+
+# Building and learning
+
+- ## Minimal process restraint
+- ## Find hard problem to solve
+- ## Be a part of the ecosystem
+
+---
+
+# Minimal process restraint
+
+- ## Our work is highly experimental
+- ## Lots of uncertainty and risks
+- ## Hard to plan exact task breakdowns
+- ## Instead plan general direction
+- ## Trust developers to best use their time and learn
+
+---
+
+# Find hard problem
+
+- ## Find problems with the largest impact given a general direction
+- ## Find hard problems to solve once for all users
+- ## Find problems end users shouldn't have to solve
+- ## Not afraid to solve problems we don't know how to
+- ## Embrace failure
+
+---
+
+# Be part of the ecosystem
+
+- ## Report bugs to anything that affect us
+- ## Contribute fixes and enhancements whenever possible
+- ## Leverage OSS community to maintain our code and docs
+- ## Learning the ecosystem helps us better support our users
+
+---
+
+# Support guidelines
+
+- ## Document everything
+- ## Async, eletronic communication
+- ## Guidance not answers
+- ## Empower users
+- ## Build community
+- ## Embed libre, not embed gratis
+
+---
+
+# Document everything
+
+- ## Scaladoc site + GitHub wiki
+- ## Any question asked twice goes into FAQ
+- ## One page confluence with everything
+- ## Hyperlink all pages for SEO
+
+---
+
+# Async, eletronic communication
+
+- ## Avoid face to face, @name and DMs
+- ## Prefer public async channels, e.g. Slack and GitHub issues
+- ## Visible to the community both for learning and leveraging help
+- ## Searcheable archive
+- ## Multi-tasking and minimize interruption
+
+---
+
+# Guidance not answers
+
+- ## We help users grow expertise, not solving their problem for them
+- ## Avoid direct answers to newbie questions
+- ## Identify questions that require genuine help or those due to "laziness"
+- ## Provide pointers, suggestions, links to code and docs, etc.
+
+---
+
+# Empower users
+
+- ## Ask users to file issues, provide stacktrace or reproducible snippet
+- ## Point users to troubleshoot guide and give feedback
+- ## Ask for PRs for trivial fixes
+
+---
+
+# Build community
+
+- ## Leverage power users
+- ## Knowledge sharing
+- ## Community based support
+- ## Open discussion for big feature requests, fixes, etc.
+
+---
+
+# Embed libre, not embed gratis
+
+- ## Embed is anti-pattern
+- ## Time consuming, not reproducible, not scalable
+- ## Sometimes useful, work with power users
+- ## Learn from each other, explore uncharted grounds
+- ## Avoid embed as offering free work
+---
+class: center, middle
+# The End
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>
