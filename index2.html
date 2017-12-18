@@ -68,51 +68,6 @@ Das Keyboard Shredder            </a>
     <div class="row">
         <div class="col-sm-9">
             <article>
-                <h2><a href="http://www.lyh.me/scio-at-scala-by-the-bay.html">Scio at Scala by the&nbsp;Bay</a></h2>
-                    <div class="well well-sm">
-<footer class="post-info">
-    <span class="label label-default">Date</span>
-    <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2016-11-14T13:04:00-05:00"> Mon 14 November 2016</time>
-    </span>
-
-
-
-        <span class="label label-default">Category</span>
-        <a href="http://www.lyh.me/category/code.html">code</a>
-
-
-<span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/data.html">data</a>
-        /
-	<a href="http://www.lyh.me/tag/scala.html">scala</a>
-        /
-	<a href="http://www.lyh.me/tag/scio.html">scio</a>
-    
-</footer><!-- /.post-info -->                    </div>
-                <div class="summary"><p>It&#8217;s been 7 months since we first announced <a href="https://github.com/spotify/scio">Scio</a> at <a href="https://cloudplatformonline.com/NEXT2016.html"><span class="caps">GCPNEXT16</span></a>. There&#8217;re now dozens of internal teams and a couple of other companies using Scio to run hundreds of pipelines on a daily basis. Within <a href="https://www.spotify.com/">Spotify</a>, Scio is now the prefered framework for building new data pipelines on <a href="http://cloud.google.com/">Google Cloud Platform</a>. We&#8217;ve also made 19 released and added tons of features and improvements. Below is a list of some notable&nbsp;ones.</p>
-<ul>
-<li>Interactive <span class="caps">REPL</span></li>
-<li>Type safe BigQuery macro improvements and <a href="https://github.com/spotify/scio-idea-plugin">Scio-<span class="caps">IDEA</span>-plugin</a></li>
-<li>BigQuery <a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/">standard <span class="caps">SQL</span> 2011 syntax</a>&nbsp;support</li>
-<li><span class="caps">HDFS</span> source and&nbsp;sink</li>
-<li>Avro file compression&nbsp;support</li>
-<li>Bigtable multi-table sink and utility for cluster&nbsp;scaling</li>
-<li>Protobuf file support and usability&nbsp;improvements</li>
-<li>Accumulator usability&nbsp;improvements</li>
-<li>End-to-end testing utilities and matchers&nbsp;improvements</li>
-<li>Join performance improvements and skewed&nbsp;join</li>
-<li>Metrics interface and&nbsp;enhancements</li>
-</ul>
-<p>I talked about Scio at <a href="http://scala.bythebay.io/">Scala by the Bay</a> last week and here are the&nbsp;slides.</p>
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/13tC6anQaZpNE8" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-
-<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scio-a-scala-api-for-google-cloud-dataflow-apache-beam" title="Scio - A Scala API for Google Cloud Dataflow &amp; Apache Beam" target="_blank">Scio - A Scala <span class="caps">API</span> for Google Cloud Dataflow <span class="amp">&amp;</span> Apache Beam</a> </strong> from <strong><a target="_blank" href="//www.slideshare.net/sinisalyh">Neville Li</a></strong> </div></p>
-                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/scio-at-scala-by-the-bay.html">more ...</a>
-                </div>
-            </article>
-            <hr/>
-            <article>
                 <h2><a href="http://www.lyh.me/semigroups.html">Semigroups</a></h2>
                     <div class="well well-sm">
 <footer class="post-info">
@@ -398,6 +353,55 @@ Das Keyboard Shredder            </a>
                 </div>
             </article>
             <hr/>
+            <article>
+                <h2><a href="http://www.lyh.me/using-cql-with-legacy-column-families.html">Using <span class="caps">CQL</span> with legacy column&nbsp;families</a></h2>
+                    <div class="well well-sm">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2014-09-13T20:47:00-04:00"> Sat 13 September 2014</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="http://www.lyh.me/category/code.html">code</a>
+
+
+<span class="label label-default">Tags</span>
+	<a href="http://www.lyh.me/tag/cassandra.html">cassandra</a>
+        /
+	<a href="http://www.lyh.me/tag/cql.html">cql</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                <div class="summary"><p>We use <a href="http://cassandra.apache.org/">Cassandra</a> extensively <a href="http://www.slideshare.net/JimmyMrdell/playlists-at-spotify-cassandra-summit-london-2013?related=1">at work</a>, and up till recently we&#8217;ve been using mostly Cassandra 1.2 with <a href="https://github.com/Netflix/astyanax">Astyanax</a> and <a href="https://thrift.apache.org/">Thrift</a> protocol in Java applications. Very recently we started adopting Cassandra 2.0 with <span class="caps">CQL</span>, <a href="https://github.com/datastax/java-driver">DataStax Java Driver</a> and binary&nbsp;protocol.</p>
+<p>While one should move to <span class="caps">CQL</span> schema to take full advantage of the new protocol and storage engine, it&#8217;s still possible to use <span class="caps">CQL</span> and the new driver on existing clusters. Say we have a legacy column family with <code>UTF8Type</code> for row/column keys and <code>BytesType</code> for values, it would look like this in <code>cassandra-cli</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">create</span> <span class="k">column</span> <span class="n">family</span> <span class="k">data</span>
+  <span class="k">with</span> <span class="n">column_type</span> <span class="o">=</span> <span class="s1">&#39;Standard&#39;</span>
+  <span class="k">and</span> <span class="n">comparator</span> <span class="o">=</span> <span class="s1">&#39;UTF8Type&#39;</span>
+  <span class="k">and</span> <span class="n">default_validation_class</span> <span class="o">=</span> <span class="s1">&#39;BytesType&#39;</span>
+  <span class="k">and</span> <span class="n">key_validation_class</span> <span class="o">=</span> <span class="s1">&#39;UTF8Type&#39;</span><span class="p">;</span>
+</pre></div>
+
+
+<p>And this in <code>cqlsh</code> after setting <code>start_native_transport: true</code> in <code>cassandra.yaml</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">data</span> <span class="p">(</span>
+  <span class="k">key</span> <span class="nb">text</span><span class="p">,</span>
+  <span class="n">column1</span> <span class="nb">text</span><span class="p">,</span>
+  <span class="n">value</span> <span class="nb">blob</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="k">key</span><span class="p">,</span> <span class="n">column1</span><span class="p">)</span>
+<span class="p">)</span> <span class="k">WITH</span> <span class="n">COMPACT</span> <span class="k">STORAGE</span><span class="p">;</span>
+</pre></div>
+
+
+<p>In this table, <code>key</code> and <code>column1</code> corresponds to row and column keys in the legacy column family and <code>value</code> corresponds to column&nbsp;value.</p>
+<p>Queries to look up a column value, an entire row, and selected columns in a row would look like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">value</span> <span class="k">FROM</span> <span class="n">mykeyspace</span><span class="p">.</span><span class="k">data</span> <span class="k">WHERE</span> <span class="k">key</span> <span class="o">=</span> <span class="s1">&#39;rowkey&#39;</span> <span class="k">AND</span> <span class="n">column1</span> <span class="o">=</span> <span class="s1">&#39;colkey&#39;</span><span class="p">;</span>
+<span class="k">SELECT</span> <span class="n">column1</span><span class="p">,</span> <span class="n">value</span> <span class="k">FROM</span> <span class="n">mykeyspace …</span></pre></div>
+                    <a class="btn btn-default btn-xs" href="http://www.lyh.me/using-cql-with-legacy-column-families.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
 
         <ul class="pagination">
                 <li class="prev"><a href="http://www.lyh.me/index.html">&laquo;</a>
@@ -450,11 +454,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
-    <li class="list-group-item"><a href="http://www.lyh.me/featran.html">Featran</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">Automatic type-class derivation with&nbsp;Shapeless</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
     <li class="list-group-item"><a href="http://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
+    <li class="list-group-item"><a href="http://www.lyh.me/decompiling-scala-code.html">Decompiling Scala&nbsp;code</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
