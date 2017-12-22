@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
 <head>
-    <title>Scio at Philly ETE - Das Keyboard Shredder</title>
+    <title>Featran - Das Keyboard Shredder</title>
     <!-- Using the latest rendering mode for IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
@@ -9,22 +9,23 @@
 
 
 
-<link rel="canonical" href="http://www.lyh.me/scio-at-philly-ete.html">
+<link rel="canonical" href="http://www.lyh.me/featran.html">
 
         <meta name="author" content="Neville Li" />
-        <meta name="keywords" content="data,scala,scio" />
-        <meta name="description" content="It’s been another 6 months since my talk about Scio at Scala by the Bay. We’ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within Spotify. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other Google Cloud Big Data products instead of Hadoop, Scalding and Hive. Spotify data university round 3 &amp; 1st time covering Scio, @ApacheBeam &amp; @GCPBigData 👋 Hadoop, HDFS, M/R, YARN 🍾 batch + streaming pic.twitter.com/1gWIEbN0mW— Neville Li (@sinisa_lyh) March 28, 2017 And here’s a list of some notable improvements in Scio. Master branch is now based on Apache Beam Graduate type safe BigQuery API form experimental to stable Sparkey side input support TensorFlow TFRecord file IO Cloud Pub/Sub attributes support Named transformations for streaming update Safe-guard against malformed tests and better error messages Flexible custom IO wiring KryoRegistrar for custom Kryo serialization Table description for type-safe BigQuery Lots of performance improvements and bug fixes I talked about …" />
+        <meta name="keywords" content="scala,fp,data,ml" />
+        <meta name="description" content="Featran is a Scala feature transformation library for data science and machine learning. We recently open sourced it and I gave talks at Scale By the Bay and NABDConf. Here are the slides." />
 
         <meta property="og:site_name" content="Das Keyboard Shredder" />
         <meta property="og:type" content="article"/>
-        <meta property="og:title" content="Scio at Philly ETE"/>
-        <meta property="og:url" content="http://www.lyh.me/scio-at-philly-ete.html"/>
-        <meta property="og:description" content="It’s been another 6 months since my talk about Scio at Scala by the Bay. We’ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within Spotify. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other Google Cloud Big Data products instead of Hadoop, Scalding and Hive. Spotify data university round 3 &amp; 1st time covering Scio, @ApacheBeam &amp; @GCPBigData 👋 Hadoop, HDFS, M/R, YARN 🍾 batch + streaming pic.twitter.com/1gWIEbN0mW— Neville Li (@sinisa_lyh) March 28, 2017 And here’s a list of some notable improvements in Scio. Master branch is now based on Apache Beam Graduate type safe BigQuery API form experimental to stable Sparkey side input support TensorFlow TFRecord file IO Cloud Pub/Sub attributes support Named transformations for streaming update Safe-guard against malformed tests and better error messages Flexible custom IO wiring KryoRegistrar for custom Kryo serialization Table description for type-safe BigQuery Lots of performance improvements and bug fixes I talked about …"/>
-        <meta property="article:published_time" content="2017-04-20" />
+        <meta property="og:title" content="Featran"/>
+        <meta property="og:url" content="http://www.lyh.me/featran.html"/>
+        <meta property="og:description" content="Featran is a Scala feature transformation library for data science and machine learning. We recently open sourced it and I gave talks at Scale By the Bay and NABDConf. Here are the slides."/>
+        <meta property="article:published_time" content="2017-12-11" />
             <meta property="article:section" content="code" />
-            <meta property="article:tag" content="data" />
             <meta property="article:tag" content="scala" />
-            <meta property="article:tag" content="scio" />
+            <meta property="article:tag" content="fp" />
+            <meta property="article:tag" content="data" />
+            <meta property="article:tag" content="ml" />
             <meta property="article:author" content="Neville Li" />
 
 
@@ -81,10 +82,10 @@ Das Keyboard Shredder            </a>
         <article>
             <header class="page-header">
                 <h1>
-                    <a href="http://www.lyh.me/scio-at-philly-ete.html"
+                    <a href="http://www.lyh.me/featran.html"
                        rel="bookmark"
-                       title="Permalink to Scio at Philly ETE">
-                        Scio at Philly <span class="caps">ETE</span>
+                       title="Permalink to Featran">
+                        Featran
                     </a>
                 </h1>
             </header>
@@ -94,7 +95,7 @@ Das Keyboard Shredder            </a>
 <footer class="post-info">
     <span class="label label-default">Date</span>
     <span class="published">
-        <i class="fa fa-calendar"></i><time datetime="2017-04-20T11:12:00-04:00"> Thu 20 April 2017</time>
+        <i class="fa fa-calendar"></i><time datetime="2017-12-11T13:58:00-05:00"> Mon 11 December 2017</time>
     </span>
 
 
@@ -104,37 +105,18 @@ Das Keyboard Shredder            </a>
 
 
 <span class="label label-default">Tags</span>
-	<a href="http://www.lyh.me/tag/data.html">data</a>
-        /
 	<a href="http://www.lyh.me/tag/scala.html">scala</a>
         /
-	<a href="http://www.lyh.me/tag/scio.html">scio</a>
+	<a href="http://www.lyh.me/tag/fp.html">fp</a>
+        /
+	<a href="http://www.lyh.me/tag/data.html">data</a>
+        /
+	<a href="http://www.lyh.me/tag/ml.html">ml</a>
     
 </footer><!-- /.post-info -->                    </div>
                 </div>
-                <p>It&#8217;s been another 6 months since my talk about <a href="https://github.com/spotify/scio">Scio</a> at <a href="http://scala.bythebay.io">Scala by the Bay</a>. We&#8217;ve seen huge adoption and improvements since then. The number of production Scio pipelines has grown from ~70 to 400+ within <a href="https://www.spotify.com/">Spotify</a>. A lot of other companies are using and contributing to it as well. In the most recent edition of the Spotify data university, an internal week long big data training camp for non-data engineers, we revamped the curriculum to cover Scio, BigQuery and other <a href="https://cloud.google.com/solutions/big-data/">Google Cloud Big Data</a> products instead of Hadoop, Scalding and&nbsp;Hive.</p>
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Spotify data university round 3 <span class="amp">&amp;</span> 1st time covering Scio, <a href="https://twitter.com/ApacheBeam">@ApacheBeam</a> <span class="amp">&amp;</span> <a href="https://twitter.com/GCPBigData">@GCPBigData</a> 👋 Hadoop, <span class="caps">HDFS</span>, M/R, <span class="caps">YARN</span> 🍾 batch + streaming <a href="https://t.co/1gWIEbN0mW">pic.twitter.com/1gWIEbN0mW</a></p>&mdash; Neville Li (@sinisa_lyh) <a href="https://twitter.com/sinisa_lyh/status/846549633367265281">March 28, 2017</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<p>And here&#8217;s a list of some notable improvements in&nbsp;Scio.</p>
-<ul>
-<li>Master branch is now based on <a href="https://beam.apache.org/">Apache&nbsp;Beam</a></li>
-<li>Graduate type safe BigQuery <span class="caps">API</span> form experimental to&nbsp;stable</li>
-<li><a href="https://github.com/spotify/sparkey-java">Sparkey</a> side input&nbsp;support</li>
-<li><a href="https://www.tensorflow.org/">TensorFlow</a> TFRecord file <span class="caps">IO</span></li>
-<li><a href="https://cloud.google.com/pubsub/">Cloud Pub/Sub</a> attributes&nbsp;support</li>
-<li>Named transformations for streaming&nbsp;update</li>
-<li>Safe-guard against malformed tests and better error&nbsp;messages</li>
-<li>Flexible custom <span class="caps">IO</span>&nbsp;wiring</li>
-<li>KryoRegistrar for custom Kryo&nbsp;serialization</li>
-<li>Table description for type-safe&nbsp;BigQuery</li>
-<li>Lots of performance improvements and bug&nbsp;fixes</li>
-</ul>
-<p>I talked about Scio at <a href="http://2017.phillyemergingtech.com/">Philly <span class="caps">ETE</span></a> last week and here are the&nbsp;slides.</p>
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/15xefjkymEWvVV" width="800" height="490" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-
-<p><div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/sinisalyh/scio-moving-to-google-cloud-a-spotify-story" title=" Scio - Moving to Google Cloud, A Spotify Story" target="_blank"> Scio - Moving to Google Cloud, A Spotify Story</a> </strong> from <strong><a target="_blank" href="https://www.slideshare.net/sinisalyh">Neville Li</a></strong> </div></p>
+                <p>Featran is a Scala feature transformation library for data science and machine learning. We recently open sourced it and I gave talks at <a href="http://scale.bythebay.io/">Scale By the Bay</a> and <a href="http://www.criteo.com/events/nabdconf-palo-alto/">NABDConf</a>. Here are the <a href="/slides/featran.html">slides</a>.</p>
+<iframe src="/slides/featran.html" width="800" height="450"></iframe>
             </div>
             <!-- /.entry-content -->
     <hr />
@@ -154,8 +136,8 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'scio-at-philly-ete';
-                var disqus_url = 'http://www.lyh.me/scio-at-philly-ete.html';
+                    var disqus_identifier = 'featran';
+                var disqus_url = 'http://www.lyh.me/featran.html';
 
             var disqus_config = function () {
                 this.language = "en";
