@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-
-mkvirtualenv pelican
+mkvirtualenv -p python3 pelican
 pip install --upgrade pip
 pip install pelican typogrify markdown ghp-import
