@@ -30,13 +30,9 @@ LINKS = ()
 SOCIAL = (('Spotify', 'http://open.spotify.com/user/sinisa_lyh'),
           ('GitHub', 'https://github.com/nevillelyh'),
           ('Twitter', 'https://twitter.com/sinisa_lyh'),
-          ('LinkedIn', 'https://www.linkedin.com/in/nevillelyh'),
           ('SlideShare', 'http://www.slideshare.net/sinisalyh'),
-          ('Stack-Overflow',
-           'http://stackoverflow.com/users/3880836/neville-li'),
-          ('Facebook', 'https://www.facebook.com/neville.lyh'),
-          ('Google+', 'https://plus.google.com/+NevilleLiYH'),
           ('YouTube', 'https://www.youtube.com/user/sinisalyh/videos'),
+          ('Instagram', 'https://www.instagram.com/sinisa/'),
           ('Flickr', 'https://www.flickr.com/photos/sinisa_lyh'),
           )
 
