@@ -40,28 +40,45 @@
 class: center, middle
 
 # flatMap
-## A brief history
+# A Brief History
+### ...and How We Scale Infra the OSS Way
 Neville Li
+
+---
+
+class: center, middle
+<img src="flatmap.jpg" alt="flatmap" style="width: 80%;"/>
 
 ---
 
 # History
 
-- ## Mar 2016 - formation, Neville, Rav, Andrew + Nitzan/Josh
-- ## Aug-Oct 2017 - Fallon, Romain, Anna, Rich, etc.
-- ## 3 devs for 18 months
+- ## Mar 2016 - formation, Neville, Rav and Andrew + Nitzan/Josh
+- ## Aug-Oct 2017 - Fallon, Romain, Anna and Rich
+- ## Feb-Mar 2018 - Regadas and Julien
 
 ---
 
-# During this time
+# 3 devs in 18 months
 
-- ## From ~20 to ~300 users in #scala
-- ## 0 to ~1300 production Scio pipelines
-- ## 10+ external users on Gitter, GCP Slack
+- ## Scio - _Rouge one_ &rarr; _golden path_
+- ## From ~20 &rarr; 300+ users in #scala
+- ## 0 &rarr; 1300+ production Scio pipelines
+- ## Dozens of external users on Gitter and various Slack orgs
 
-Most with no or little Scala and/or big data experience
+\# Most with no or little Scala or big data experience
+
+\# New library, language, paradigm and workflow
 
 ---
+
+class: center, middle
+## _If it was possible to have a crush on a programming language,_
+## _I would have a crush on scio and scala because it’s so awesome._
+
+### - anonymous data scientist
+---
+
 
 # GitHub commits and ranking among Spotifiers
 
@@ -69,28 +86,27 @@ Most with no or little Scala and/or big data experience
 - ## Rav - 358, #13
 - ## Andrew - 117, #36
 
-As of Dec 21, 2017, excluding GHE commits
+\# As of Dec 21, 2017, excluding GHE commits
 
 ---
 
-# GitHub repos
+# 20+ GitHub repos
 
-## >20 total
-
-- #### scio - 18 sub-projects, ~1000 total issues and PRs
-- #### scio-idea-lugin, scio-template
-- #### featran, ratatool
+- #### scio - 18 sub-projects, 1000+ total issues and PRs
+- #### scio-idea-lugin, scio.g8, scala-luigi, scio-cookie
+- #### featran, ratatool, zoltar
 - #### spotify-tensorflow, tfimage
-- #### gcs-tools, big-data-rosetta-code, spark-bigquery
-- #### hype, limbo, shapeless-datatype, parquet-avro-extra, protobuf-generic, xgboost-dist
-- #### scala-luigi, scio-cookie, tf-paved-road, xgboost-paved-road, bazel-pipelines
+- #### gcs-tools, big-data-rosetta-code
+- #### shapeless-datatype, parquet-avro-extra, protobuf-generic, xgboost-dist
+- #### tf-paved-road, xgboost-paved-road, ml-paved-road, das-repo
+- #### spark-bigquery, hype, limbo
 
 ---
 
 # Repo LOC
 
-- #### scio - 18 sub-projects, 99K
-- #### featran - 8 sub-projects, 13K
+- #### scio - 18 sub-projects, 100K
+- #### featran - 9 sub-projects, 13K
 - #### ratatool - 8K
 - #### luigi (python) - 112K
 - #### helios (java) - 116K
@@ -102,7 +118,7 @@ As of Dec 21, 2017, excluding GHE commits
 
 # Upstream repos
 
-- ## Beam - Neville 12+, Rav 13+, Andrew 3+
+- ## Apache Beam - Neville 12+, Rav 13+, Andrew 3+
 - ## chill, algebird, breeze, scalding, spark, zeppelin, parquet
 - ## kryo, sbt\*, bazel\*
 
@@ -124,8 +140,9 @@ As of Dec 21, 2017, excluding GHE commits
 
 - ## scio wiki - ~15K words
 - ## big-data-rosetta-code - ~3K LOC
-- ## 20+ blog posts, slidedesks and tech-talks
-- ## 5 week long data university, 2+ devs almost full time
+- ## 20+ blog posts, slide decks and tech-talks
+- ## 5 rounds data university, 2 devs almost 100% each time
+- ## #monaditos - _the real scala channel_
 
 ---
 
@@ -136,34 +153,39 @@ As of Dec 21, 2017, excluding GHE commits
 - ## Educate users on new programming paradigm and best practices
 
 ## 33% building, 33% learning, 33% education
+\# and 1% Poutine Hockey Poutine™
 
 ---
 
 # Building and learning
 
-- ## Minimal process restraint
-- ## Find hard problem to solve
-- ## Be a part of the ecosystem
+- # Minimal process restraint
+- # Find hard problem to solve
+- # Be a part of the ecosystem
 
 ---
 
 # Minimal process restraint
 
-- ## Our work is highly experimental
-- ## Lots of uncertainty and risks
-- ## Hard to plan exact task breakdowns
+- ## Highly experimental work, uncertainty and risks
+- ## Hard to plan exact task breakdown
 - ## Instead plan general direction
-- ## Trust developers to best use their time and learn
+- ## Trust teammates to grow and do the right thing
 
 ---
 
-# Find hard problem
+# Find hard problems
 
-- ## Find problems with the largest impact given a general direction
-- ## Find hard problems to solve once for all users
-- ## Find problems end users shouldn't have to solve
-- ## Not afraid to solve problems we don't know how to
+- ## With the largest impact given a general direction
+- ## To solve once for everyone
+- ## Users shouldn't have to deal with
+- ## Not afraid to tackle problems we don't know how to
 - ## Embrace failure
+
+---
+
+class: center, middle
+<img src="scala.png" alt="scala" style="width: 60%;"/>
 
 ---
 
@@ -178,27 +200,32 @@ As of Dec 21, 2017, excluding GHE commits
 
 # Support guidelines
 
-- ## Document everything
-- ## Async, eletronic communication
-- ## Guidance not answers
-- ## Empower users
-- ## Build community
-- ## Embed libre, not embed gratis
+- # Document everything
+- # Async, eletronic communication
+- # Guidance not answers
+- # Empower users, build community
+- # _Embed libre_, not _embed gratis_
 
 ---
 
 # Document everything
 
-- ## Scaladoc site + GitHub wiki
+- ## ScalaDoc site, GitHub wiki
+- ## Annotated examples code &rarr; site (compiler plugin)
 - ## Any question asked twice goes into FAQ
-- ## One page confluence with everything
+- ## One confluence page with everything
 - ## Hyperlink all pages for SEO
+
+---
+
+class: center, middle
+<img src="solomon.png" alt="solomon" style="width: 80%;"/>
 
 ---
 
 # Async, eletronic communication
 
-- ## Avoid face to face, @name and DMs
+- ## Avoid face to face, @me and DMs
 - ## Prefer public async channels, e.g. Slack and GitHub issues
 - ## Visible to the community both for learning and leveraging help
 - ## Searcheable archive
@@ -208,18 +235,28 @@ As of Dec 21, 2017, excluding GHE commits
 
 # Guidance not answers
 
-- ## We help users grow expertise, not solving their problem for them
+- ## We help users grow expertise, not solve problems for them
 - ## Avoid direct answers to newbie questions
 - ## Identify questions that require genuine help or those due to "laziness"
-- ## Provide pointers, suggestions, links to code and docs, etc.
+- ## Provide pointers, suggestions, links to code &amp; docs, etc.
+
+---
+
+class: center, middle
+<img src="golightly.png" alt="golightly" style="width: 80%;"/>
 
 ---
 
 # Empower users
 
-- ## Ask users to file issues, provide stacktrace or reproducible snippet
-- ## Point users to troubleshoot guide and give feedback
+- ## Ask for GH issues, stacktrace or repro snippet
+- ## Point to troubleshoot guide and give feedback
 - ## Ask for PRs for trivial fixes
+
+---
+
+class: center, middle
+<img src="psobot.png" alt="psobot" style="width: 80%;"/>
 
 ---
 
@@ -232,16 +269,28 @@ As of Dec 21, 2017, excluding GHE commits
 
 ---
 
+# Contributors
+- ## Scio - 53 total, 17 DI, 17 non-DI
+
+<img src="claire.png" alt="claire" style="width: 80%;"/>
+<img src="guidj.png" alt="guidj" style="width: 40%;"/>
+<img src="jpv.png" alt="jpv" style="width: 40%;"/>
+
+---
+
 # Embed libre, not embed gratis
 
-- ## Embed is anti-pattern
+- ## _Embed considered harmful_
 - ## Time consuming, not reproducible, not scalable
-- ## Sometimes useful, work with power users
+- ## Sometimes useful when working with power users
 - ## Learn from each other, explore uncharted grounds
 - ## Avoid embed as offering free work
+
 ---
+
 class: center, middle
 # The End
+
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
