@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>flatMap</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code,
+      .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        left: 3em;
+        bottom: 3em;
+      }
+      @page {
+        size: 1210px 681px;
+        margin: 0;
+      }
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      }
+      /* Two-column layout */
+      .left-column {
+        width: 50%;
+        float: left;
+      }
+      .right-column {
+        width: 50%;
+        float: right;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# flatMap
+## OSS Infra at Scale
+Neville Li
+
+---
+
+class: center, middle
+# Disclaimer
+## Flamey topic ahead!
+## Credits to everyone working on data/ML
+
+---
+
+class: center, middle
+<img src="flatmap.jpg" alt="flatmap" style="width: 80%;"/>
+
+---
+
+# History
+
+- ## Mar 2016 - formation, Neville, Rav and Andrew + Nitzan/Josh (PM)<br/>
+### Scio, Ratatool, Luigi, ... - data pipelines, quality, GCP migration
+
+- ## Aug-Oct 2017 - Fallon, Romain, Anna and Rich
+### Featran, TensorFlow, XGBoost, ... - ML foundations
+
+- ## Feb-Mar 2018 - Regadas and Julien
+### Zoltar, Noether, ML paved road, ... - E2E ML, model serving, metrics, shared repo
+
+---
+
+# 3 devs in 18 months
+
+- ## Scio - _Rogue One_ &rarr; _golden path_ (even Google)
+- ## From ~20 &rarr; 300+ users in #scala
+- ## 0 &rarr; 1300+ production pipelines
+- ## 100+ external users on Gitter and various Slack orgs
+
+
+\# Most with no or little Scala or big data experience
+
+\# New language, paradigm, libraries and workflow
+
+---
+
+class: center, middle
+## _If it was possible to have a crush on a programming language,_
+## _I would have a crush on scio and scala because it’s so awesome._
+
+### - anonymous data scientist
+
+---
+
+# 20+ GitHub repos
+
+- #### scio - 18 sub-projects, 1000+ total issues and PRs
+- #### featran - 9 sub-projects
+- #### ratatool, zoltar, noether
+- #### scio-idea-lugin, scio.g8, scala-luigi, scio-cookie
+- #### spotify-tensorflow, tfimage
+- #### gcs-tools, big-data-rosetta-code
+- #### shapeless-datatype, parquet-avro-extra, protobuf-generic, xgboost-dist
+- #### tf-paved-road, xgboost-paved-road, ml-paved-road, das-repo
+- #### spark-bigquery, hype, limbo, ...
+
+---
+
+# Repo LOC
+
+.left-column[
+- #### scio - 18 sub-projects, 100K
+- #### featran - 9 sub-projects, 13K
+- #### ratatool - 8K
+]
+
+.right-column[
+- #### luigi (python) - 112K
+- #### helios (java) - 116K
+- #### styx (java) - 55K
+- #### apollo (java) - 48K
+- #### spydra (java) - 9K
+]
+
+---
+
+# GitHub commits and ranking among Spotifiers
+
+- ## Neville - 1935, #1
+- ## Rav - 394, #12
+- ## Andrew - 136, #36
+
+\# As of Apr 23, 2018, excluding GHE commits
+
+---
+
+# Upstream contributions
+
+- ## Apache Beam - Neville 12+, Rav 13+, Andrew 3+
+- ## algebird, chill, breeze, scalding, spark, zeppelin, parquet
+- ## kryo, sbt\*, bazel\*
+
+---
+
+# A Lot of Experimental Work
+
+.left-column[
+- ### Type macros and IntelliJ plugin
+- ### Type level programming
+- ### Property based testing, 100% coverage
+- ### Micro-benchmark, Java ASM, JNI
+]
+
+.right-column[
+- ### ClassLoader and REPL
+- ### Scala compiler and standard lib issues
+- ### JVM limits
+- ### Build tools
+]
+
+---
+
+# Education
+
+- ## scio wiki - ~15K words
+- ## big-data-rosetta-code - ~3K LOC
+- ## 5 rounds data university, 2 devs almost 100% each time
+- ## 20+ blog posts, slide decks and tech-talks
+- ## #monaditos - _the real scala channel_
+
+---
+
+# Our roles
+
+- ## Build tools to help users focus on business problem
+- ## Be the experts in the tools our users need
+- ## Educate users on new programming paradigm and best practices
+
+## 33% building, 33% learning, 33% education
+\# and 1% Poutine Hockey Poutine™
+
+---
+
+# Building and learning
+
+- # Minimal process restraint
+- # Find the right problems to solve
+- # Be a part of the ecosystem
+
+---
+
+# Minimal process restraint
+
+- ## Highly experimental work, uncertainty and risks
+- ## Hard to plan exact task breakdown
+- ## Instead plan general direction
+- ## Trust teammates to grow and do the right thing
+
+---
+
+# Find the right problems to solve
+
+- ## ... with the largest impact
+- ## ... once for everyone
+- ## ... that users shouldn't have to deal with
+- ## Not afraid to tackle problems we don't know how to
+- ## Embrace failures
+
+---
+
+class: center, middle
+<img src="scala.png" alt="scala" style="width: 60%;"/>
+
+---
+
+# Be part of the ecosystem
+
+- ## Report bugs to anything that affects us
+- ## Contribute fixes and enhancements whenever possible
+- ## Leverage the community to maintain our code and docs
+- ## Learning the ecosystem helps us better support our users
+
+---
+
+# Support guidelines
+
+- ## Document everything
+- ## Async, eletronic communication
+- ## Guidance not answers
+- ## Empower users, build community
+- ## _Embed libre_, not _embed gratis_
+
+---
+
+# Document everything
+
+- ## ScalaDoc site, GitHub wiki
+- ## Annotated example code &rarr; site (compiler plugin)
+- ## Any question asked twice goes into FAQ
+- ## One confluence page with everything
+- ## Hyperlink all pages for SEO
+
+---
+
+class: center, middle
+<img src="solomon.png" alt="solomon" style="width: 80%;"/>
+
+---
+
+# Async, eletronic communication
+
+- ## Avoid face to face, @me and DMs
+- ## Prefer public async channels, e.g. Slack and GitHub issues
+- ## Visible to the community both for learning and leveraging help
+- ## Searcheable archive
+- ## Multi-tasking and minimize interruption
+
+---
+
+# Guidance not answers
+
+- ## We help users grow expertise, not solve problems for them
+- ## Avoid direct answers to newbie questions
+- ## Identify questions that require genuine help or those due to "laziness"
+- ## Provide pointers, suggestions, links to code &amp; docs, etc.
+
+---
+
+class: center, middle
+<img src="golightly.png" alt="golightly" style="width: 80%;"/>
+
+---
+
+# Empower users
+
+- ## Ask for GH issues, stacktrace or repro snippet
+- ## Point to troubleshoot guide and give feedback
+- ## Ask for PRs for trivial fixes
+
+---
+
+class: center, middle
+# _Be the change that you wish to see in the code_
+
+---
+
+class: center, middle
+<img src="psobot.png" alt="psobot" style="width: 80%;"/>
+
+---
+
+# Build community
+
+- ## Leverage power users
+- ## Knowledge sharing
+- ## Community based support
+- ## Open discussion for big feature requests, fixes, etc.
+- ## #scala is a community not support channel
+
+---
+
+# Contributors
+- ## Scio - 53 total, 17 DI, 17 non-DI
+- ## scio-cookie - 38 total, 16 non-DI
+- ## scala-luigi - 33 total, 16 non-DI
+- ## Mostly community - scio-bigtable, xgboost, spark-bigquery
+
+---
+
+class: center, middle
+<img src="claire.png" alt="claire" style="width: 100%;"/>
+<img src="guidj.png" alt="guidj" style="width: 40%;"/>
+<img src="jpv.png" alt="jpv" style="width: 40%;"/>
+
+---
+
+# Embed libre, not embed gratis
+
+- ## Hot take: _Embed considered harmful_
+- ## Time consuming, not reproducible, not scalable
+- ## Bad: push new product with poor docs and adoption
+- ## Good: build new infra with power users
+- ## Avoid embed as offering free work
+
+---
+
+class: center, middle
+# The End
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {
+          scroll: false
+        }
+      });
+
+      // Setup MathJax
+      MathJax.Hub.Config({
+        tex2jax: {
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      });
+      MathJax.Hub.Queue(function() {
+        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
+          return(elem.SourceElement());
+        }).parent().addClass('has-jax');
+      });
+
+      MathJax.Hub.Configured();
+    </script>
+  </body>
+</html>
