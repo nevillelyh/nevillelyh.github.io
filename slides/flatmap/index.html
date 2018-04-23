@@ -33,6 +33,15 @@
           left: 0 !important;
         }
       }
+      /* Two-column layout */
+      .left-column {
+        width: 50%;
+        float: left;
+      }
+      .right-column {
+        width: 50%;
+        float: right;
+      }
     </style>
   </head>
   <body>
@@ -46,6 +55,13 @@ Neville Li
 ---
 
 class: center, middle
+# Disclaimer
+## The topic of process is inherently flamey
+## None of this possible w/o everyone who works on data/ML
+
+---
+
+class: center, middle
 <img src="flatmap.jpg" alt="flatmap" style="width: 80%;"/>
 
 ---
@@ -53,13 +69,13 @@ class: center, middle
 # History
 
 - ## Mar 2016 - formation, Neville, Rav and Andrew + Nitzan/Josh (PM)<br/>
-### Scio, Ratatool, Luigi, GCP migration, ...
+### Scio, Ratatool, Luigi, ... - data pipelines, quality, GCP migration
 
 - ## Aug-Oct 2017 - Fallon, Romain, Anna and Rich
-### Featran, TensorFlow, XGBoost, ...
+### Featran, TensorFlow, XGBoost, ... - ML foundations
 
 - ## Feb-Mar 2018 - Regadas and Julien
-### Zoltar, Noether, ML paved road, model serving, metrics, ...
+### Zoltar, Noether, ML paved road, ... - E2E ML, model serving, metrics, shared repo
 
 ---
 
@@ -82,16 +98,6 @@ class: center, middle
 ## _I would have a crush on scio and scala because it’s so awesome._
 
 ### - anonymous data scientist
----
-
-
-# GitHub commits and ranking among Spotifiers
-
-- ## Neville - 1935, #1
-- ## Rav - 394, #12
-- ## Andrew - 136, #36
-
-\# As of Apr 23, 2018, excluding GHE commits
 
 ---
 
@@ -111,14 +117,28 @@ class: center, middle
 
 # Repo LOC
 
+.left-column[
 - #### scio - 18 sub-projects, 100K
 - #### featran - 9 sub-projects, 13K
 - #### ratatool - 8K
+]
+.right-column[
 - #### luigi (python) - 112K
 - #### helios (java) - 116K
 - #### styx (java) - 55K
 - #### apollo (java) - 48K
 - #### spydra (java) - 9K
+]
+
+---
+
+# GitHub commits and ranking among Spotifiers
+
+- ## Neville - 1935, #1
+- ## Rav - 394, #12
+- ## Andrew - 136, #36
+
+\# As of Apr 23, 2018, excluding GHE commits
 
 ---
 
