@@ -27,10 +27,10 @@ AUTHOR_FEED_RSS = None
 LINKS = ()
 
 # Social widget
-SOCIAL = (('Spotify', 'http://open.spotify.com/user/sinisa_lyh'),
+SOCIAL = (('Spotify', 'https://open.spotify.com/user/sinisa_lyh'),
           ('GitHub', 'https://github.com/nevillelyh'),
           ('Twitter', 'https://twitter.com/sinisa_lyh'),
-          ('SlideShare', 'http://www.slideshare.net/sinisalyh'),
+          ('SlideShare', 'https://www.slideshare.net/sinisalyh'),
           ('YouTube', 'https://www.youtube.com/user/sinisalyh/videos'),
           ('Instagram', 'https://www.instagram.com/sinisa/'),
           ('Flickr', 'https://www.flickr.com/photos/sinisa_lyh'),
