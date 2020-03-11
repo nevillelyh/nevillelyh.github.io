@@ -1129,6 +1129,8 @@ def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField
 
 # AvroType in action
 
+--
+
 ```sbt
 scala> import magnolify.avro._
 ```
@@ -1148,9 +1150,6 @@ foo: Foo = Foo(1,List(a, b, c),Some(true))
 ```sbt
 scala> val converter = AvroType[Foo]
 converter: magnolify.avro.AvroType[Foo] = magnolify.avro.AvroType$$anon$1@53bdb702
-
-scala> val foo = Foo(1, List("a", "b", "c"), Some(true))
-foo: Foo = Foo(1,List(a, b, c),Some(true))
 ```
 
 --
@@ -1162,8 +1161,11 @@ genericRecord: org.apache.avro.generic.GenericRecord = {"a": 1, "b": ["a", "b", 
 scala> genericRecord.getSchema
 org.apache.avro.Schema = {"type":"record","name":"Foo","namespace":"$iw","fields":[{"name":"a","type":"int"},
 {"name":"b","type":{"type":"array","items":"string"},"default":[]},{"name":"c","type":["null","boolean"],"default":null}]}
+
 ```
+
 --
+
 ```sbt
 scala> converter.from(genericRecord)
 res: Foo = Foo(1,List(a, b, c),Some(true))
