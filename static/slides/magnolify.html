@@ -1054,21 +1054,16 @@ object AvroType {
 
 - Explicitly define primitive field conversions and let Magnolify derivation handle CCs
 
+- Some primitive types have same representation in CC as in Avro...
 
 ```scala
+implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
+
 private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
   new AvroField.Aux[T, From, To] {
     override protected val schema: Schema = Schema.create(tpe)
     ...
   }
-```
-
---
-
-- Some primitive types have same representation in CC as in Avro...
-
-```scala
-implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
 ```
 
 --
@@ -1128,6 +1123,49 @@ def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField
 
 - maybe support complex union types in future?
 
+---
+
+# AvroType in action
+
+```sbt
+scala> import magnolify.avro._
+```
+
+--
+
+```sbt
+scala> case class Foo(a: Int, b: List[String], c: Option[Boolean])
+defined class Foo
+
+scala> val foo = Foo(1, List("a", "b", "c"), Some(true))
+foo: Foo = Foo(1,List(a, b, c),Some(true))
+```
+
+--
+
+```sbt
+scala> val converter = AvroType[Foo]
+converter: magnolify.avro.AvroType[Foo] = magnolify.avro.AvroType$$anon$1@53bdb702
+
+scala> val foo = Foo(1, List("a", "b", "c"), Some(true))
+foo: Foo = Foo(1,List(a, b, c),Some(true))
+```
+
+--
+
+```sbt
+scala> val genericRecord = converter.to(foo)
+genericRecord: org.apache.avro.generic.GenericRecord = {"a": 1, "b": ["a", "b", "c"], "c": true}
+
+scala> genericRecord.getSchema
+org.apache.avro.Schema = {"type":"record","name":"Foo","namespace":"$iw","fields":[{"name":"a","type":"int"},
+{"name":"b","type":{"type":"array","items":"string"},"default":[]},{"name":"c","type":["null","boolean"],"default":null}]}
+```
+--
+```sbt
+scala> converter.from(genericRecord)
+res: Foo = Foo(1,List(a, b, c),Some(true))
+```
 ---
 
 # Other Converters
