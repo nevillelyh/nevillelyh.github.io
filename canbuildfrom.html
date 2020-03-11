@@ -39,11 +39,8 @@
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder ATOM Feed"/>
 
-
-
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder code ATOM Feed"/>
-
 </head>
 <body>
 
@@ -115,79 +112,79 @@ Das Keyboard Shredder            </a>
                 <p>We recently had an internal knowledge sharing on higher-kinded types and <code>CanBuildFrom</code> type classes in Scala. Here&#8217;s a short&nbsp;summary.</p>
 <h2>Basics</h2>
 <p>Let&#8217;s start by implementing <code>map</code>.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">(</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">Int</span><span class="o">],</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Double</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">Double</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">(</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">Int</span><span class="o">],</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Double</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">Double</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
 <span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">),</span> <span class="k">_</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">)</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>This implementation is not very good since it only works with <code>Seq[Int]</code> and <code>Int =&gt; Double</code>. It&#8217;s easy to parameterize <code>Int</code> and <code>Double</code>.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>However <code>map(Seq(1, 2, 3), _ + 0.1)</code> now fails to compile with a message <code>missing parameter type for expanded function ((x$1) =&gt; x$1.$plus(10))</code></p>
 <p>This is because inference of <code>A</code> in <code>f: A =&gt; B</code> depends on the type of <code>xs: Seq[A]</code>, and limitation of Scala type inference. A common workaround is to curry&nbsp;arguments.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
 <span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">))(</span><span class="k">_</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">)</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>Similar pattern is commonly seen in Scala, like <code>foldLeft(z: B)(op: (B, A) =&gt; B)</code>. Another benefit is we can now write <code>f</code> in a multi-line <code>{}</code> block more&nbsp;elegantly.</p>
-<div class="highlight"><pre><span></span><span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">))</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="n">map</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">))</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span>
   <span class="k">val</span> <span class="n">y</span> <span class="k">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">0.1</span>
   <span class="n">println</span><span class="o">(</span><span class="s">s&quot;</span><span class="si">$x</span><span class="s"> + 0.5 = </span><span class="si">$y</span><span class="s">&quot;</span><span class="o">)</span>
   <span class="n">y</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <h2>Higher-kinded&nbsp;types</h2>
 <p>However this version still only works on <code>Seq[A]</code>. We could parameterize it as <code>M[_]</code>, also known as higher-kinded&nbsp;type.</p>
-<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">scala.language.higherKinds</span>
-<span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="nn">scala.language.higherKinds</span>
+<span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="p">,</span> <span class="kt">A</span><span class="p">,</span> <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>But now we have a compiler error saying <code>value map is not a member of type parameter M[A]</code>. We can add a upper bound for <code>M[_]</code> but it still wouldn&#8217;t&nbsp;work.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">&lt;:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">&lt;:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span><span class="p">,</span> <span class="kt">A</span><span class="p">,</span> <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>Despite the fact that <code>M[_]</code> is a sub-type of <code>Seq[A]</code>, and <code>Seq[A]</code> has a <code>map</code> method, we can&#8217;t build a <code>M[B]</code> back from <code>Seq[A]#map[B](f: A =&gt; B)</code>, since <code>M[B]</code> is a more specific type than <code>Seq[B]</code>.</p>
-<div class="highlight"><pre><span></span>type mismatch;
-[error]  found   : Seq[B]
-[error]  required: M[B]
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">type</span><span class="w"> </span><span class="n">mismatch</span><span class="p">;</span><span class="w"></span>
+<span class="o">[</span><span class="n">error</span><span class="o">]</span><span class="w">  </span><span class="k">found</span><span class="w">   </span><span class="err">:</span><span class="w"> </span><span class="n">Seq</span><span class="o">[</span><span class="n">B</span><span class="o">]</span><span class="w"></span>
+<span class="o">[</span><span class="n">error</span><span class="o">]</span><span class="w">  </span><span class="nl">required</span><span class="p">:</span><span class="w"> </span><span class="n">M</span><span class="o">[</span><span class="n">B</span><span class="o">]</span><span class="w"></span>
+</code></pre></div>
 
 
 <p>However if we look at the method signature of <code>Seq[A]#map(f: A =&gt; B)</code> it actually looks like&nbsp;this.</p>
-<div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">TraversableLike</span><span class="o">[</span><span class="kt">+A</span>, <span class="kt">+Repr</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">B</span>, <span class="kt">That</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">bf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">Repr</span>, <span class="kt">B</span>, <span class="kt">That</span><span class="o">])</span><span class="k">:</span> <span class="kt">That</span>
+<div class="highlight"><pre><span></span><code><span class="k">trait</span> <span class="nc">TraversableLike</span><span class="o">[</span><span class="kt">+A</span><span class="p">,</span> <span class="kt">+Repr</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">B</span><span class="p">,</span> <span class="kt">That</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">bf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">Repr</span><span class="p">,</span> <span class="kt">B</span><span class="p">,</span> <span class="kt">That</span><span class="o">])</span><span class="k">:</span> <span class="kt">That</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>Note that it&#8217;s a method on <code>trait TraversableLike</code>, which means any <code>TraversableLike</code> collection can share the same <code>map</code> implementation. Also worth noting is <code>Seq[+A]</code> has an inheritance hierarchy like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Seq</span><span class="o">[</span><span class="kt">+A</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">SeqLike</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="c1">// ...</span>
-<span class="k">trait</span> <span class="nc">SeqLike</span><span class="o">[</span><span class="kt">+A</span>, <span class="kt">+Repr</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">IterableLike</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">Repr</span><span class="o">]</span> <span class="c1">// ...</span>
-<span class="k">trait</span> <span class="nc">IterableLike</span><span class="o">[</span><span class="kt">+A</span>, <span class="kt">+Repr</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">TraversableLike</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">Repr</span><span class="o">]</span> <span class="c1">// ...</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">trait</span> <span class="nc">Seq</span><span class="o">[</span><span class="kt">+A</span><span class="o">]</span> <span class="k">extends</span> <span class="nc">SeqLike</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="c1">// ...</span>
+<span class="k">trait</span> <span class="nc">SeqLike</span><span class="o">[</span><span class="kt">+A</span><span class="p">,</span> <span class="kt">+Repr</span><span class="o">]</span> <span class="k">extends</span> <span class="nc">IterableLike</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="kt">Repr</span><span class="o">]</span> <span class="c1">// ...</span>
+<span class="k">trait</span> <span class="nc">IterableLike</span><span class="o">[</span><span class="kt">+A</span><span class="p">,</span> <span class="kt">+Repr</span><span class="o">]</span> <span class="k">extends</span> <span class="nc">TraversableLike</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="kt">Repr</span><span class="o">]</span> <span class="c1">// ...</span>
+</code></pre></div>
 
 
 <p>We see that in <code>Seq[A] extends SeqLike[A, Seq[A]]</code>, type of the current trait <code>Seq[A]</code> is also used as a type parameter for the super-type, which is propagated all the way to <code>TraversableLike</code>. This is commonly known as F-bounded polymorphism, which is useful heere since methods on sub-types of <code>TraversableLike</code> can now return a more specific type, e.g. <code>Seq</code>, <code>List</code>, <code>Vector</code>, instead of the same broad super-type. For more information on F-bounded polymorphism, check out Marconi Lanna&#8217;s <a href="https://github.com/marconilanna/NEScala2015">excellent presentation</a> at NEScala&nbsp;2015.</p>
 <p>In the case of <code>Seq[Int]#map(f: Int =&gt; Double)</code>, we can expand the method like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">Int</span>, <span class="kt">That</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Double</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">bf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span>, <span class="kt">Double</span>, <span class="kt">That</span><span class="o">])</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">That</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Double</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">bf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span><span class="p">,</span> <span class="kt">Double</span><span class="p">,</span> <span class="kt">That</span><span class="o">])</span>
+</code></pre></div>
 
 
 <h2>CanBuildFrom</h2>
 <p><code>CanBuildFrom</code> is a key type class in the Scala collections library and enables a lot code&nbsp;reuse.</p>
-<div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">CanBuildFrom</span><span class="o">[</span><span class="kt">-From</span>, <span class="kt">-Elem</span>, <span class="kt">+To</span><span class="o">]</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">trait</span> <span class="nc">CanBuildFrom</span><span class="o">[</span><span class="kt">-From</span><span class="p">,</span> <span class="kt">-Elem</span><span class="p">,</span> <span class="kt">+To</span><span class="o">]</span>
+</code></pre></div>
 
 
 <p>In its type signature, <code>From</code> is the original collection and <code>To</code> is the target collection. <code>Elem</code> is the element type of the target collection and in some determines the type of <code>To</code>. For example we can map over a <code>Map[K, V]</code> into <code>K -&gt; V</code> (which is a syntactic sugar for <code>(K, V)</code>), and get another map. However mapping into <code>String</code> would result in a <code>List[String]</code> since one cannot build a <code>Map[K, V]</code> with a single&nbsp;type.</p>
-<div class="highlight"><pre><span></span><span class="c1">// From: Map[String, Int]</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// From: Map[String, Int]</span>
 <span class="c1">// (String, Int) =&gt; (String, Double)</span>
 <span class="c1">// To: Map[String, Double]</span>
 <span class="c1">// CanBuildFrom[Map[String, Int], (String, Double), Map[String, Double]]</span>
@@ -198,17 +195,17 @@ Das Keyboard Shredder            </a>
 <span class="c1">// To: List[String]</span>
 <span class="c1">// CanBuildFrom[Map[String, Int], String, List[String]]</span>
 <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;a&quot;</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">&quot;b&quot;</span> <span class="o">-&gt;</span> <span class="mi">2</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">kv</span> <span class="k">=&gt;</span> <span class="n">kv</span><span class="o">.</span><span class="n">_1</span> <span class="o">+</span> <span class="n">kv</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">toString</span><span class="o">)</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>We can use <code>CanBuildFrom</code> to rewrite our <code>map</code> function.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">&lt;:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span>
-                             <span class="o">(</span><span class="k">implicit</span> <span class="n">cbf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>, <span class="kt">B</span>, <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">map</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">&lt;:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span><span class="p">,</span> <span class="kt">A</span><span class="p">,</span> <span class="kt">B</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=&gt;</span> <span class="n">B</span><span class="o">)</span>
+                             <span class="o">(</span><span class="k">implicit</span> <span class="n">cbf</span><span class="k">:</span> <span class="kt">CanBuildFrom</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span><span class="p">,</span> <span class="kt">B</span><span class="p">,</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">M</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">b</span> <span class="k">=</span> <span class="n">cbf</span><span class="o">()</span> <span class="c1">// new Builder[Elem, To]</span>
   <span class="n">xs</span><span class="o">.</span><span class="n">foreach</span><span class="o">(</span><span class="n">x</span> <span class="k">=&gt;</span> <span class="n">b</span> <span class="o">+=</span> <span class="n">f</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
   <span class="n">b</span><span class="o">.</span><span class="n">result</span><span class="o">()</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>Our function can now support any <code>Seq</code> types without losing the type&nbsp;information.</p>
@@ -231,11 +228,11 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'canbuildfrom';
-                var disqus_url = 'https://www.lyh.me/canbuildfrom.html';
-
             var disqus_config = function () {
                 this.language = "en";
+
+                        this.page.identifier = '2017-05-18-canbuildfrom';
+                        this.page.url = 'https://www.lyh.me/canbuildfrom.html';
             };
 
             /* * * DON'T EDIT BELOW THIS LINE * * */

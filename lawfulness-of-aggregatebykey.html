@@ -41,11 +41,8 @@
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder ATOM Feed"/>
 
-
-
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder code ATOM Feed"/>
-
 </head>
 <body>
 
@@ -121,16 +118,16 @@ Das Keyboard Shredder            </a>
                 <p>I spent a couple hours yesterday debugging what I thought was a Protobuf serialization issue, which turns out to be an unlawful Monoid-like use of <code>aggregateByKey</code> in <a href="https://github.com/spotify/scio">Scio</a>.</p>
 <h2>The&nbsp;Problem</h2>
 <p>Both Scio and Spark have <code>aggregate</code> and <code>aggregateByKey</code> transformations that look like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="c1">// on SCollection[V]</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// on SCollection[V]</span>
 <span class="k">def</span> <span class="n">aggregate</span><span class="o">[</span><span class="kt">U</span><span class="o">](</span><span class="n">zeroValue</span><span class="k">:</span> <span class="kt">U</span><span class="o">)(</span><span class="n">seqOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">V</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">,</span> <span class="n">combOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">U</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">)</span><span class="k">:</span> <span class="kt">SCollection</span><span class="o">[</span><span class="kt">U</span><span class="o">]</span>
 
 <span class="c1">// on SCollection[(K, V)]</span>
-<span class="k">def</span> <span class="n">aggregateByKey</span><span class="o">[</span><span class="kt">U</span><span class="o">](</span><span class="n">zeroValue</span><span class="k">:</span> <span class="kt">U</span><span class="o">)(</span><span class="n">seqOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">V</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">,</span> <span class="n">combOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">U</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">)</span><span class="k">:</span> <span class="kt">SCollection</span><span class="o">[(</span><span class="kt">K</span>, <span class="kt">U</span><span class="o">)]</span>
-</pre></div>
+<span class="k">def</span> <span class="n">aggregateByKey</span><span class="o">[</span><span class="kt">U</span><span class="o">](</span><span class="n">zeroValue</span><span class="k">:</span> <span class="kt">U</span><span class="o">)(</span><span class="n">seqOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">V</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">,</span> <span class="n">combOp</span><span class="k">:</span> <span class="o">(</span><span class="kt">U</span><span class="o">,</span> <span class="kt">U</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">U</span><span class="o">)</span><span class="k">:</span> <span class="kt">SCollection</span><span class="o">[(</span><span class="kt">K</span><span class="p">,</span> <span class="kt">U</span><span class="o">)]</span>
+</code></pre></div>
 
 
 <p>And we have some business logic that looks like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Count</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Count</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="n">z</span> <span class="k">=</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span> <span class="c1">// zeroValue</span>
 <span class="k">def</span> <span class="n">seqOp</span><span class="o">(</span><span class="n">acc</span><span class="k">:</span> <span class="kt">Count</span><span class="o">,</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Count</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Count</span><span class="o">(</span><span class="n">v</span><span class="o">.</span><span class="n">id</span><span class="o">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">v</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
@@ -139,42 +136,42 @@ Das Keyboard Shredder            </a>
 <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">10</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">100</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="mi">5</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="mi">50</span><span class="o">)))</span>
   <span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">id</span><span class="o">)</span>
   <span class="o">.</span><span class="n">aggregateByKey</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">,</span> <span class="n">combOp</span><span class="o">)</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>This code however, only works correctly locally with <code>DirectRunner</code> and always produces results with <code>id == ""</code> when running on Dataflow service with the <code>DataflowRunner</code>. Can you spot the&nbsp;bug?</p>
 <h2>Monoid&nbsp;laws</h2>
 <p>You might notice that <code>zeroValue</code> and <code>combOp</code> together resemble a <a href="https://en.wikipedia.org/wiki/Monoid">Monoid</a>, which should satisfy the identity&nbsp;law:</p>
-<div class="highlight"><pre><span></span><span class="n">combOp</span><span class="o">(</span><span class="n">zeroValue</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="o">==</span> <span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">zeroValue</span><span class="o">)</span> <span class="o">==</span> <span class="n">x</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">combOp</span><span class="o">(</span><span class="n">zeroValue</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="o">==</span> <span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">zeroValue</span><span class="o">)</span> <span class="o">==</span> <span class="n">x</span>
+</code></pre></div>
 
 
 <p>Since elements in Scio, Spark, etc. are unordered, <code>combOp</code> should also be commutative to make computation&nbsp;deterministic.</p>
-<div class="highlight"><pre><span></span><span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span> <span class="o">==</span> <span class="n">combOp</span><span class="o">(</span><span class="n">y</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span> <span class="o">==</span> <span class="n">combOp</span><span class="o">(</span><span class="n">y</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span>
+</code></pre></div>
 
 
 <h2>Under the&nbsp;hood</h2>
 <p>Here are 3 scenarios of what could happen to our code. Let&#8217;s assume our data is split up into 2&nbsp;partitions.</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">xs1</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">10</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">15</span><span class="o">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">xs1</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">10</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">15</span><span class="o">))</span>
 <span class="k">val</span> <span class="n">xs2</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">100</span><span class="o">),</span> <span class="nc">Count</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="mi">150</span><span class="o">))</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>The first scenario is the most intuitive given the method signature of <code>aggregateByKey</code>. Elements in every partition are accumulated into <code>zeroValue</code> with <code>seqOp</code>, and the accumulated values are reduced with <code>combOp</code>. This produces the correct&nbsp;result.</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">r1</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="n">xs1</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">xs2</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">)).</span><span class="n">reduce</span><span class="o">(</span><span class="n">combOp</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">r1</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="n">xs1</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">xs2</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">)).</span><span class="n">reduce</span><span class="o">(</span><span class="n">combOp</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>The next 2 scenarios are similar, except that <code>zeroValue</code> is appended or prepended to the list of accumulated results of <code>xs1</code> and <code>xs2</code> as input to <code>combOp</code>.</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">r2</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="n">z</span><span class="o">,</span> <span class="n">xs1</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">xs2</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">)).</span><span class="n">reduce</span><span class="o">(</span><span class="n">combOp</span><span class="o">)</span> <span class="c1">// incorrect</span>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">r2</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="n">z</span><span class="o">,</span> <span class="n">xs1</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">xs2</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">)).</span><span class="n">reduce</span><span class="o">(</span><span class="n">combOp</span><span class="o">)</span> <span class="c1">// incorrect</span>
 <span class="k">val</span> <span class="n">r3</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="n">xs1</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">xs2</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">z</span><span class="o">)(</span><span class="n">seqOp</span><span class="o">),</span> <span class="n">z</span><span class="o">).</span><span class="n">reduce</span><span class="o">(</span><span class="n">combOp</span><span class="o">)</span> <span class="c1">// correct</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>We realize that only <code>r3</code> is correct but <code>r2</code> is not. This is because <code>combOp</code> breaks the identity law and since <code>List#reduce</code> starts from the left, <code>combOp(z, x)</code> will not populate <code>id</code> correctly while <code>combOp(x, z)</code> does. We made the wrong assumption in our code that <code>zeroValue</code> is only used in <code>seqOp</code> and never fed directly into <code>combOp</code>, and didn&#8217;t implement it correctly. Any of these 3 scenarios could happen depending on the platform implementation. We need to fix <code>combOp</code> to satisfy the identity&nbsp;law:</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Count</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Count</span><span class="o">)</span><span class="k">:</span> <span class="kt">Count</span> <span class="o">=</span> <span class="nc">Count</span><span class="o">(</span><span class="k">if</span> <span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">nonEmpty</span><span class="o">)</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span> <span class="k">else</span> <span class="n">y</span><span class="o">.</span><span class="n">id</span><span class="o">,</span> <span class="n">x</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">combOp</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Count</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Count</span><span class="o">)</span><span class="k">:</span> <span class="kt">Count</span> <span class="o">=</span> <span class="nc">Count</span><span class="o">(</span><span class="k">if</span> <span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">nonEmpty</span><span class="o">)</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span> <span class="k">else</span> <span class="n">y</span><span class="o">.</span><span class="n">id</span><span class="o">,</span> <span class="n">x</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>For more details see <a href="https://github.com/spotify/scio/issues/729">spotify/scio#729</a> and <a href="https://issues.apache.org/jira/browse/BEAM-2453"><span class="caps">BEAM</span>-2453</a>.</p>
@@ -197,11 +194,11 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'lawfulness-of-aggregatebykey';
-                var disqus_url = 'https://www.lyh.me/lawfulness-of-aggregatebykey.html';
-
             var disqus_config = function () {
                 this.language = "en";
+
+                        this.page.identifier = '2017-07-19-lawfulness-of-aggregatebykey';
+                        this.page.url = 'https://www.lyh.me/lawfulness-of-aggregatebykey.html';
             };
 
             /* * * DON'T EDIT BELOW THIS LINE * * */

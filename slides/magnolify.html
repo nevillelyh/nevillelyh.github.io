@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Magnolify All The Things!
+    </title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Magnolify All The Things!
+
+### Neville Li @sinisa_lyh
+
+### Claire McGinty
+
+### NEScala 2020
+
+---
+
+# Agenda
+
+- ### Type classes
+- ### Magnolia
+- ### Property-Based Testing with Discipline
+- ### Converters
+- ### Magnolia vs shapeless
+- ### Other Fun Bits
+
+---
+
+# Type classes
+
+> ### A type system construct that supports parametric polymorphism
+
+--
+
+```scala
+trait Show[T] {
+  def show(t: T): String
+}
+```
+
+--
+
+```scala
+object Show {
+  def apply[T](f: T => String) = new Show[T] {
+    override def show(t: T) = f(t)
+  }
+}
+```
+
+--
+
+```scala
+trait Semigroup[T] {
+  def combine(x: T, y: T): T
+}
+```
+
+--
+
+```scala
+object Semigroup {
+  def apply[T](f: (T, T) => T) = new Semigroup[T] {
+    override def combine(x: T, y: T): T = f(x, y)
+  }
+}
+```
+
+---
+
+# Type class derivation
+
+```scala
+object Show {
+  // ...
+
+  // primitive instances
+  implicit val showString = Show[String](identity)
+  implicit val showInt = Show[Int](_.toString)
+```
+
+--
+
+```scala
+  // derived instances
+  implicit def showTuple2[A, B](implicit a: Show[A], b: Show[B]) =
+    Show[(A, B)](t => s"(${a.show(t._1)}, ${b.show(t._2)})")
+```
+
+--
+
+```scala
+  // tuple 3, 4, 5, .., 22
+}
+```
+
+--
+
+### Tuples only, no case classes, no sealed trait
+
+---
+
+# Magnolia
+
+- ### [github.com/propensive/magnolia](https://github.com/propensive/magnolia)
+
+> ### Magnolia is a generic macro for automatic materialization of typeclasses for datatypes composed from _case classes_ (products) and _sealed traits_ (coproducts).
+
+> ### It supports recursively-defined datatypes out-of-the-box, and incurs no significant time-penalty during compilation.
+
+> ### If derivation fails, error messages are detailed and informative.
+
+---
+
+# Magnolify Show derivation
+
+```scala
+import magnolia._
+
+object ShowDerivation {
+  type Typeclass[T] = Show[T]
+
+  def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
+    Show.show { x =>
+      caseClass.parameters
+        .map(p => s"${p.label} = ${p.typeclass.show(p.dereference(x))}")
+        .mkString(s"${caseClass.typeName.full} {", ", ", "}")
+    }
+
+  def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
+    Show.show { x =>
+      sealedTrait.dispatch(x)(sub => sub.typeclass.show(sub.cast(x)))
+    }
+
+  implicit def apply[T]: Typeclass[T] = macro Magnolia.gen[T]
+}
+```
+
+---
+
+# Combine - parameters of a case class
+
+```scala
+case class Record(s: String, i: Int)
+val showRecord = ShowDerivation[Record]
+```
+
+```scala
+def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
+  Show.show { x =>
+    caseClass.parameters
+      .map(p => s"${p.label} = ${p.typeclass.show(p.dereference(x))}")
+      .mkString(s"${caseClass.typeName.full} {", ", ", "}")
+  }
+```
+
+--
+
+```scala
+abstract class CaseClass[Typeclass[_], Type] {
+                   /* ^ [Show[_],    Record] ^ */
+  val typeName: TypeName // TypeName("com.spotify", "Record")
+  def parameters: Seq[Param[Typeclass, Type]]
+}
+```
+
+--
+
+```scala
+trait Param[Typeclass[_], Type] {
+      /* ^ [Show[_],    Record] ^ */
+  type PType                                      //     String     Int
+  def label: String                               //        "s"     "i"
+  def typeclass: Typeclass[PType]                 // showString showInt
+  def dereference(param: Type): PType             //        _.s     _.i
+}
+```
+
+---
+
+# Dispatch - subtypes of a sealed trait
+
+```scala
+sealed trait Shape
+case class Point(x: Int, y: Int) extends Shape
+case class Rectangle(x1: Int, y1: Int, x2: Int, y2: Int) extends Shape
+val showShape = ShowDerivation[Shape]
+```
+
+```scala
+def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
+  Show.show { x =>
+    sealedTrait.dispatch(x)(sub => sub.typeclass.show(sub.cast(x)))
+  }
+```
+
+--
+
+```scala
+abstract class SealedTrait[Typeclass[_], Type] {
+  val typeName: TypeName // TypeName("com.spotify", "Shape")
+  def dispatch[R](value: Type)(handle: Subtype[Typeclass, Type] => R): R
+                   /* ^ Shape                 [Show[_],  Shape] => String ^ */
+}
+```
+
+--
+
+```scala
+trait Subtype[Typeclass[_], Type] {
+        /* ^ [Show[_],     Shape] ^ */
+  def typeclass: Typeclass[PType]                 // Show[Point] or Show[Rectangle]
+  def cast: PartialFunction[Type, SType]          // Shape => Point or Rectangle
+}
+```
+
+---
+
+class: center, middle
+
+# Time to Magnolify Things!
+
+---
+
+# ScalaCheck
+
+- ### Property-based testing with deterministic generators
+
+--
+
+```scala
+sealed abstract class Gen[+T] {
+  def apply(p: Gen.Parameters, seed: Seed): Option[T]
+  def map[U](f: T => U): Gen[U]
+  def flatMap(f: T => Gen[U]): Gen[U]
+}
+```
+
+--
+
+```scala
+sealed abstract class Arbitrary[T] {
+  def arbitrary: Gen[T]
+}
+
+object Arbitrary {
+  def apply[T](gen: Gen[T]): Arbitrary[T] = new Arbitrary[T] {
+    override def arbitrary: Gen[T] = gen
+  }
+
+  implicit lazy val arbString: Arbitrary[String] = // ...
+  implicit lazy val arbInt: Arbitrary[Int] = // ...
+}
+```
+
+---
+
+# Arbitrary derivation
+
+```scala
+case class Record(s: String, i: Int)
+```
+
+--
+
+```scala
+val genString: Gen[String] = implicitly[Arbitrary[String]].arbitrary
+val genInt: Gen[Int] = implicitly[Arbitrary[Int]].arbitrary
+```
+
+--
+
+```scala
+val genRecord: Gen[Record] = for (s <- genString; i <- genInt) yield Record(s, i)
+val arbRecord: Arbitrary[Record] = Arbitrary(genRecord)
+```
+
+--
+
+```scala
+val genRecord: Gen[Record] = genString.flatMap { s =>
+  genInt.map { i =>
+    Record(s, i)
+  }
+}
+```
+
+--
+
+### State Monad: `seed` &rArr; `(T, nextSeed)`
+
+[Let's build ourselves a small ScalaCheck](https://typelevel.org/blog/2016/10/17/minicheck.html) - Typelevel blog by Lars Hupel
+
+---
+
+# Magnolify Arbitrary derivation
+
+```scala
+type Typeclass[T] = Arbitrary[T]
+
+def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
+  Arbitrary {
+    caseClass.constructMonadic(_.typeclass.arbitrary)(monadicGen)
+  }
+
+def dispatch[T: Fallback](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
+  Arbitrary {
+    Gen.oneOf(sealedTrait.subtypes.map(_.typeclass.arbitrary)).flatMap(identity)
+  }
+```
+
+--
+
+```scala
+private val monadicGen: Monadic[Gen] = new Monadic[Gen] {
+  override def point[A](value: A): Gen[A] =
+    Gen.const(value)
+  override def flatMap[A, B](from: Gen[A])(fn: A => Gen[B]): Gen[B] =
+    from.flatMap(fn)
+  override def map[A, B](from: Gen[A])(fn: A => B): Gen[B] =
+    from.map(fn)
+}
+```
+
+---
+
+# Arbitrary properties
+
+```scala
+def test[T](implicit arb: Arbitrary[T]) = {
+  val prms = Gen.Parameters.default
+  val g = arb.arbitrary // Gen[T]
+```
+
+### What to test?
+
+--
+
+```scala
+  property("uniqueness") = Prop.forAll { seed: Seed =>
+    val xs = Gen.listOfN(10, g)(prms, seed).get
+    xs.toSet.size > 1
+  }
+```
+
+--
+
+```scala
+  property("consistency") = Prop.forAll { seed: Seed =>
+    g(prms, seed) == g(prms, seed)
+  }
+}
+```
+
+---
+
+# ERROR
+
+`[error] java.lang.StackOverflowError`
+
+--
+
+### Recursive ADT
+
+```scala
+sealed trait Node
+case class Leaf(value: Int) extends Node
+case class Branch(left: Node, right: Node) extends Node
+```
+
+```scala
+sealed trait GNode[+T]
+case class GLeaf[+T](value: T) extends GNode[T]
+case class GBranch[+T](left: GNode[T], right: GNode[T]) extends GNode[T]
+```
+
+---
+
+# Generation size
+
+```scala
+def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] = Arbitrary {
+  Gen.lzy(Gen.sized { size =>
+    if (size >= 0) {
+      Gen.resize(
+        size - 1,
+        caseClass.constructMonadic(_.typeclass.arbitrary)(monadicGen))
+    } else {
+      Gen.fail[T]
+    }
+  })
+}
+
+def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = Arbitrary {
+  Gen.sized { size =>
+    if (size > 0) {
+      Gen.resize(
+        size - 1,
+        Gen.oneOf(sealedTrait.subtypes.map(_.typeclass.arbitrary)).flatMap(identity))
+    } else {
+      Gen.fail[T]
+    }
+  }
+}
+```
+
+---
+
+# FAILED
+
+```
+! ArbitraryDerivation.Node.uniqueness: Falsified after 0 passed tests.
+! ArbitraryDerivation.GNode.uniqueness: Falsified after 2 passed tests.
+```
+
+--
+
+- ### `Gen.fail[T]` &rArr; `None` &rArr; `Gen.listOfN` &rArr; `Nil`
+- ### Resize unaware of ADT structure
+- ### Fallback to base case instead, e.g. `Leaf`
+
+---
+
+# Recursive fallback
+
+```scala
+sealed trait Fallback[+T] {
+  def get: Gen[T]
+}
+
+object Fallback {
+  def apply[T](g: Gen[T]): Fallback[T] = new Fallback[T] {
+    override def get: Gen[T] = g
+  }
+
+  def apply[T](v: T): Fallback[T] = Fallback[T](Gen.const(v))
+  def apply[T](implicit arb: Arbitrary[T]): Fallback[T] =
+    Fallback[T](arb.arbitrary)
+
+  implicit def defaultFallback[T]: Fallback[T] = Fallback[T](Gen.fail)
+}
+```
+
+[alexarchambault/scalacheck-shapeless#50](https://github.com/alexarchambault/scalacheck-shapeless/issues/50)
+
+---
+
+# Injecting fallback
+
+
+```diff
+-def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
++def combine[T: Fallback](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
+
+--------------------------------------------------------------------------------
+
+-def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
++def dispatch[T: Fallback](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
+```
+```diff
+  } else {
+-    Gen.fail[T]
++    implicitly[Fallback[T]].get
+  }
+```
+
+```scala
+implicit val f = Fallback[Leaf]
+```
+
+---
+
+class: center, middle
+
+# Magnolify All The Cats!
+
+---
+
+# Cats Eq
+
+```scala
+trait Eq[T] {
+  def eqv(x: T, y: T): Boolean
+}
+```
+
+--
+
+- ### Combine
+
+```scala
+Eq.instance { (x, y) =>
+  caseClass.parameters.forall(p => p.typeclass.eqv(p.dereference(x), p.dereference(y)))
+}
+```
+
+--
+
+- ### Dispatch
+
+```scala
+Eq.instance { (x, y) =>
+  sealedTrait.dispatch(x) { sub =>
+    sub.cast.isDefinedAt(y) && sub.typeclass.eqv(sub.cast(x), sub.cast(y))
+  }
+}
+```
+
+---
+
+# Cats Semigroup
+
+```scala
+trait Semigroup[T] {
+  def combine(x: T, y: T): T
+}
+```
+
+--
+
+- ### Combine
+
+```scala
+Semigroup.instance { (x, y) =>
+  caseClass.construct(p => p.typeclass.combine(p.dereference(x), p.dereference(y)))
+}
+```
+
+--
+
+- ### Dispatch
+
+```scala
+@implicitNotFound("Cannot derive Semigroup for sealed trait")
+private sealed trait Dispatchable[T]
+def dispatch[T: Dispatchable](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = ???
+```
+
+[spotify/tfexample-derive](https://github.com/spotify/tfexample-derive)
+
+---
+
+# Testing with Discipline
+
+--
+
+```scala
+implicit val eqRecord = EqDerivation[Record]
+cats.kernel.laws.discipline.EqTests[Record].eqv.all
+```
+
+- reflexivity - `x == x`
+- symmetry - `eqv(x, y) == eqv(y, x)`
+- antisymmetry - `f: T => T` &rArr; if `eqv(x, y)` &rArr; `eqv(f(x), f(y))`
+- transitivity - if `eqv(x, y) && eqv(y, z)` &rArr; `eqv(x, z)`
+
+--
+
+```scala
+implicit val sgRecord = SemigroupDerivation[Record]
+cats.kernel.laws.discipline.SemigroupTests[Record].eqv.all
+```
+
+- associative - `sg.combine(sg.combine(x, y), z) == sg.combine(x, sg.combine(y, z))`
+- repeat1 - `sg.combineN(x, 1) == x`
+- repeat2 - `sg.combineN(x, 2) == sg.combine(x, x)`
+- combineAllOption - `sg.combineAllOption(xs) == xs.reduceOption(sg.combine)`
+
+---
+
+# Arbitrary function
+
+- ### `Eq[T]` antisymmetry - `f: T => T` &rArr; if `eqv(x, y)` &rArr; `eqv(f(x), f(y))`
+
+--
+
+- ### `implicit arbF: Arbitrary[T => T]`
+
+--
+
+```scala
+implicit def arbFunction1[A,Z](implicit g: Arbitrary[Z], co: Cogen[A]): Arbitrary[A => Z]
+```
+
+--
+
+```scala
+trait Cogen[T] {
+  def perturb(seed: Seed, t: T): Seed
+}
+```
+
+--
+
+### Remember `Gen[T]`?
+
+- `Gen[T]` - `seed` &rArr; `(T, nextSeed)`
+- `Cogen[T]` - `(seed, T)` &rArr; `prevSeed`
+
+
+[Functions and Determinism in Property-based Testing](http://plastic-idolatry.com/erik/ete2017.pdf) - talk by Erik Osheim
+
+---
+
+# Cogen[T]
+
+```scala
+trait Cogen[T] {
+  def perturb(seed: Seed, t: T): Seed
+}
+```
+
+--
+
+- ### Combine
+
+```scala
+Cogen { (seed, t: T) =>
+  caseClass.parameters.foldLeft(seed) { (seed, p) =>
+    p.typeclass.perturb(seed, p.dereference(t))
+  }
+}
+```
+
+--
+
+- ### Dispatch
+
+```scala
+Cogen { (seed, t: T) =>
+  sealedTrait.dispatch(t) { sub =>
+    sub.typeclass.perturb(seed, sub.cast(t))
+  }
+}
+```
+
+---
+
+# Cogen properties
+
+### Remember Arbitrary properties?
+
+--
+
+```scala
+property("uniqueness") = Prop.forAll { seed: Seed, xs: List[T] =>
+  xs.map(co.perturb(seed, _)).toSet.size == xs.toSet.size
+}
+```
+
+--
+
+```scala
+property("consistency") = Prop.forAll { (seed: Seed, x: T) =>
+  co.perturb(seed, x) == co.perturb(seed, x)
+}
+```
+
+---
+
+# FAILED
+
+
+```
+[info] ! CogenDerivation.Nullable.uniqueness: Falsified after 41 passed tests.
+[info] > ARG_0: 0
+[info] > ARG_0_ORIGINAL: -8945615488364931345
+[info] > ARG_1: List("Nullable(Some(false),None,None)", "Nullable(None,Some(0),None)")
+```
+
+--
+
+```scala
+case class Nullable(b: Option[Boolean], i: Option[Int], s: Option[String])
+```
+
+--
+
+```scala
+implicit def cogenOption[A](implicit A: Cogen[A]): Cogen[Option[A]] =
+    Cogen((seed, o) => o.fold(seed)(a => A.perturb(seed.next, a)))
+
+implicit lazy val cogenBoolean: Cogen[Boolean] =
+    Cogen(b => if (b) 1L else 0L)
+
+implicit lazy val cogenChar: Cogen[Char] = Cogen(_.toLong)
+```
+
+--
+
+- ### No-op for `None`
+- ### `Cogen[Boolean]` &hArr; `Cogen[Int]` @ [1, 0]
+
+
+---
+
+# Fixing Cogen
+
+
+```diff
+Cogen { (seed, t: T) =>
+  caseClass.parameters.foldLeft(seed) { (seed, p) =>
+-    p.typeclass.perturb(seed, p.dereference(t))
++    val s = Cogen.cogenInt.perturb(seed, p.index)
++    p.typeclass.perturb(s, p.dereference(t))
+  }
+}
+
+--------------------------------------------------------------------------------
+
+Cogen { (seed, t: T) =>
+  sealedTrait.dispatch(t) { sub =>
+-    sub.typeclass.perturb(seed, sub.cast(t))
++    val s = Cogen.cogenInt.perturb(seed, p.index)
++    sub.typeclass.perturb(s, sub.cast(t))
+  }
+}
+```
+
+---
+
+# One more bug
+
+```
+[info] ! ArbitraryDerivation.Nullable.uniqueness: Falsified after 81 passed tests.
+[info] > ARG_0: Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+```
+
+--
+
+```scala
+scala> val seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=").get
+seed: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+scala> seed.next
+res0: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+scala> seed.next.next
+res1: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+scala> seed.next.next.next
+res2: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+```
+
+### Remember the properties?
+
+```scala
+  property("uniqueness") = Prop.forAll { seed: Seed =>
+                    /* ^ implicit a: Arbitrary[Seed] ^ */
+```
+
+---
+
+# Pseudo ramdom seed
+
+```scala
+sealed abstract class Seed {
+  // ...
+  def next: Seed = // shift and mangle a, b, c, d bits
+}
+
+object Seed {
+  private case class apply(a: Long, b: Long, c: Long, d: Long) extends Seed
+
+  def fromLongs(a: Long, b: Long, c: Long, d: Long): Seed = apply(a, b, c, d)
+
+  def apply(s: Long): Seed = {
+    var i = 0
+    var seed: Seed = Seed(0xf1ea5eed, s, s, s)
+    while (i < 20) { seed = seed.next; i += 1 }
+    seed
+  }
+}
+```
+
+--
+
+
+```scala
+scala> Seed.fromLongs(0, 0, 0, 0)
+res3: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+```
+
+---
+
+# Fixing Seed
+
+```diff
+-property(s"$name.uniqueness") = Prop.forAll { seed: Seed =>
++property(s"$name.uniqueness") = Prop.forAll { l: Long =>
+  val seed = Seed(l) // prevent Magnolia from deriving `Seed`
+```
+
+--
+
+### Fixing implicit scopes
+
+- `import magnolify.$MODULE.semiauto._` for manual derivation
+
+  e.g. `implicit val arbRecord = ArbitraryDerivation[Record]`
+
+
+- `import magnolify.$MODULE.auto._` for implicits
+  ```scala
+    def genArbitraryMacro[T: c.WeakTypeTag](c: whitebox.Context): c.Tree = {
+      import c.universe._
+      val wtt = weakTypeTag[T]
+      q"""_root_.magnolify.scalacheck.semiauto.ArbitraryDerivation.apply[$wtt]"""
+    }
+
+    // ArbitraryDerivation is a macro and requires WeakTypeTag
+    implicit def genArbitrary[T]: Arbitrary[T] = macro genArbitraryMacro[T]
+  ```
+
+---
+
+class: center, middle
+
+# Magnolify All The Data!
+
+---
+
+# Converters
+
+Derive case classes for common serialization formats, and converters between CC and underlying type
+
+- BigQuery
+--
+
+- DataStore
+--
+
+- Protobuf
+--
+
+- Tensorflow
+--
+
+- Avro
+
+--
+
+```scala
+trait Converter[T, Reader, Writer] extends Serializable {
+  def from(v: Reader): T
+  def to(v: T): Writer
+}
+```
+
+---
+
+# AvroType[T]
+
+```java
+package org.apache.avro.generic;
+
+public interface GenericRecord extends IndexedRecord {
+  /** Set the value of a field given its name. */
+  void put(String key, Object v);
+
+  /** Return the value of a field given its name. */
+  Object get(String key);
+}
+```
+
+---
+
+# AvroType[T]
+
+`GenericRecord`s have a default implementation...
+
+```java
+package org.apache.avro.generic;
+
+public static class Record implements GenericRecord, Comparable<Record> {
+  private final Schema schema;
+  private final Object[] values;
+}
+```
+
+and associated `Schema`:
+```java
+package org.apache.avro;
+
+public abstract class Schema {
+  public enum Type {
+    RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT, DOUBLE, BOOLEAN, NULL;
+  }
+
+  public static class Field {
+    private final String name;
+    private final Schema schema;
+    private final String doc;
+    private final JsonNode defaultValue;
+  }
+}
+```
+
+---
+
+# AvroType[T]
+
+We can represent primitive fields...
+
+```scala
+sealed trait AvroField[T] extends Serializable { self =>
+  type FromT
+  type ToT
+
+  val schema: Schema
+  def defaultVal: Any
+  def from(v: FromT): T
+  def to(v: T): ToT
+
+  def fromAny(v: Any): T = from(v.asInstanceOf[FromT])
+}
+```
+
+--
+
+...and entire `GenericRecord`s:
+
+```scala
+sealed trait AvroType[T] extends Converter[T, GenericRecord, GenericRecord] {
+  val schema: Schema
+  def apply(r: GenericRecord): T = from(r)
+  def apply(t: T): GenericRecord = to(t)
+}
+object AvroType {
+  implicit def apply[T](implicit f: AvroField.Record[T]): AvroType[T] = ...
+}
+```
+
+---
+
+# AvroType[T]
+
+- Explicitly define primitive field conversions and let Magnolify derivation handle CCs
+
+
+```scala
+private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
+  new AvroField.Aux[T, From, To] {
+    override protected val schema: Schema = Schema.create(tpe)
+    ...
+  }
+```
+
+--
+
+- Some primitive types have same representation in CC as in Avro...
+
+```scala
+implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
+```
+
+--
+
+- But some are handled differently:
+
+```scala
+implicit val afString = aux[String, CharSequence, String](Schema.Type.STRING)(_.toString)(identity)
+```
+
+--
+
+```scala
+implicit def afOption[T](implicit f: AvroField[T]): AvroField[Option[T]] =
+  new Aux[Option[T], f.FromT, f.ToT] {
+    override protected val schema: Schema =
+      Schema.createUnion(Schema.create(Schema.Type.NULL), f.schema)
+    ...
+  }
+```
+---
+
+- ### Combine
+
+```scala
+def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField[T] {
+  override type FromT = GenericRecord
+  override type ToT = GenericRecord
+
+  override protected val schemaString: String = Schema.createRecord(caseClass.typeName, ...)
+
+  override def defaultVal: Any = null
+
+  override def from(v: GenericRecord): T =
+    caseClass.construct(p => p.typeclass.fromAny(v.get(p.label)))
+
+  override def to(v: T): GenericRecord =
+    caseClass.parameters
+      .foldLeft(new GenericRecordBuilder(schema)) { (b, p) =>
+        b.set(p.label, p.typeclass.to(p.dereference(v)))
+      }.build()
+}
+```
+
+---
+
+- ### Dispatch
+
+```scala
+  @implicitNotFound("Cannot derive AvroField for sealed trait")
+  private sealed trait Dispatchable[T]
+
+  def dispatch[T: Dispatchable](sealedTrait: SealedTrait[Typeclass, T]): Record[T] = ???
+```
+
+--
+
+- maybe support complex union types in future?
+
+---
+
+# Other Converters
+
+--
+
+BigQuery
+```scala
+sealed trait TableRowType[T] extends Converter[T, TableRow, TableRow]
+```
+
+--
+
+Protobuf
+```scala
+sealed trait ProtobufType[T, MsgT <: Message] extends Converter[T, MsgT, MsgT]
+```
+
+--
+
+Tensorflow
+```scala
+sealed trait ExampleType[T] extends Converter[T, Example, Example.Builder]
+```
+
+--
+
+Datastore
+```scala
+sealed trait EntityType[T] extends Converter[T, Entity, Entity.Builder]
+```
+---
+
+# Magnolia vs shapeless
+
+- ### Type signature
+
+  ```scala
+    def from[L <: HList](m: GenericRecord)(implicit gen: LabelledGeneric.Aux[A, L],
+                                           fromL: FromAvroRecord[L]): Option[A]
+
+    def to[L <: HList](a: A)(implicit gen: LabelledGeneric.Aux[A, L],
+                             toL: ToAvroRecord[L], tt: TypeTag[A]): GenericRecord
+  ```
+
+- ### Implicit chaining
+
+  `LowPriorityFromMappable1` &rArr; `LowPriorityFromMappableOption1` &rArr; `LowPriorityFromMappableSeq1` &rArr; `LowPriorityFromMappable0` &rArr; `LowPriorityFromMappableOption0` &rArr; `LowPriorityFromMappableSeq0`
+
+  `LowPriorityToMappable1` &rArr; `LowPriorityToMappableOption1` &rArr; `LowPriorityToMappableSeq1` &rArr; `LowPriorityToMappable0` &rArr; `LowPriorityToMappableOption0` &rArr; `LowPriorityToMappableSeq0`
+
+
+---
+
+# Benchmark
+
+### Compilation (seconds)
+
+
+|           | `Arbitrary[T]` | Converters |
+|-----------|---------------:|-----------:|
+| shapeless |             45 |         59 |
+| Magnolia  |              3 |          8 |
+
+### Converters (ns/op)
+
+|           | Avro From | Avro To  | BigQuery From | BigQuery To | Datastore From | Datastore To |
+|-----------|----------:|---------:|--------------:|------------:|---------------:|-------------:|
+| shapeless |  3444.143 | 6720.992 |      4839.656 |    3791.165 |       8482.950 |     6142.070 |
+| Magnolia  |  1218.947 | 3534.206 |      7740.430 |    8441.074 |       1990.760 |     5656.189 |
+
+---
+
+# Other Fun Bits
+
+- ### `Hash[T]` - mirror `scala.util.hashing.MurmurHash3#productHash`
+- ### Micro-optimization - `Semigroup#combineAllOption`, etc.
+- ### Scala 2.13 - shims for `CanBuildFrom` &rArr; `mutable.Builder`, etc.
+- ### Scala 2.11 - Magnolia fork
+- ### Serialization - `CanBuildFrom`, data type round-trips
+- ### `ambiguous implicit values` - `List`, `Option` are sealed traits!
+
+---
+
+# Related work
+
+- ### [spotify/scio](https://github.com/spotify/scio/tree/master/scio-core/src/main/scala/com/spotify/scio/coders) - Magnolia derived coders for data serialization
+- ### [nevillelyh/parquet-extra](https://github.com/nevillelyh/parquet-extra/tree/master/parquet-types) - Magnolia derived Parquet IO for Scala types
+- ### [milessabin/shapeless](https://github.com/milessabin/shapeless) - generic programming for Scala
+- ### [nevillelyh/shapeless-datatype](https://github.com/nevillelyh/shapeless-datatype) - shapeless based data type converters, etc.
+- ### [alexarchambault/scalacheck-shapeless](https://github.com/alexarchambault/scalacheck-shapeless) - shapeless based Arbitrary derivation
+---
+
+class: center, middle
+
+# Magnolify
+
+## [github.com/spotify/magnolify](https://github.com/spotify/magnolify)
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        //countIncrementalSlides: false,
+      });
+    </script>
+  </body>
+</html>

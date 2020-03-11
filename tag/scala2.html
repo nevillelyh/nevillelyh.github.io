@@ -34,8 +34,6 @@
               title="Das Keyboard Shredder ATOM Feed"/>
 
 
-
-
 </head>
 <body>
 
@@ -327,8 +325,8 @@ Das Keyboard Shredder            </a>
 <p>Parquet is a columnar storage system designed for <span class="caps">HDFS</span>. It offers some nice improvements over row-major systems including better compression and less I/O with column projection and predicate pushdown. Avro is a data serialization system that enables type-safe access to structured data with complex schema. The <code>parquet-avro</code> module makes it possible to store data in Parquet format on disk and process them as Avro objects inside a <span class="caps">JVM</span> data pipeline like <a href="https://github.com/twitter/scalding">Scalding</a> or <a href="http://spark.apache.org/">Spark</a>.</p>
 <h2>Projection</h2>
 <p>Parquet allows reading only a subset of columns via projection. Here&#8217;s an Scalding <a href="https://github.com/epishkin/scalding/tree/parquet_avro/scalding-parquet">example</a> from <a href="http://www.tapad.com/">Tapad</a>.</p>
-<div class="highlight"><pre><span></span><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="s">&quot;field1&quot;</span><span class="o">,</span> <span class="s">&quot;field2.field2a&quot;</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="s">&quot;field1&quot;</span><span class="o">,</span> <span class="s">&quot;field2.field2a&quot;</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>Note that fields specifications are strings even though the <span class="caps">API</span> has access to Avro type <code>Signal</code> which has strongly typed getter&nbsp;methods.</p>

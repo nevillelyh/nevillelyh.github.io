@@ -34,8 +34,6 @@
               title="Das Keyboard Shredder ATOM Feed"/>
 
 
-
-
 </head>
 <body>
 
@@ -136,7 +134,7 @@ Das Keyboard Shredder            </a>
 </footer><!-- /.post-info -->                    </div>
                 <div class="summary"><p>I recently picked up <a href="http://www.lighttable.com/">Light Table</a> for <a href="http://clojure.org/">Clojure</a> development and liked it. Form evaluation works out of the box and indentation is better than that in <a href="http://plugins.jetbrains.com/plugin/?id=4050">La Clojure</a> plugin for <a href="http://www.jetbrains.com/idea/">IntelliJ <span class="caps">IDEA</span></a>.</p>
 <p>I particularly like the idea of command bar, which allows you to search for Light Table commands by name and execute them quickly. I was already used to <span class="caps">IDEA</span>&#8217;s key map though (<code>Mac OS X 10.5+</code> which is more natural to Mac users than the default <code>Mac OS X</code>), and wanted something similar. The setting files are in Clojure so it&#8217;s easy to customize. This is what I got so far for <code>user.keymap</code>:</p>
-<div class="highlight"><pre><span></span><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="ss">:+</span> <span class="p">{</span><span class="ss">:app</span> <span class="p">{</span><span class="s">&quot;alt-space&quot;</span> <span class="p">[</span><span class="ss">:show-commandbar-transient</span><span class="p">]}</span>
 
      <span class="ss">:editor</span> <span class="p">{</span><span class="s">&quot;alt-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.watch-selection</span><span class="p">]</span>
               <span class="s">&quot;alt-shift-w&quot;</span> <span class="p">[</span><span class="ss">:editor.watch.unwatch</span><span class="p">]</span>
@@ -147,7 +145,7 @@ Das Keyboard Shredder            </a>
               <span class="s">&quot;pmeta-shift-up&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineUp</span><span class="p">]</span>
               <span class="s">&quot;pmeta-shift-down&quot;</span> <span class="p">[</span><span class="ss">:editor.sublime.swapLineDown</span><span class="p">]</span>
               <span class="s">&quot;pmeta-/&quot;</span> <span class="p">[</span><span class="ss">:toggle-comment-selection</span> <span class="ss">:editor.line-down</span><span class="p">]}}}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>Apart from these, I found myself using <code>"pmeta-enter" [:eval-editor-form]</code> and <code>"ctrl-d" [:editor.doc.toggle]</code> most when writing Clojure code. After all they are probably the most essential ones no matter what editor you use&nbsp;:)</p>

@@ -41,11 +41,8 @@
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder ATOM Feed"/>
 
-
-
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder code ATOM Feed"/>
-
 </head>
 <body>
 
@@ -123,31 +120,31 @@ Das Keyboard Shredder            </a>
 <p>Parquet is a columnar storage system designed for <span class="caps">HDFS</span>. It offers some nice improvements over row-major systems including better compression and less I/O with column projection and predicate pushdown. Avro is a data serialization system that enables type-safe access to structured data with complex schema. The <code>parquet-avro</code> module makes it possible to store data in Parquet format on disk and process them as Avro objects inside a <span class="caps">JVM</span> data pipeline like <a href="https://github.com/twitter/scalding">Scalding</a> or <a href="http://spark.apache.org/">Spark</a>.</p>
 <h2>Projection</h2>
 <p>Parquet allows reading only a subset of columns via projection. Here&#8217;s an Scalding <a href="https://github.com/epishkin/scalding/tree/parquet_avro/scalding-parquet">example</a> from <a href="http://www.tapad.com/">Tapad</a>.</p>
-<div class="highlight"><pre><span></span><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="s">&quot;field1&quot;</span><span class="o">,</span> <span class="s">&quot;field2.field2a&quot;</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="s">&quot;field1&quot;</span><span class="o">,</span> <span class="s">&quot;field2.field2a&quot;</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>Note that fields specifications are strings even though the <span class="caps">API</span> has access to Avro type <code>Signal</code> which has strongly typed getter&nbsp;methods.</p>
 <p>This is slightly counter-intuitive since most Scala developers are used to transformations like <code>pipe.map(_.getField)</code>. It&#8217;s however can be easily solved with macro since the syntax tree of is accessible. A modified version has signature of <code>def apply[T](getters: (T =&gt; Any)*): Schema</code> and can be used like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="k">_</span><span class="o">.</span><span class="n">getField1</span><span class="o">,</span> <span class="k">_</span><span class="o">.</span><span class="n">getField2</span><span class="o">.</span><span class="n">getField2a</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="nc">Projection</span><span class="o">[</span><span class="kt">Signal</span><span class="o">](</span><span class="k">_</span><span class="o">.</span><span class="n">getField1</span><span class="o">,</span> <span class="k">_</span><span class="o">.</span><span class="n">getField2</span><span class="o">.</span><span class="n">getField2a</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>The macro version looks more natural plus you get auto-complete support from the <span class="caps">IDE</span> and avoid&nbsp;typos.</p>
 <h2>Predicate</h2>
 <p>Predicate is an even better use case for macros. The Parquet predicate <span class="caps">API</span> supports a fixed set of column types and operators, and the user must use the correct factory methods to construct an expression tree. A simple lambda like <code>i: Item =&gt; i.price &lt; 100 &amp;&amp; i.getReviews &gt;= 10</code> becomes&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">parquet.filter2.predicate.FilterApi</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">parquet.filter2.predicate.FilterPredicate</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">parquet.filter2.predicate.FilterApi</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">parquet.filter2.predicate.FilterPredicate</span><span class="p">;</span>
 
-<span class="n">FilterPredicate</span> <span class="n">p</span> <span class="o">=</span> <span class="n">FilterApi</span><span class="o">(</span>
-  <span class="n">FilterApi</span><span class="o">.</span><span class="na">lt</span><span class="o">(</span><span class="n">FilterApi</span><span class="o">.</span><span class="na">floatColumn</span><span class="o">(</span><span class="s">&quot;price&quot;</span><span class="o">),</span> <span class="mi">100</span><span class="n">f</span><span class="o">),</span>
-  <span class="n">FilterApi</span><span class="o">.</span><span class="na">gteq</span><span class="o">(</span><span class="n">FilterApi</span><span class="o">.</span><span class="na">intColumn</span><span class="o">(</span><span class="s">&quot;reviews&quot;</span><span class="o">),</span> <span class="mi">10</span><span class="o">));</span>
-</pre></div>
+<span class="n">FilterPredicate</span> <span class="n">p</span> <span class="o">=</span> <span class="n">FilterApi</span><span class="p">(</span>
+  <span class="n">FilterApi</span><span class="p">.</span><span class="na">lt</span><span class="p">(</span><span class="n">FilterApi</span><span class="p">.</span><span class="na">floatColumn</span><span class="p">(</span><span class="s">&quot;price&quot;</span><span class="p">),</span> <span class="mi">100</span><span class="n">f</span><span class="p">),</span>
+  <span class="n">FilterApi</span><span class="p">.</span><span class="na">gteq</span><span class="p">(</span><span class="n">FilterApi</span><span class="p">.</span><span class="na">intColumn</span><span class="p">(</span><span class="s">&quot;reviews&quot;</span><span class="p">),</span> <span class="mi">10</span><span class="p">));</span>
+</code></pre></div>
 
 
 <p>Obviously this very cumbersome and even worse than the projection case. But with macros it feels almost like writing a regular Scala predicate&nbsp;lambda:</p>
-<div class="highlight"><pre><span></span><span class="nc">Predicate</span><span class="o">[</span><span class="kt">Item</span><span class="o">](</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="n">i</span><span class="o">.</span><span class="n">getPrice</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="o">.</span><span class="n">getReviews</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="nc">Predicate</span><span class="o">[</span><span class="kt">Item</span><span class="o">](</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="n">i</span><span class="o">.</span><span class="n">getPrice</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="o">.</span><span class="n">getReviews</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="o">)</span>
+</code></pre></div>
 
 
 <h2>Lessons&nbsp;learned</h2>
@@ -177,11 +174,11 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'fun-with-macros-and-parquet-avro';
-                var disqus_url = 'https://www.lyh.me/fun-with-macros-and-parquet-avro.html';
-
             var disqus_config = function () {
                 this.language = "en";
+
+                        this.page.identifier = '2015-01-08-fun-with-macros-and-parquet-avro';
+                        this.page.url = 'https://www.lyh.me/fun-with-macros-and-parquet-avro.html';
             };
 
             /* * * DON'T EDIT BELOW THIS LINE * * */

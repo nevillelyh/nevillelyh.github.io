@@ -40,11 +40,8 @@
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder ATOM Feed"/>
 
-
-
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
               title="Das Keyboard Shredder code ATOM Feed"/>
-
 </head>
 <body>
 
@@ -118,37 +115,37 @@ Das Keyboard Shredder            </a>
                 <p>One topic that came up a lot when optimizing Scala data applications is the performance of standard collections, or the hidden cost of temporary copies. The collections <span class="caps">API</span> is easy to learn and maps well to many Python concepts where a lot of data engineers are familiar with. But the performance penalty can be pretty big when it&#8217;s repeated over millions of records in a <span class="caps">JVM</span> with limited&nbsp;heap.</p>
 <h2>Mapping&nbsp;values</h2>
 <p>Let&#8217;s take a look at one most naive example first, mapping the values of a <code>Map</code>.</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mi">2</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mi">3</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mi">2</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mi">3</span><span class="o">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">toList</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">t</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">_1</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">_2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)).</span><span class="n">toMap</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>Looks simple enough but obviously not optimal. Two temporary <code>List[(String, Int)]</code> were created, one from <code>toList</code> and one from <code>map</code>. <code>map</code> also creates 3 copies of <code>(String, Int)</code>.</p>
 <p>There are a few commonly seen variations. These don&#8217;t create temporary collections but still key-value&nbsp;tuples.</p>
-<div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">((</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="n">m</span><span class="o">)</span> <span class="k">yield</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="o">((</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="n">m</span><span class="o">)</span> <span class="k">yield</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>If one reads the <a href="http://www.scala-lang.org/api/2.10.4/index.html#scala.collection.immutable.Map">ScalaDoc</a> closely, there&#8217;s a <code>mapValues</code> method already and it probably is the shortest and most&nbsp;performant.</p>
-<div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">mapValues</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">m</span><span class="o">.</span><span class="n">mapValues</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</code></pre></div>
 
 
 <h2>Java&nbsp;conversion</h2>
 <p>Similar problem exists when converting between Scala and Java collections. We store data on <span class="caps">HDFS</span> in <a href="http://avro.apache.org/">Avro</a> and one most commonly used data structure is high dimensional vector, represented as <code>java.util.List[java.lang.Float]</code> in Avro and <code>Array[Float]</code> in Scala and <a href="https://github.com/scalanlp/breeze">breeze</a>.</p>
 <p>Since there&#8217;s no direct conversion between Java <code>List</code> and Scala <code>Array</code>, the naive solution requires a temporary copy and looks like&nbsp;this:</p>
-<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">java.util.</span><span class="o">{</span> <span class="nc">List</span> <span class="k">=&gt;</span> <span class="nc">JList</span> <span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="nn">java.util.</span><span class="o">{</span> <span class="nc">List</span> <span class="k">=&gt;</span> <span class="nc">JList</span> <span class="o">}</span>
 <span class="k">import</span> <span class="nn">java.lang.</span><span class="o">{</span> <span class="nc">Float</span> <span class="k">=&gt;</span> <span class="nc">JFloat</span> <span class="o">}</span>
 <span class="k">import</span> <span class="nn">scala.collection.JavaConverters._</span>
 
 <span class="k">def</span> <span class="n">javaToArray</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">JList</span><span class="o">[</span><span class="kt">JFloat</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Float</span><span class="o">]</span> <span class="k">=</span> <span class="n">v</span><span class="o">.</span><span class="n">asScala</span><span class="o">.</span><span class="n">asInstanceOf</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">Float</span><span class="o">]].</span><span class="n">toArray</span>
 <span class="k">def</span> <span class="n">arrayToJava</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Float</span><span class="o">])</span><span class="k">:</span> <span class="kt">JList</span><span class="o">[</span><span class="kt">JFloat</span><span class="o">]</span> <span class="k">=</span> <span class="n">v</span><span class="o">.</span><span class="n">toList</span><span class="o">.</span><span class="n">asInstanceOf</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">JFloat</span><span class="o">]].</span><span class="n">asJava</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>The conversion is almost 10 times faster by doing the conversion manually in a&nbsp;loop.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">javaToArray</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">JList</span><span class="o">[</span><span class="kt">JFloat</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Float</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">javaToArray</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">JList</span><span class="o">[</span><span class="kt">JFloat</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Float</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">r</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Float</span><span class="o">](</span><span class="n">v</span><span class="o">.</span><span class="n">size</span><span class="o">)</span>
   <span class="k">var</span> <span class="n">i</span> <span class="k">=</span> <span class="mi">0</span>
   <span class="k">val</span> <span class="n">j</span> <span class="k">=</span> <span class="n">v</span><span class="o">.</span><span class="n">iterator</span>
@@ -168,12 +165,12 @@ Das Keyboard Shredder            </a>
   <span class="o">}</span>
   <span class="n">r</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <h2>Merging&nbsp;maps</h2>
 <p>Same goes for merging 2 <code>Map[String, Double]</code> by summing up values of duplicate keys. Both solutions below require 2 copies of key sets, one union/intersect&nbsp;set,</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">m1</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mf">1.0</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mf">2.0</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mf">3.0</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">m1</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mf">1.0</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mf">2.0</span><span class="o">,</span> <span class="s">&quot;C&quot;</span> <span class="o">-&gt;</span> <span class="mf">3.0</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">m2</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span><span class="s">&quot;A&quot;</span> <span class="o">-&gt;</span> <span class="mf">1.5</span><span class="o">,</span> <span class="s">&quot;B&quot;</span> <span class="o">-&gt;</span> <span class="mf">2.5</span><span class="o">,</span> <span class="s">&quot;D&quot;</span> <span class="o">-&gt;</span> <span class="mf">3.5</span><span class="o">)</span>
 
 <span class="c1">// solution 1</span>
@@ -186,29 +183,29 @@ Das Keyboard Shredder            </a>
 <span class="o">(</span><span class="n">m1</span><span class="o">.</span><span class="n">keySet</span> <span class="o">++</span> <span class="n">m2</span><span class="o">.</span><span class="n">keySet</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">k</span> <span class="k">=&gt;</span>
   <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">m1</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span> <span class="o">+</span> <span class="n">m2</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">))</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>The best solution for this case also happens to be the shortest. It leverages the fact that pairs from the right-hand size of <code>++</code> overwrite those on the left-hand size. One could even compare size of the maps and put the smaller on the right-hand size to further reduce&nbsp;copies.</p>
-<div class="highlight"><pre><span></span><span class="n">m1</span> <span class="o">++</span> <span class="n">m2</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="n">m1</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">))</span> <span class="o">}</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">m1</span> <span class="o">++</span> <span class="n">m2</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">v</span> <span class="o">+</span> <span class="n">m1</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">))</span> <span class="o">}</span>
+</code></pre></div>
 
 
 <h2>Cheating by&nbsp;mutation</h2>
 <p>All of these optimizations are nice but sometimes they are just not enough. Imagine if the map merge operation is used in a <code>foldLeft</code> on the reducer size, over millions of users with one <code>Map</code> each, we&#8217;ll be basically creating that many temporary copies and sometimes <span class="caps">GC</span> just can&#8217;t keep up. Good thing is that in some cases we know for sure a temporary object won&#8217;t be reused ever again, and can mutate it in place and pass it along to further reduce copying. In the example below <span class="caps">LHS</span> is mutated in place and returned in the binary&nbsp;operation.</p>
-<div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">scala.collection.mutable.</span> <span class="o">{</span> <span class="nc">Map</span> <span class="k">=&gt;</span> <span class="nc">MMap</span> <span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="nn">scala.collection.mutable.</span> <span class="o">{</span> <span class="nc">Map</span> <span class="k">=&gt;</span> <span class="nc">MMap</span> <span class="o">}</span>
 
-<span class="k">def</span> <span class="n">mergeMaps</span><span class="o">(</span><span class="n">m1</span><span class="k">:</span> <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Double</span><span class="o">],</span> <span class="n">m2</span><span class="k">:</span> <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Double</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
+<span class="k">def</span> <span class="n">mergeMaps</span><span class="o">(</span><span class="n">m1</span><span class="k">:</span> <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Double</span><span class="o">],</span> <span class="n">m2</span><span class="k">:</span> <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Double</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
   <span class="n">m2</span><span class="o">.</span><span class="n">foreach</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">m1</span><span class="o">(</span><span class="n">k</span><span class="o">)</span> <span class="k">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">m1</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span> <span class="o">}</span>
   <span class="n">m1</span>
 <span class="o">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p>And in this <code>foldLeft</code> operation, <span class="caps">LHS</span> is always the same object as initial value <code>z</code> and mutated throughout the&nbsp;group.</p>
-<div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">group</span><span class="k">:</span> <span class="kt">Grouped</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Double</span><span class="o">]]</span> <span class="c1">// = ...</span>
-<span class="n">group</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="nc">MMap</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Double</span><span class="o">]())(</span><span class="n">mergeMaps</span><span class="o">)</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">val</span> <span class="n">group</span><span class="k">:</span> <span class="kt">Grouped</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">MMap</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Double</span><span class="o">]]</span> <span class="c1">// = ...</span>
+<span class="n">group</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="nc">MMap</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Double</span><span class="o">]())(</span><span class="n">mergeMaps</span><span class="o">)</span>
+</code></pre></div>
 
 
 <p>Some numeric libraries, like <a href="http://mikiobraun.github.io/jblas/"><span class="caps">JBLAS</span></a> offer operators in both immutable (by copying) and mutable (by mutating in place) fashions. It&#8217;s probably best to start with the immutable ones to ensure correctness, and drop down to mutating in place when running into performance&nbsp;problems.</p>
@@ -231,11 +228,11 @@ Das Keyboard Shredder            </a>
             /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
             var disqus_shortname = 'lyh'; // required: replace example with your forum shortname
 
-                    var disqus_identifier = 'how-many-copies';
-                var disqus_url = 'https://www.lyh.me/how-many-copies.html';
-
             var disqus_config = function () {
                 this.language = "en";
+
+                        this.page.identifier = '2014-08-02-how-many-copies';
+                        this.page.url = 'https://www.lyh.me/how-many-copies.html';
             };
 
             /* * * DON'T EDIT BELOW THIS LINE * * */
