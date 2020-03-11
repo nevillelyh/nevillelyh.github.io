@@ -785,6 +785,7 @@ implicit lazy val cogenBoolean: Cogen[Boolean] =
     Cogen(b => if (b) 1L else 0L)
 
 implicit lazy val cogenChar: Cogen[Char] = Cogen(_.toLong)
+implicit def cogenString: Cogen[String] = Cogen.it(_.iterator)
 ```
 
 --
@@ -941,6 +942,8 @@ class: center, middle
 
 Derive case classes for common serialization formats, and converters between CC and underlying type
 
+--
+
 - BigQuery
 --
 
@@ -1054,21 +1057,16 @@ object AvroType {
 
 - Explicitly define primitive field conversions and let Magnolify derivation handle CCs
 
+- Some primitive types have same representation in CC as in Avro...
 
 ```scala
+implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
+
 private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
   new AvroField.Aux[T, From, To] {
     override protected val schema: Schema = Schema.create(tpe)
     ...
   }
-```
-
---
-
-- Some primitive types have same representation in CC as in Avro...
-
-```scala
-implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
 ```
 
 --
@@ -1130,6 +1128,51 @@ def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField
 
 ---
 
+# AvroType in action
+
+--
+
+```sbt
+scala> import magnolify.avro._
+```
+
+--
+
+```sbt
+scala> case class Foo(a: Int, b: List[String], c: Option[Boolean])
+defined class Foo
+
+scala> val foo = Foo(1, List("a", "b", "c"), Some(true))
+foo: Foo = Foo(1,List(a, b, c),Some(true))
+```
+
+--
+
+```sbt
+scala> val converter = AvroType[Foo]
+converter: magnolify.avro.AvroType[Foo] = magnolify.avro.AvroType$$anon$1@53bdb702
+```
+
+--
+
+```sbt
+scala> val genericRecord = converter.to(foo)
+genericRecord: org.apache.avro.generic.GenericRecord = {"a": 1, "b": ["a", "b", "c"], "c": true}
+
+scala> genericRecord.getSchema
+org.apache.avro.Schema = {"type":"record","name":"Foo","namespace":"$iw","fields":[{"name":"a","type":"int"},
+{"name":"b","type":{"type":"array","items":"string"},"default":[]},{"name":"c","type":["null","boolean"],"default":null}]}
+
+```
+
+--
+
+```sbt
+scala> converter.from(genericRecord)
+res: Foo = Foo(1,List(a, b, c),Some(true))
+```
+---
+
 # Other Converters
 
 --
@@ -1159,6 +1202,13 @@ Datastore
 ```scala
 sealed trait EntityType[T] extends Converter[T, Entity, Entity.Builder]
 ```
+
+---
+
+class: center, middle
+
+# Magnolify All The Shapes!
+
 ---
 
 # Magnolia vs shapeless
