@@ -35,9 +35,9 @@ class: center, middle
 # Agenda
 
 - ### Type classes
-- ### Magnolia
-- ### Property-Based Testing with Discipline
-- ### Converters
+- ### Magnolia with ScalaCheck and Cats
+- ### Property-Based Testing with ScalaCheck and Discipline
+- ### Data Type Converters
 - ### Magnolia vs shapeless
 - ### Other Fun Bits
 
@@ -55,6 +55,9 @@ trait Show[T] {
 }
 ```
 
+???
+pretty printer
+
 --
 
 ```scala
@@ -65,6 +68,9 @@ object Show {
 }
 ```
 
+???
+companion object
+
 --
 
 ```scala
@@ -72,6 +78,9 @@ trait Semigroup[T] {
   def combine(x: T, y: T): T
 }
 ```
+
+???
+algebraic structure of a set and an associative binary operation
 
 --
 
@@ -82,6 +91,9 @@ object Semigroup {
   }
 }
 ```
+
+???
+companion object
 
 ---
 
@@ -96,6 +108,9 @@ object Show {
   implicit val showInt = Show[Int](_.toString)
 ```
 
+???
+primitive instances
+
 --
 
 ```scala
@@ -103,6 +118,9 @@ object Show {
   implicit def showTuple2[A, B](implicit a: Show[A], b: Show[B]) =
     Show[(A, B)](t => s"(${a.show(t._1)}, ${b.show(t._2)})")
 ```
+
+???
+compose tuple instances
 
 --
 
@@ -152,6 +170,12 @@ object ShowDerivation {
   implicit def apply[T]: Typeclass[T] = macro Magnolia.gen[T]
 }
 ```
+
+???
+- start with type class alias
+- combine method for case clases
+- dispatch method for sealed traits
+- implicit method to summon the derivation macro
 
 ---
 
@@ -288,19 +312,19 @@ val genInt: Gen[Int] = implicitly[Arbitrary[Int]].arbitrary
 --
 
 ```scala
-val genRecord: Gen[Record] = for (s <- genString; i <- genInt) yield Record(s, i)
-val arbRecord: Arbitrary[Record] = Arbitrary(genRecord)
-```
-
---
-
-```scala
 val genRecord: Gen[Record] = genString.flatMap { s =>
   genInt.map { i =>
     Record(s, i)
   }
 }
 ```
+--
+
+```scala
+val genRecord: Gen[Record] = for (s <- genString; i <- genInt) yield Record(s, i)
+val arbRecord: Arbitrary[Record] = Arbitrary(genRecord)
+```
+
 
 --
 
@@ -325,6 +349,11 @@ def dispatch[T: Fallback](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] 
     Gen.oneOf(sealedTrait.subtypes.map(_.typeclass.arbitrary)).flatMap(identity)
   }
 ```
+
+???
+- combine - because `Gen[T]` is a monad, `constructMonadic` through an adapter `monadicGen`
+
+- dispatch - randomly delegate to one of the sub types
 
 --
 
@@ -360,6 +389,9 @@ def test[T](implicit arb: Arbitrary[T]) = {
   }
 ```
 
+???
+Why not `== 10`? Some types have limited sample space, e.g. `Boolean`, `Option[Boolean]`.
+
 --
 
 ```scala
@@ -368,6 +400,9 @@ def test[T](implicit arb: Arbitrary[T]) = {
   }
 }
 ```
+
+???
+`Gen[T]` is deterministic given a `Seed`
 
 ---
 
@@ -421,6 +456,11 @@ def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = Arbitrar
 }
 ```
 
+???
+`Gen[T]` has size, useful for cases like `List[T]`.
+
+Shrink for each recurive layer, fail when size runs out.
+
 ---
 
 # FAILED
@@ -435,6 +475,11 @@ def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = Arbitrar
 - ### `Gen.fail[T]` &rArr; `None` &rArr; `Gen.listOfN` &rArr; `Nil`
 - ### Resize unaware of ADT structure
 - ### Fallback to base case instead, e.g. `Leaf`
+
+???
+`Gen.listOfN` uses `traverse`
+
+Resize unaware of `Leaf` vs `Branch`
 
 ---
 
@@ -511,6 +556,9 @@ Eq.instance { (x, y) =>
 }
 ```
 
+???
+All fields should be equal
+
 --
 
 - ### Dispatch
@@ -522,6 +570,11 @@ Eq.instance { (x, y) =>
   }
 }
 ```
+
+???
+Remember that `cast` is a `PartialFunction`
+
+Same sub type and equal
 
 ---
 
@@ -543,6 +596,9 @@ Semigroup.instance { (x, y) =>
 }
 ```
 
+???
+Combine each field of `x` and `y`
+
 --
 
 - ### Dispatch
@@ -554,6 +610,9 @@ def dispatch[T: Dispatchable](sealedTrait: SealedTrait[Typeclass, T]): Typeclass
 ```
 
 [spotify/tfexample-derive](https://github.com/spotify/tfexample-derive)
+
+???
+Cannot combine different sub types
 
 ---
 
@@ -583,15 +642,26 @@ cats.kernel.laws.discipline.SemigroupTests[Record].eqv.all
 - repeat2 - `sg.combineN(x, 2) == sg.combine(x, x)`
 - combineAllOption - `sg.combineAllOption(xs) == xs.reduceOption(sg.combine)`
 
+???
+`combineN` and `combineAllOption` are extra methods that allow optimization for multiple inputs
+
 ---
 
 # Arbitrary function
 
-- ### `Eq[T]` antisymmetry - `f: T => T` &rArr; if `eqv(x, y)` &rArr; `eqv(f(x), f(y))`
+- `Eq[T]` antisymmetry - `f: T => T` &rArr; if `eqv(x, y)` &rArr; `eqv(f(x), f(y))`
+
+???
+if `x == y`, `f(x)` should equal `f(y)`, and vice versa
 
 --
 
-- ### `implicit arbF: Arbitrary[T => T]`
+- `implicit arbF: Arbitrary[T => T]`
+
+???
+Not the same as `Arbitrary[T]`
+
+`f(x) = x + 1` not the same as randomly generating `x`
 
 --
 
@@ -606,6 +676,8 @@ trait Cogen[T] {
   def perturb(seed: Seed, t: T): Seed
 }
 ```
+
+> _perturb_: subject (a system, moving object, or process) to an influence tending to alter its normal or regular state or path.
 
 --
 
@@ -639,6 +711,9 @@ Cogen { (seed, t: T) =>
 }
 ```
 
+???
+Chain `perturb` of each field and pass `seed` alone
+
 --
 
 - ### Dispatch
@@ -650,6 +725,9 @@ Cogen { (seed, t: T) =>
   }
 }
 ```
+
+???
+Call `perturb` of the sub type
 
 ---
 
@@ -665,6 +743,9 @@ property("uniqueness") = Prop.forAll { seed: Seed, xs: List[T] =>
 }
 ```
 
+???
+Unique input must produce unique "previous seed" via `perturb`
+
 --
 
 ```scala
@@ -672,6 +753,9 @@ property("consistency") = Prop.forAll { (seed: Seed, x: T) =>
   co.perturb(seed, x) == co.perturb(seed, x)
 }
 ```
+
+???
+Same input and `seed` must produce same "previous seed"
 
 ---
 
@@ -708,6 +792,9 @@ implicit lazy val cogenChar: Cogen[Char] = Cogen(_.toLong)
 - ### No-op for `None`
 - ### `Cogen[Boolean]` &hArr; `Cogen[Int]` @ [1, 0]
 
+???
+For both input `Nullable` instances, only `Cogen[Int]#perturb(seed, 0)` is called
+
 
 ---
 
@@ -733,6 +820,9 @@ Cogen { (seed, t: T) =>
   }
 }
 ```
+
+???
+Inject field index to distinguish them
 
 ---
 
@@ -766,6 +856,10 @@ res2: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
                     /* ^ implicit a: Arbitrary[Seed] ^ */
 ```
 
+--
+
+No `implicit val arbSeed: Arbitrary[Seed]` in ScalaCheck!
+
 ---
 
 # Pseudo ramdom seed
@@ -798,6 +892,9 @@ scala> Seed.fromLongs(0, 0, 0, 0)
 res3: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 ```
 
+???
+Magnolia kicked in and generated implicit for `Seed.apply`
+
 ---
 
 # Fixing Seed
@@ -828,6 +925,9 @@ res3: org.scalacheck.rng.Seed = Seed.fromBase64("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     // ArbitraryDerivation is a macro and requires WeakTypeTag
     implicit def genArbitrary[T]: Arbitrary[T] = macro genArbitraryMacro[T]
   ```
+
+???
+Fine-grained control over implicit derivation
 
 ---
 
