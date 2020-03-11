@@ -840,8 +840,227 @@ class: center, middle
 
 # Converters
 
-Pick one (Datastore Entity?), generalize to all
+Derive case classes for common serialization formats, and converters between CC and underlying type
 
+- BigQuery
+--
+
+- DataStore
+--
+
+- Protobuf
+--
+
+- Tensorflow
+--
+
+- Avro
+
+--
+
+```scala
+trait Converter[T, Reader, Writer] extends Serializable {
+  def from(v: Reader): T
+  def to(v: T): Writer
+}
+```
+
+---
+
+# AvroType[T]
+
+```java
+package org.apache.avro.generic;
+
+public interface GenericRecord extends IndexedRecord {
+  /** Set the value of a field given its name. */
+  void put(String key, Object v);
+
+  /** Return the value of a field given its name. */
+  Object get(String key);
+}
+```
+
+---
+
+# AvroType[T]
+
+`GenericRecord`s have a default implementation...
+
+```java
+package org.apache.avro.generic;
+
+public static class Record implements GenericRecord, Comparable<Record> {
+	private final Schema schema;
+	private final Object[] values;
+}
+```
+
+and associated `Schema`:
+```java
+package org.apache.avro;
+
+public abstract class Schema {
+	public enum Type {
+      RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT, DOUBLE, BOOLEAN, NULL;
+	}
+	
+	public static class Field {
+		private final String name;
+		private final Schema schema;
+		private final String doc;
+		private final JsonNode defaultValue;
+	}
+}
+```
+
+---
+
+# AvroType[T]
+
+We can represent primitive fields...
+
+```scala
+sealed trait AvroField[T] extends Serializable { self =>
+  type FromT
+  type ToT
+
+  protected val schemaString: String
+  def schema: Schema = new Schema.Parser().parse(schemaString)
+  def defaultVal: Any
+  def from(v: FromT): T
+  def to(v: T): ToT
+
+  def fromAny(v: Any): T = from(v.asInstanceOf[FromT])
+}
+```
+
+--
+
+...and entire `GenericRecord`s:
+
+```scala
+sealed trait AvroType[T] extends Converter[T, GenericRecord, GenericRecord] {
+  protected val schemaString: String
+  def schema: Schema = new Schema.Parser().parse(schemaString)
+  def apply(r: GenericRecord): T = from(r)
+  def apply(t: T): GenericRecord = to(t)
+}
+object AvroType {
+  implicit def apply[T](implicit f: AvroField.Record[T]): AvroType[T] = ...
+}
+```
+
+---
+
+# AvroType[T]
+
+- Explicitly define primitive field conversions and let Magnolify derivation handle CCs
+
+
+```scala
+private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
+	new AvroField.Aux[T, From, To] {
+		override protected val schemaSchema: String = Schema.create(tpe).toString()
+		...
+    }
+```
+
+--
+
+- Some primitive types have same representation in CC as in Avro...
+
+```scala
+implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
+```
+
+--
+
+- But some are handled differently:
+
+```scala
+implicit val afString = aux[String, CharSequence, String](Schema.Type.STRING)(_.toString)(identity)
+```
+
+--
+
+```scala
+implicit def afOption[T](implicit f: AvroField[T]): AvroField[Option[T]] = new Aux[Option[T], f.FromT, f.ToT] {
+	override protected val schemaSchema: String =
+		Schema.createUnion(Schema.create(Schema.Type.NULL), f.schema).toString()
+	...
+}
+```
+---
+
+- ### Combine
+
+```scala
+def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField[T] {
+	override type FromT = GenericRecord
+	override type ToT = GenericRecord
+    
+	override protected val schemaString: String = Schema.createRecord(caseClass.typeName, ...)
+
+	override def defaultVal: Any = null
+
+	override def from(v: GenericRecord): T =
+		caseClass.construct(p => p.typeclass.fromAny(v.get(p.label)))
+
+	override def to(v: T): GenericRecord =
+		caseClass.parameters
+			.foldLeft(new GenericRecordBuilder(schema)) { (b, p) =>
+				b.set(p.label, p.typeclass.to(p.dereference(v)))
+			}.build()
+}
+```
+
+---
+
+- ### Dispatch
+
+```scala
+  @implicitNotFound("Cannot derive AvroField for sealed trait")
+  private sealed trait Dispatchable[T]
+
+  def dispatch[T: Dispatchable](sealedTrait: SealedTrait[Typeclass, T]): Record[T] = ???
+```
+
+--
+
+- maybe support complex union types in future?
+
+---
+
+# Other Converters
+
+--
+
+BigQuery
+```scala
+sealed trait TableRowType[T] extends Converter[T, TableRow, TableRow]
+```
+
+--
+
+Protobuf
+```scala
+sealed trait ProtobufType[T, MsgT <: Message] extends Converter[T, MsgT, MsgT]
+```
+
+--
+
+Tensorflow
+```scala
+sealed trait ExampleType[T] extends Converter[T, Example, Example.Builder]
+```
+
+--
+
+Datastore
+```scala
+sealed trait EntityType[T] extends Converter[T, Entity, Entity.Builder]
+```
 ---
 
 # Other fun bits
