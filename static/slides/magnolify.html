@@ -24,23 +24,22 @@ class: center, middle
 
 # Magnolify All The Things!
 
-Neville Li @sinisa_lyh
+### Neville Li @sinisa_lyh
 
-Claire McGinty
+### Claire McGinty
 
-NEScala 2020
+### NEScala 2020
 
 ---
 
 # Agenda
 
-1. Type classes
-1. Magnolia
-1. ScalaCheck
-1. Cats
-1. Converters
-1. Benchmark against shapeless
-1. Honorable metions, e.g. Parquet, Coder
+- ### Type classes
+- ### Magnolia
+- ### Property-Based Testing with Discipline
+- ### Converters
+- ### Magnolia vs shapeless
+- ### Other Fun Bits
 
 ---
 
@@ -891,8 +890,8 @@ public interface GenericRecord extends IndexedRecord {
 package org.apache.avro.generic;
 
 public static class Record implements GenericRecord, Comparable<Record> {
-	private final Schema schema;
-	private final Object[] values;
+  private final Schema schema;
+  private final Object[] values;
 }
 ```
 
@@ -901,16 +900,16 @@ and associated `Schema`:
 package org.apache.avro;
 
 public abstract class Schema {
-	public enum Type {
-      RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT, DOUBLE, BOOLEAN, NULL;
-	}
-	
-	public static class Field {
-		private final String name;
-		private final Schema schema;
-		private final String doc;
-		private final JsonNode defaultValue;
-	}
+  public enum Type {
+    RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT, DOUBLE, BOOLEAN, NULL;
+  }
+
+  public static class Field {
+    private final String name;
+    private final Schema schema;
+    private final String doc;
+    private final JsonNode defaultValue;
+  }
 }
 ```
 
@@ -925,8 +924,7 @@ sealed trait AvroField[T] extends Serializable { self =>
   type FromT
   type ToT
 
-  protected val schemaString: String
-  def schema: Schema = new Schema.Parser().parse(schemaString)
+  val schema: Schema
   def defaultVal: Any
   def from(v: FromT): T
   def to(v: T): ToT
@@ -941,8 +939,7 @@ sealed trait AvroField[T] extends Serializable { self =>
 
 ```scala
 sealed trait AvroType[T] extends Converter[T, GenericRecord, GenericRecord] {
-  protected val schemaString: String
-  def schema: Schema = new Schema.Parser().parse(schemaString)
+  val schema: Schema
   def apply(r: GenericRecord): T = from(r)
   def apply(t: T): GenericRecord = to(t)
 }
@@ -960,10 +957,10 @@ object AvroType {
 
 ```scala
 private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
-	new AvroField.Aux[T, From, To] {
-		override protected val schemaSchema: String = Schema.create(tpe).toString()
-		...
-    }
+  new AvroField.Aux[T, From, To] {
+    override protected val schema: Schema = Schema.create(tpe)
+    ...
+  }
 ```
 
 --
@@ -985,11 +982,12 @@ implicit val afString = aux[String, CharSequence, String](Schema.Type.STRING)(_.
 --
 
 ```scala
-implicit def afOption[T](implicit f: AvroField[T]): AvroField[Option[T]] = new Aux[Option[T], f.FromT, f.ToT] {
-	override protected val schemaSchema: String =
-		Schema.createUnion(Schema.create(Schema.Type.NULL), f.schema).toString()
-	...
-}
+implicit def afOption[T](implicit f: AvroField[T]): AvroField[Option[T]] =
+  new Aux[Option[T], f.FromT, f.ToT] {
+    override protected val schema: Schema =
+      Schema.createUnion(Schema.create(Schema.Type.NULL), f.schema)
+    ...
+  }
 ```
 ---
 
@@ -997,21 +995,21 @@ implicit def afOption[T](implicit f: AvroField[T]): AvroField[Option[T]] = new A
 
 ```scala
 def combine[T](caseClass: CaseClass[Typeclass, T]): AvroField[T] = new AvroField[T] {
-	override type FromT = GenericRecord
-	override type ToT = GenericRecord
-    
-	override protected val schemaString: String = Schema.createRecord(caseClass.typeName, ...)
+  override type FromT = GenericRecord
+  override type ToT = GenericRecord
 
-	override def defaultVal: Any = null
+  override protected val schemaString: String = Schema.createRecord(caseClass.typeName, ...)
 
-	override def from(v: GenericRecord): T =
-		caseClass.construct(p => p.typeclass.fromAny(v.get(p.label)))
+  override def defaultVal: Any = null
 
-	override def to(v: T): GenericRecord =
-		caseClass.parameters
-			.foldLeft(new GenericRecordBuilder(schema)) { (b, p) =>
-				b.set(p.label, p.typeclass.to(p.dereference(v)))
-			}.build()
+  override def from(v: GenericRecord): T =
+    caseClass.construct(p => p.typeclass.fromAny(v.get(p.label)))
+
+  override def to(v: T): GenericRecord =
+    caseClass.parameters
+      .foldLeft(new GenericRecordBuilder(schema)) { (b, p) =>
+        b.set(p.label, p.typeclass.to(p.dereference(v)))
+      }.build()
 }
 ```
 
@@ -1063,17 +1061,6 @@ sealed trait EntityType[T] extends Converter[T, Entity, Entity.Builder]
 ```
 ---
 
-# Other fun bits
-
-- ### `Hash[T]` - mirror `scala.util.hashing.MurmurHash3#productHash`
-- ### Micro-optimization - `Semigroup#combineAllOption`, etc.
-- ### Scala 2.13 - shims for `CanBuildFrom` &rArr; `mutable.Builder`, etc.
-- ### Scala 2.11 - Magnolia fork
-- ### Serialization - `CanBuildFrom`, data type round-trips
-- ### `ambiguous implicit values` - `List`, `Option` are sealed traits!
-
----
-
 # Magnolia vs shapeless
 
 - ### Type signature
@@ -1114,6 +1101,16 @@ sealed trait EntityType[T] extends Converter[T, Entity, Entity.Builder]
 
 ---
 
+# Other Fun Bits
+
+- ### `Hash[T]` - mirror `scala.util.hashing.MurmurHash3#productHash`
+- ### Micro-optimization - `Semigroup#combineAllOption`, etc.
+- ### Scala 2.13 - shims for `CanBuildFrom` &rArr; `mutable.Builder`, etc.
+- ### Scala 2.11 - Magnolia fork
+- ### Serialization - `CanBuildFrom`, data type round-trips
+- ### `ambiguous implicit values` - `List`, `Option` are sealed traits!
+
+---
 
 # Related work
 
