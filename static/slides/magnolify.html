@@ -1066,12 +1066,12 @@ object AvroType {
 
 # AvroType[T]
 
-- Explicitly define primitive field conversions and let Magnolify derivation handle CCs
+- Explicitly define primitive field conversions and let Magnolia derivation handle CCs
 
 - Some primitive types have same representation in CC as in Avro...
 
 ```scala
-implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)
+implicit val afInt = aux[Int, Int, Int]](Schema.Type.INT)(identity)(identity)
 
 private def aux[T, From, To](tpe: Schema.Type)(f: From => T)(g: T => To): AvroField[T] =
   new AvroField.Aux[T, From, To] {
