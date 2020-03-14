@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
 <head>
-    <title>Decompiling Scala code - Das Keyboard Shredder</title>
+    <title>Decompiling Scala code - Stackdiver as a Service</title>
     <!-- Using the latest rendering mode for IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
@@ -15,7 +15,7 @@
         <meta name="keywords" content="scala,fp" />
         <meta name="description" content="I was bored today and decided to decompile some Scala code for fun and profit. I’m using Scala 2.12.2 and Java 1.8.0_121. Scala object package javap object Test01 { def main(args: Array[String]): Unit = Unit } public final class javap.Test01$ { public static javap.Test01$ MODULE$; public static {}; public void main(java.lang.String[]); private javap.Test01$(); } public final class javap.Test01 { public static void main(java.lang.String[]); } As we can see a Scala object is compiled to 2 Java classes, Test01 with static methods for Java compatibility and a Test01$ with a static instance of itself as MODULE$, so that Test01 can be used as an instance value in Scala. Class constructors package javap class Test02(val x: Int, val y: Int, z: Int) { def this(x: Int, y: Int) = this(x, y, 0) } public class javap.Test02 { private final int x; private final int y; public int x(); public int y(); public javap.Test02(int, int, int); public javap.Test02(int, int); } Looks like the default constructor (val x: Int, val y: Int, z: Int) and the overloaded one (x: Int, y: Int) each generated a Java constructor. However only x and y …" />
 
-        <meta property="og:site_name" content="Das Keyboard Shredder" />
+        <meta property="og:site_name" content="Stackdiver as a Service" />
         <meta property="og:type" content="article"/>
         <meta property="og:title" content="Decompiling Scala code"/>
         <meta property="og:url" content="https://www.lyh.me/decompiling-scala-code.html"/>
@@ -37,10 +37,10 @@
     <link rel="stylesheet" href="https://www.lyh.me/theme/css/style.css" type="text/css"/>
 
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
-              title="Das Keyboard Shredder ATOM Feed"/>
+              title="Stackdiver as a Service ATOM Feed"/>
 
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
-              title="Das Keyboard Shredder code ATOM Feed"/>
+              title="Stackdiver as a Service code ATOM Feed"/>
 </head>
 <body>
 
@@ -54,7 +54,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a href="https://www.lyh.me/" class="navbar-brand">
-Das Keyboard Shredder            </a>
+Stackdiver as a Service            </a>
         </div>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
@@ -346,7 +346,7 @@ Das Keyboard Shredder            </a>
     <p>
       <strong>About Neville Li</strong><br/>
         
-Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, das keyboard shredder, author of <a href="https://github.com/spotify/scio">Scio</a>
+Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, creator of <a href="https://github.com/spotify/scio">Scio</a>, technical cave & wreck diver, lefty guitar player
 
     </p>
 </div><!-- Sidebar -->
@@ -372,11 +372,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="https://www.lyh.me/magnolify.html">Magnolify</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/featran.html">Featran</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">Automatic type-class derivation with&nbsp;Shapeless</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
-    <li class="list-group-item"><a href="https://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
@@ -415,7 +415,7 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
    <div class="container">
       <hr>
       <div class="row">
-         <div class="col-xs-10">&copy; 2017 Neville Li
+         <div class="col-xs-10">&copy; 2020 Neville Li
             &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
             <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
             <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>

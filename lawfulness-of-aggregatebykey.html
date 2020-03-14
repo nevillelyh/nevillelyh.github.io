@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
 <head>
-    <title>Lawfulness of aggregateByKey - Das Keyboard Shredder</title>
+    <title>Lawfulness of aggregateByKey - Stackdiver as a Service</title>
     <!-- Using the latest rendering mode for IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
@@ -15,7 +15,7 @@
         <meta name="keywords" content="scala,scio,data,fp" />
         <meta name="description" content="I spent a couple hours yesterday debugging what I thought was a Protobuf serialization issue, which turns out to be an unlawful Monoid-like use of aggregateByKey in Scio. The Problem Both Scio and Spark have aggregate and aggregateByKey transformations that look like this: // on SCollection[V] def aggregate[U](zeroValue: U)(seqOp: (U, V) =&gt; U, combOp: (U, U) =&gt; U): SCollection[U] // on SCollection[(K, V)] def aggregateByKey[U](zeroValue: U)(seqOp: (U, V) =&gt; U, combOp: (U, U) =&gt; U): SCollection[(K, U)] And we have some business logic that looks like this: case class Count(id: String, count: Int) val z = Count(&#34;&#34;, 0) // zeroValue def seqOp(acc: Count, v: Count) = Count(v.id, acc.count + v.count) def combOp(x: Count, y: Count) = Count(x.id, x.count + y.count) sc.parallelize(Seq(Count(&#34;a&#34;, 10), Count(&#34;a&#34;, 100), Count(&#34;b&#34;, 5), Count(&#34;b&#34;, 50))) .groupBy(_.id) .aggregateByKey(z)(seqOp, combOp) This code however, only works correctly locally with DirectRunner and always produces results with id == &#34;&#34; when running on Dataflow service with the DataflowRunner. Can you spot the bug? Monoid laws You might notice that zeroValue and combOp together resemble a Monoid, which should satisfy the identity law: combOp(zeroValue …" />
 
-        <meta property="og:site_name" content="Das Keyboard Shredder" />
+        <meta property="og:site_name" content="Stackdiver as a Service" />
         <meta property="og:type" content="article"/>
         <meta property="og:title" content="Lawfulness of aggregateByKey"/>
         <meta property="og:url" content="https://www.lyh.me/lawfulness-of-aggregatebykey.html"/>
@@ -39,10 +39,10 @@
     <link rel="stylesheet" href="https://www.lyh.me/theme/css/style.css" type="text/css"/>
 
         <link href="https://www.lyh.me/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
-              title="Das Keyboard Shredder ATOM Feed"/>
+              title="Stackdiver as a Service ATOM Feed"/>
 
         <link href="https://www.lyh.me/feeds/code.atom.xml" type="application/atom+xml" rel="alternate"
-              title="Das Keyboard Shredder code ATOM Feed"/>
+              title="Stackdiver as a Service code ATOM Feed"/>
 </head>
 <body>
 
@@ -56,7 +56,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a href="https://www.lyh.me/" class="navbar-brand">
-Das Keyboard Shredder            </a>
+Stackdiver as a Service            </a>
         </div>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
@@ -228,7 +228,7 @@ Das Keyboard Shredder            </a>
     <p>
       <strong>About Neville Li</strong><br/>
         
-Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, das keyboard shredder, author of <a href="https://github.com/spotify/scio">Scio</a>
+Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, creator of <a href="https://github.com/spotify/scio">Scio</a>, technical cave & wreck diver, lefty guitar player
 
     </p>
 </div><!-- Sidebar -->
@@ -254,11 +254,11 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
 <li class="list-group-item">
   <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
   <ul class="list-group" id="recentposts">
+    <li class="list-group-item"><a href="https://www.lyh.me/magnolify.html">Magnolify</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/featran.html">Featran</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/automatic-type-class-derivation-with-shapeless.html">Automatic type-class derivation with&nbsp;Shapeless</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/lambda-serialization.html">Lambda&nbsp;serialization</a></li>
     <li class="list-group-item"><a href="https://www.lyh.me/lawfulness-of-aggregatebykey.html">Lawfulness of&nbsp;aggregateByKey</a></li>
-    <li class="list-group-item"><a href="https://www.lyh.me/canbuildfrom.html">CanBuildFrom</a></li>
   </ul>
 </li>
 <!-- End Sidebar/Recent Posts -->
@@ -297,7 +297,7 @@ Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a h
    <div class="container">
       <hr>
       <div class="row">
-         <div class="col-xs-10">&copy; 2017 Neville Li
+         <div class="col-xs-10">&copy; 2020 Neville Li
             &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
             <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
             <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>
