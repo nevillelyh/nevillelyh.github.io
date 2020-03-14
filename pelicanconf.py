@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 AUTHOR = u'Neville Li'
-SITENAME = u'Das Keyboard Shredder'
+SITENAME = u'Stackdiver as a Service'
 SITEURL = ''
 
 PATH = 'content'
@@ -49,7 +49,7 @@ TYPOGRIFY = True
 
 # pelican-bootstrap3
 ABOUT_ME = '''
-Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, das keyboard shredder, author of <a href="https://github.com/spotify/scio">Scio</a>
+Data infrastructure @<a href="https://twitter.com/Spotify">Spotify</a>, ex-@<a href="https://twitter.com/Yahoo">Yahoo</a> search, creator of <a href="https://github.com/spotify/scio">Scio</a>, technical cave & wreck diver, lefty guitar player
 '''
 AVATAR = ('/avatar.jpg')
 ADDTHIS_PROFILE = 'sinisalyh'
