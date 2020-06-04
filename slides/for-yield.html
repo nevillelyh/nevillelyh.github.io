@@ -205,7 +205,9 @@ class: center, middle
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured">
+    </script>
     <script>
       var slideshow = remark.create({
         ratio: '16:9',
@@ -220,12 +222,6 @@ class: center, middle
           skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
         }
       });
-      MathJax.Hub.Queue(function() {
-        $(MathJax.Hub.getAllJax()).map(function(index, elem) {
-          return(elem.SourceElement());
-        }).parent().addClass('has-jax');
-      });
-
       MathJax.Hub.Configured();
     </script>
   </body>
