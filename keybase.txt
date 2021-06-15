@@ -4,72 +4,49 @@ https://keybase.io/neville
 
 I hereby claim:
 
-  * I am an admin of http://www.lyh.me
+  * I am an admin of https://www.lyh.me
   * I am neville (https://keybase.io/neville) on keybase.
-  * I have a public key with fingerprint 2B6E E888 8B79 1D6F C494  5D3E 4D1A CB6B 1195 29E3
+  * I have a public key ASDXcwdV05HnbakA99ommetDGP2rKZGKr06P3OHVHJSWgQo
 
 To do so, I am signing this object:
 
 {
   "body": {
     "key": {
-      "eldest_kid": "0101325a9a8beca62d892826743b48413b2653280c3067aca41f55893244daa3efe90a",
-      "fingerprint": "2b6ee8888b791d6fc4945d3e4d1acb6b119529e3",
+      "eldest_kid": "01204d09d0d2c3437842b673eb106050c6a13ef99810809246d1f5d9767c983e1c140a",
       "host": "keybase.io",
-      "key_id": "4d1acb6b119529e3",
-      "kid": "0101325a9a8beca62d892826743b48413b2653280c3067aca41f55893244daa3efe90a",
+      "kid": "0120d7730755d391e76da900f7da2699eb4318fdab29918aaf4e8fdce1d51c9496810a",
       "uid": "2d8f65dd1823032650f1686443c06519",
       "username": "neville"
     },
     "merkle_root": {
-      "ctime": 1511446517,
-      "hash_meta": "70582250cab40878d4cd5117bd9f037e186ae727689b730bc4be044b9d5d2d4f",
-      "seqno": 1739080
-    },
-    "revoke": {
-      "sig_ids": [
-        "4b9fbadd08f5928c0563174dc456664592f7fd6a209abda1b0aa604fbfde42a00f"
-      ]
+      "ctime": 1623733440,
+      "hash": "1c2b632b8219d6ae212db0586378ee78807b68f3991d8d6877f9def96ed864e339ebb26b82fca538ffcdb8c1dff45a146d455a0ea3f4f28dd22cb42794afcf40",
+      "hash_meta": "f461343c962f48e9b8c81dce7fefa970f7fb84d8f58552593e607ba2fc087a1f",
+      "seqno": 20185027
     },
     "service": {
+      "entropy": "t9M7VJ976SyF4jDcofTpPLLg",
       "hostname": "www.lyh.me",
-      "protocol": "http:"
+      "protocol": "https:"
     },
     "type": "web_service_binding",
-    "version": 1
+    "version": 2
   },
-  "ctime": 1511446541,
-  "expire_in": 157680000,
-  "prev": "e40cd4a2a04d79135f79b024481f81f583750072d1ac7cc91095da34c26d37be",
-  "seqno": 15,
+  "client": {
+    "name": "keybase.io go client",
+    "version": "5.6.1"
+  },
+  "ctime": 1623733466,
+  "expire_in": 504576000,
+  "prev": "cb9626e8863590dc17cf6850517dfa145df9719f53a379cd331c5ee114f9ee00",
+  "seqno": 80,
   "tag": "signature"
 }
 
 which yields the signature:
 
------BEGIN PGP MESSAGE-----
-
-owGtU1tsFFUY7kINbUUtwaAVG3WiMdpmPdc5Zzap+sADBlDB1Idi3ZzbdCe7nVlm
-lm23uPHBS9pKGqLiJYZAgAREEkI0ipFESjCi1ZKY1gtifFARlCY+iCWo6JkNJMb4
-6Mkkk/Pn+77/O99/zpZrFja1ZNbcNFVcsvWu7zJTZ2VT37Iv2zc5MtI1J7fJKZrG
-z5S0SSr5YqCdnAMggBhR4QkujRIu0txDHLmMYEk4gVgil2LEgcLAZUIJAn1KuYcR
-IVoIbHzjAeF0O34QDpi4HAdhxcoi6RrD7ZLMg9r1FfEI1dgQDYWSroTQo8gz2BIL
-UZIyrDkpEpMNIluzm3zD3n/g/2ffGxtylu67VGvIEQbYUoEPXe4SghVwKfRSYGLi
-UAwaiw5NNSiVjFPvdgZNXCyZfBxFlTRbVQlSBKQQEmKJzJ5PJIX8oKkIS2SAcoQo
-UEISwBnXRGkLZVJ7PsDMQO4KwxBzuScZBlIRaQAh0tNUI018ayMxG8LIdmDYAxxY
-B7GpRkWTNk+CAZta4uTWO5biyyOJ0Bpwn9pkFKAuhoxoRajrusTWfOZrVyDgCakF
-lEAIFxBf+toQJADwnf562i6uBqohnw7qcgBDQ0PZUq2QtZtupxxHlUhFJVsvVCrl
-XBpLpVZu4IzMX1bIyyDU9o5YQtXESRCF9hAW+a/ECOx2zHA5iE0+SBHUZgHsStuY
-qpU0BChNhHVItL1bmPrMk8BOlUPffpRjRgFgKL04TCkPAo9qgYlCrsZMmn9ESK1P
-MWA1bXChqGyM7UTbxjK4uSnT0tS57LbmrvDM6HO1zujYi/33XnlXVy1IH1VTW2v7
-lcqF2UV/lR78cyCevLhq9vSB3kfB4R8e7ylM3HPerJg7Cpp/nbouMzPzrNxx8ub6
-hv198epfvGjrpeEbz2/LvvTyyo8Wfg2ux+DaNdtO7Ti+eP/n3y76OFCZD9cfvJXN
-fXV0wXjc1fr8U/NPtHR8Vnsv3/FC9ve9fxz/zXl6ek/rW3y7v/3SseXD8z/2/OTP
-TH6/d90z7au/WHvLA0v7pteN7dqz+YaRxYff2NX26cSJQyvCs4/tu/8OhD7oOzU/
-euf74xevnhhd/moyee4C69/8tj4neoPk9p0jr/XuOzHY9RD7Zsn0oY7dY95cPffK
-mftO7z45S9TDa8d6trz7zs9v9ozc3VV9vb501fgn/BH65MojnX8D
-=uTAf
------END PGP MESSAGE-----
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEg13MHVdOR522pAPfaJpnrQxj9qymRiq9Oj9zh1RyUloEKp3BheWxvYWTESpcCUMQgy5Ym6IY1kNwXz2hQUX36FF35cZ9To3nNMxxe4RT57gDEIO418tXoh4TVIwEkU7RTSwRrBfA0leZysuU41Vf1WNsKAgHCo3NpZ8RAMuEGM0Ge7xtHAl2KBNef7Yb6mzN/l0bPVuO+S8eJV22byJQsLl+JLkxDsLSE9nJlfte7j08UuGhmqbPAA8g2DqhzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIA3hYf5tSiH3nYRV1obZHR3fOq7ZoWflrGXaExrb6AJ/o3RhZ80CAqd2ZXJzaW9uAQ==
 
 And finally, I am proving ownership of this host by posting or
 appending to this document.
